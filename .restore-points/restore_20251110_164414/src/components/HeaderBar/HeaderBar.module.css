@@ -1,0 +1,6 @@
+.header{ display:flex; justify-content:space-between; align-items:center;
+  padding:14px 18px; border-radius:var(--radius); background:#151823; box-shadow:var(--shadow); }
+.metric{ font-weight:700; }
+.badge{ padding:6px 10px; border-radius:10px; background:#22273a; }
+.timerRed{ color:#e87474; animation: blink .8s steps(2,start) infinite; }
+.row{ display:flex; gap:8px; align-items:center; }

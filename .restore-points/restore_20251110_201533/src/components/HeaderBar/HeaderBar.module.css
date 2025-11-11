@@ -1,0 +1,45 @@
+.header{ 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center;
+  padding:12.6px 16.2px; 
+  border-radius:var(--radius); 
+  background:#151823; 
+  box-shadow:var(--shadow); 
+  flex-wrap: wrap;
+  gap: 7.2px;
+}
+.metric{ font-weight:700; font-size: 0.9em; }
+.badge{ padding:5.4px 9px; border-radius:9px; background:#22273a; font-size: 0.9em; }
+.timerRed{ color:#e87474; animation: blink .8s steps(2,start) infinite; }
+.row {
+  display: flex;
+  gap: 7.2px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 10.8px 12.6px;
+    gap: 5.4px;
+  }
+  .row {
+    gap: 5.4px;
+    font-size: 10.8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 9px 10.8px;
+    gap: 3.6px;
+  }
+  .row {
+    flex-direction: column;
+    align-items: center;
+    gap: 3.6px;
+    font-size: 9.9px;
+  }
+}

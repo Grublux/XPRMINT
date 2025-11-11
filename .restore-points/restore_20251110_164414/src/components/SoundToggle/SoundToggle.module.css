@@ -1,0 +1,5 @@
+.btn{
+  appearance:none; border:0; border-radius:10px; padding:6px 10px;
+  background:#22273a; color:var(--text); cursor:pointer; font-weight:600;
+}
+.btn:hover{ background:#2c3143; }

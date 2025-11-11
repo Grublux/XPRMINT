@@ -1,0 +1,12 @@
+.panel{ background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+.label{ color:var(--muted); margin-bottom:8px; }
+.svg{ width:100%; display:block; }
+.track{ fill:#23283a; }
+.goal{
+  fill:url(#goalGrad);
+}
+.handle{ filter:none; transition:filter .2s ease; }
+.near{ filter: drop-shadow(0 0 8px rgba(255,216,117,.9)); }
+.under{ fill: var(--blue); }
+.over{ fill: var(--red); }
+

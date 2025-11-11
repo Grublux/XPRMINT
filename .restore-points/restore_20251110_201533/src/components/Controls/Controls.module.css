@@ -1,0 +1,9 @@
+.panel{ background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+.label{ color:var(--muted); margin-bottom:8px; }
+.row{ display:flex; gap:12px; margin-top:12px; }
+.btn{
+  appearance:none; border:0; border-radius:12px; padding:12px 18px;
+  color:#111; background:var(--gold); font-weight:800; cursor:pointer;
+}
+.btn:disabled{ opacity:.5; cursor:not-allowed; }
+

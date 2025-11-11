@@ -1,0 +1,405 @@
+.grid{ 
+  display:grid; 
+  gap:16px; 
+  grid-template-columns:1fr; 
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+  overflow-x: visible; /* Allow content to be visible */
+}
+.topRow{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
+.infoRow {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+}
+.specimenRow{ 
+  display:flex; 
+  gap:16px; 
+  align-items:stretch; 
+  justify-content:center; 
+  width: 100%;
+  max-width: 752px; /* Match dialRow max width */
+  margin: 0 auto; /* Center the row */
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  position: relative; /* For absolute positioning of MovesTicker */
+  overflow-x: visible; /* Allow content to be visible */
+}
+
+.potSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3.6px;
+  padding: 12.6px 10.8px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
+  border-radius: var(--radius);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(255, 215, 0, 0.1);
+  flex: 0 1 auto;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 21.6px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+}
+
+.potSection::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.potLabel {
+  font-size: 11.7px;
+  color: rgba(255, 215, 0, 0.9);
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.potValue {
+  font-size: 24px;
+  color: #FFD700;
+  text-align: left;
+  font-weight: 900;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+.timerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 0 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.timerLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: right;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timerValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: right;
+  font-weight: 700;
+}
+
+.timerDanger {
+  color: #e87474;
+  animation: blink 0.8s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.specimenRow > *:nth-child(1) {
+  flex: 0 0 auto; /* Don't grow, use fixed width */
+  min-width: 0;
+  box-sizing: border-box;
+  /* Will be centered by parent's justify-content: center */
+}
+.specimenRow > *:nth-child(2) {
+  position: absolute; /* Position absolutely so it doesn't affect centering */
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 200px;
+  max-width: 25%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.dialRow {
+  display: flex;
+  gap: calc(16px * (550px * 932 / 1127) / 752px); /* Scale gap proportionally */
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: calc(550px * 932 / 1127); /* Match specimen panel width */
+  margin: 0 auto; /* Center the row */
+  box-sizing: border-box;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sliderRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 9px 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sizeControl {
+  display: flex;
+  flex-direction: column;
+  gap: 3.6px;
+  align-items: center;
+  min-width: 200px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.sizeLabel {
+  font-size: 11.7px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.sizeSlider {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation; /* Optimize touch interactions */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+.sizeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px; /* Larger for touch */
+  height: 20px; /* Larger for touch */
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.sizeSlider::-moz-range-thumb {
+  width: 20px; /* Larger for touch */
+  height: 20px; /* Larger for touch */
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: none;
+  touch-action: manipulation;
+}
+
+/* Mobile responsive - maintain exact layout, scale down */
+@media (max-width: 768px) {
+  .grid {
+    gap: 12px;
+    padding: 0 12px;
+  }
+  .infoRow {
+    gap: 12px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  
+  .title {
+    font-size: 18px;
+    letter-spacing: 1.35px;
+  }
+  .specimenRow {
+    gap: 12px;
+    flex-wrap: nowrap; /* Keep layout structure */
+    max-width: 100%; /* Allow full width on mobile */
+  }
+  
+  .potSection {
+    padding: 7.2px 5.4px;
+    flex: 0 1 auto;
+    min-width: 140px;
+  }
+  
+  .potLabel {
+    font-size: 9px;
+  }
+  
+  .potValue {
+    font-size: 16px;
+  }
+  
+  .timerSection {
+    padding: 7.2px 5.4px;
+    flex: 0 1 auto;
+    min-width: 140px;
+  }
+  
+  .timerLabel {
+    font-size: 8.1px;
+  }
+  
+  .timerValue {
+    font-size: 14px;
+  }
+  .specimenRow {
+    max-width: 100%; /* Allow full width on mobile */
+    gap: 8px;
+  }
+  .specimenRow > *:nth-child(1) {
+    flex: 0 0 auto;
+    width: 100%; /* Full width on mobile */
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto; /* Center */
+  }
+  .specimenRow > *:nth-child(2) {
+    display: none; /* Hide MovesTicker on mobile to save space */
+  }
+  .dialRow {
+    gap: 5.1px; /* Scale gap (16 * 0.85 * (550px * 932 / 1127) / 752px) */
+    flex-wrap: nowrap; /* Keep layout structure */
+    overflow-x: visible; /* Don't scroll */
+    padding: 0 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .sliderRow {
+    padding: 7.2px 12px;
+  }
+  .sizeControl {
+    min-width: 180px;
+    max-width: 100%;
+    width: 100%;
+  }
+  .sizeLabel {
+    font-size: 10.8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    gap: 8px;
+    padding: 0 8px;
+  }
+  .infoRow {
+    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  
+  .title {
+    font-size: 16.2px;
+    letter-spacing: 0.9px;
+  }
+  .specimenRow {
+    gap: 6px;
+    flex-wrap: nowrap; /* Keep layout structure */
+    max-width: 100%; /* Allow full width on small mobile */
+  }
+  .specimenRow > *:nth-child(1) {
+    flex: 0 0 auto;
+    width: 100%; /* Full width on small mobile */
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto; /* Center */
+  }
+  .specimenRow > *:nth-child(2) {
+    display: none; /* Hide MovesTicker on mobile to save space */
+  }
+  .dialRow {
+    gap: 4.5px; /* Scale gap (16 * 0.75 * (550px * 932 / 1127) / 752px) */
+    flex-wrap: nowrap; /* Keep layout structure */
+    overflow-x: visible; /* Don't scroll */
+    padding: 0 4px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .potSection {
+    padding: 4.5px 3.6px;
+    flex: 0 1 auto;
+    min-width: 80px;
+  }
+  .potLabel {
+    font-size: 6.3px; /* Scale down */
+  }
+  .potValue {
+    font-size: 12px; /* Scale down */
+  }
+  .timerSection {
+    padding: 4.5px 3.6px;
+    flex: 0 1 auto;
+    min-width: 80px;
+  }
+  .timerLabel {
+    font-size: 6.3px; /* Scale down */
+  }
+  .timerValue {
+    font-size: 10.5px; /* Scale down */
+  }
+  .sliderRow {
+    padding: 5.4px 8px;
+  }
+  .sizeControl {
+    min-width: 160px;
+    max-width: 100%;
+    width: 100%;
+  }
+  .sizeLabel {
+    font-size: 9.9px;
+  }
+}

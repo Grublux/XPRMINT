@@ -1,0 +1,18 @@
+.panel{ 
+  background:var(--panel); 
+  border-radius:var(--radius); 
+  box-shadow:var(--shadow); 
+  padding:12px; 
+  display:flex; 
+  flex-direction:column; 
+  gap:8px; 
+  width:50%;
+  margin:0 auto;
+}
+.label{ color:var(--muted); font-size:13px; margin-bottom:4px; text-align:center; }
+.count{ 
+  font-size:11px; 
+  color:var(--muted); 
+  opacity:0.7;
+  font-weight:500;
+}

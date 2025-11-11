@@ -1,0 +1,67 @@
+.grid{ 
+  display:grid; 
+  gap:14.4px; 
+  grid-template-columns:1fr; 
+  max-width: 100%;
+  padding: 7.2px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+.topRow{ 
+  display:flex; 
+  gap:10.8px; 
+  align-items:center; 
+  justify-content:space-between; 
+  flex-wrap: wrap;
+  width: 100%;
+}
+.specimenRow{ 
+  display:flex; 
+  gap:14.4px; 
+  align-items:stretch; 
+  justify-content:center; 
+  width: 100%;
+}
+.dialRow {
+  display: flex;
+  gap: 14.4px;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Mobile and smaller viewports */
+@media (max-width: 768px) {
+  .grid {
+    gap: 10.8px;
+    padding: 7.2px;
+  }
+  .topRow {
+    gap: 7.2px;
+  }
+  .specimenRow {
+    gap: 7.2px;
+  }
+  .dialRow {
+    gap: 7.2px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    gap: 7.2px;
+    padding: 3.6px;
+  }
+  .topRow {
+    gap: 5.4px;
+  }
+  .specimenRow {
+    gap: 5.4px;
+  }
+  .dialRow {
+    gap: 5.4px;
+  }
+}

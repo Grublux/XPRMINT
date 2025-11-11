@@ -1,0 +1,138 @@
+.tickerContainer {
+  width: 80%;
+  max-width: 80%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+}
+
+.tickerTrack {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.tickerContent {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+  will-change: transform;
+  /* Transform is controlled by JavaScript for continuous scrolling */
+}
+
+.tickerItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: fit-content;
+}
+
+.meRow {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.rank {
+  font-size: 11.7px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+}
+
+.username {
+  font-size: 12.6px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.meRow .username {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+.frequency {
+  font-size: 11.7px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.distance {
+  font-size: 10.8px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .tickerContainer {
+    width: 80%;
+    max-width: 80%;
+  }
+  .tickerItem {
+    gap: 8px;
+    padding: 0 10px;
+    min-width: max-content;
+  }
+  .rank {
+    font-size: 10.8px;
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+  .username {
+    font-size: 11.7px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  .frequency {
+    font-size: 10.8px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  .distance {
+    font-size: 9.9px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+}
+
+@media (max-width: 480px) {
+  .tickerContainer {
+    width: 80%;
+    max-width: 80%;
+  }
+  .tickerItem {
+    gap: 6px;
+    padding: 0 8px;
+    min-width: max-content;
+  }
+  .rank {
+    font-size: 9.9px;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+  .username {
+    font-size: 10.8px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  .frequency {
+    font-size: 9.9px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  .distance {
+    font-size: 9px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+}

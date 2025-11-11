@@ -1,0 +1,9 @@
+.wrap{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; }
+.btn{
+  appearance:none; border:0; border-radius:10px; padding:6px 12px;
+  color:#111; background:var(--gold); font-weight:700; cursor:pointer; font-size:12px;
+  white-space:pre-line;
+  text-align:center;
+}
+.btn:disabled{ opacity:.5; cursor:not-allowed; }
+.helper{ color:var(--muted); font-size:10px; }

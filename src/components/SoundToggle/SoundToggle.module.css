@@ -1,0 +1,21 @@
+.btn{
+  appearance:none; border:0; border-radius:9px; padding:5.4px 9px;
+  background:#22273a; color:var(--text); cursor:pointer; font-weight:600;
+  font-size: 0.9em;
+}
+.btn:hover{ background:#2c3143; }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .btn {
+    padding: 4.5px 7.2px;
+    font-size: 10.8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 3.6px 5.4px;
+    font-size: 9.9px;
+  }
+}

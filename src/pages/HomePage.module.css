@@ -1,0 +1,4 @@
+.wrap{ display:flex; flex-direction:column; gap:12px; background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; }
+.cta{ align-self:flex-start; background:var(--gold); color:#111; font-weight:800; padding:10px 14px; border-radius:12px; }
+
+

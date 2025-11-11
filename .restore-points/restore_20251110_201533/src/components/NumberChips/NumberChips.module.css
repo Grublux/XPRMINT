@@ -1,0 +1,49 @@
+.row{ display:flex; gap:10.8px; }
+.chip{
+  background:#2a2f3d; color:var(--text); font-weight:700;
+  padding:9px 12.6px; border:0; border-radius:10.8px; cursor:pointer;
+  min-width: 60px;
+  width: 60px;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 0.9em;
+}
+.chip:hover:not(.placeholder):not(.disabled){ background:#30374a; }
+.chip.placeholder {
+  background: #1a1f2e;
+  cursor: default;
+  opacity: 0.3;
+}
+.chip.placeholder:hover {
+  background: #1a1f2e;
+}
+.disabled{ opacity:.5; cursor:not-allowed; }
+.active {
+  border: 2px solid #00ff88;
+  box-shadow: 0 0 7.2px rgba(0, 255, 136, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .row {
+    gap: 7.2px;
+  }
+  .chip {
+    min-width: 50px;
+    width: 50px;
+    padding: 7.2px 10.8px;
+    font-size: 12.6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .row {
+    gap: 5.4px;
+  }
+  .chip {
+    min-width: 45px;
+    width: 45px;
+    padding: 5.4px 9px;
+    font-size: 10.8px;
+  }
+}

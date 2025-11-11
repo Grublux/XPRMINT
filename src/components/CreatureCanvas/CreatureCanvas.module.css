@@ -1,0 +1,237 @@
+.container{
+  display: flex;
+  flex-direction: column;
+  gap: 7.2px;
+  width: fit-content; /* Size to content */
+  max-width: 752px; /* Match dialRow width */
+  min-width: 0; /* Allow flex shrinking */
+  margin: 0; /* Parent flex container will center this */
+  box-sizing: border-box;
+}
+.header{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  flex-direction: row;
+  gap: 9px;
+  width: 100%;
+}
+
+.headerLeft,
+.headerRight {
+  flex: 0 0 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  min-height: 48px;
+}
+
+.headerCenter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  text-align: center;
+}
+
+.targetLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.targetValue {
+  font-size: 18px;
+  color: var(--accent);
+  text-align: center;
+  font-weight: 700;
+}
+
+.resonanceDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  min-height: 20px;
+  border: 1px solid transparent; /* Helps visualize the divs */
+  gap: 3.6px;
+}
+
+.currentLabel {
+  font-size: 9.9px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resonanceValue {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.headerLeft .resonanceValue {
+  color: #4a9eff; /* Blue when below target */
+}
+
+.headerRight .resonanceValue {
+  color: #ff6b6b; /* Red when above target */
+}
+.sizeControl{
+  display: flex;
+  flex-direction: column;
+  gap: 3.6px;
+  align-items: center;
+}
+.sizeLabel{
+  font-size: 11.7px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.sizeSlider{
+  width: 100%;
+  max-width: 200px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sizeSlider::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+}
+.sizeSlider::-moz-range-thumb{
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: none;
+}
+.panel{
+  background:var(--panel);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:10.8px;
+  display:flex;
+  flex-direction:column;
+  gap:7.2px;
+  height: 550px; /* Slightly taller */
+  width: calc(550px * 932 / 1127); /* Width scales proportionally to height */
+  max-width: 100%; /* Don't exceed container */
+  min-height: 288px;
+  position: relative;
+  background-image: url('/specimen_bg2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden; /* Clip to container */
+}
+.canvas{
+  width:100%;
+  height:100%;
+  border-radius:var(--radius);
+  display:block;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile responsive - scale down but maintain structure */
+@media (max-width: 768px) {
+  .container {
+    width: 100%; /* Full width on mobile */
+    max-width: 100%;
+    gap: 5.4px;
+    margin: 0 auto; /* Center the container */
+  }
+  .header {
+    gap: 4.5px;
+    font-size: 0.85em; /* Scale down font sizes */
+  }
+  .headerLeft,
+  .headerRight {
+    flex: 1;
+    min-height: 30px;
+  }
+  .targetLabel {
+    font-size: 7.65px; /* 9 * 0.85 */
+  }
+  .targetValue {
+    font-size: 13.6px; /* 16 * 0.85 */
+  }
+  .currentLabel {
+    font-size: 7.65px; /* 9 * 0.85 */
+  }
+  .resonanceValue {
+    font-size: 13.6px; /* 16 * 0.85 */
+  }
+  .panel {
+    padding: 5.4px; /* Scale down padding */
+    height: 467.5px; /* Scale down from 550px (550 * 0.85) */
+    width: calc(467.5px * 932 / 1127); /* Maintain aspect ratio */
+    max-width: 100%;
+  }
+  .canvas {
+    height: 100%;
+    touch-action: none; /* Prevent default touch behaviors */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100%; /* Full width on small mobile */
+    max-width: 100%;
+    gap: 4.5px;
+    margin: 0 auto; /* Center the container */
+  }
+  .header {
+    gap: 3.6px;
+    font-size: 0.75em; /* Scale down font sizes more */
+  }
+  .headerLeft,
+  .headerRight {
+    flex: 1;
+    min-height: 26px;
+  }
+  .targetLabel {
+    font-size: 6.75px; /* 9 * 0.75 */
+  }
+  .targetValue {
+    font-size: 12px; /* 16 * 0.75 */
+  }
+  .currentLabel {
+    font-size: 6.75px; /* 9 * 0.75 */
+  }
+  .resonanceValue {
+    font-size: 12px; /* 16 * 0.75 */
+  }
+  .panel {
+    padding: 4.5px; /* Scale down padding */
+    height: 412.5px; /* Scale down from 550px (550 * 0.75) */
+    width: calc(412.5px * 932 / 1127); /* Maintain aspect ratio */
+    max-width: 100%;
+  }
+  .canvas {
+    touch-action: none; /* Prevent default touch behaviors */
+  }
+}
+
