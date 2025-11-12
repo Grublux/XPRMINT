@@ -31,11 +31,12 @@ export default function FrequencyReadout({ direction }: Props){
   const handleClick = () => {
     if (disabled || selectedIdx === null) return;
     
-    // Get electrode position (lightning originates from electrode)
+    // Get electrode position (lightning originates from center of orb image)
     if (electrodeRef.current) {
       const rect = electrodeRef.current.getBoundingClientRect();
+      // Center of the orb image - shifted up 10px
       const fromX = rect.left + rect.width / 2;
-      const fromY = rect.top + rect.height / 2;
+      const fromY = rect.top + rect.height / 2 - 10; // Center vertically, shifted up 10px
       
       // Target: center of specimen orb with random variation to strike different areas
       // Use data attribute for reliable selection

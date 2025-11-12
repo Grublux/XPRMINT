@@ -9,6 +9,7 @@
   width: 100%; /* Take full width to allow expansion */
   flex: 1 1 0; /* Allow flexible sizing */
   min-width: 0; /* Allow shrinking */
+  margin-top: -20px; /* Negative top margin to pull cathode orbs up */
 }
 
 .anode {
@@ -18,7 +19,7 @@
   object-position: center; /* Center the image vertically */
   position: relative;
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0; /* Remove auto margin */
   margin-bottom: 7.2px;
   order: -1;
   display: block;
@@ -29,9 +30,10 @@
   height: 165.24px; /* Same size as anode - reduced by another 15% */
   object-fit: contain; /* Use contain to prevent cropping, scale to fit */
   object-position: center; /* Center the image vertically */
+  transform: scaleX(-1); /* Flip horizontally to create mirror image */
   position: relative;
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0; /* Remove auto margin */
   margin-bottom: 7.2px;
   order: -1;
   display: block;
