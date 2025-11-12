@@ -299,10 +299,11 @@
   .specimenRow {
     max-width: 100%; /* Allow full width on mobile */
     gap: 8px;
+    justify-content: center; /* Center the specimen */
   }
   .specimenRow > *:nth-child(1) {
     flex: 0 0 auto;
-    width: 100%; /* Full width on mobile */
+    width: fit-content; /* Size to content */
     max-width: 100%;
     min-width: 0;
     margin: 0 auto; /* Center */
@@ -350,10 +351,11 @@
     gap: 6px;
     flex-wrap: nowrap; /* Keep layout structure */
     max-width: 100%; /* Allow full width on small mobile */
+    justify-content: center; /* Center the specimen */
   }
   .specimenRow > *:nth-child(1) {
     flex: 0 0 auto;
-    width: 100%; /* Full width on small mobile */
+    width: fit-content; /* Size to content */
     max-width: 100%;
     min-width: 0;
     margin: 0 auto; /* Center */

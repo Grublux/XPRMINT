@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useGame } from '../../state/gameStore';
 import { click } from '../../lib/audio';
 import { buzz } from '../../lib/haptics';
@@ -22,6 +22,11 @@ export default function FrequencyReadout({ direction }: Props){
   const hz = selectedNumber;
   const dir = direction === 'up' ? 'add' : 'sub';
   const actionText = direction === 'up' ? 'Add' : 'Subtract';
+  
+  // Stable callback to prevent unnecessary re-renders
+  const handleBoltComplete = useCallback(() => {
+    setBolt(null);
+  }, []);
 
   const handleClick = () => {
     if (disabled || selectedIdx === null) return;
@@ -32,26 +37,38 @@ export default function FrequencyReadout({ direction }: Props){
       const fromX = rect.left + rect.width / 2;
       const fromY = rect.top + rect.height / 2;
       
-      // Target: random position on specimen canvas
+      // Target: center of specimen orb with random variation to strike different areas
       // Use data attribute for reliable selection
       const specimenCanvas = document.querySelector('[data-specimen-canvas="true"]') as HTMLCanvasElement;
       
       if (specimenCanvas) {
         const specRect = specimenCanvas.getBoundingClientRect();
         
-        // Randomize X position (30% to 70% of width for variety)
-        const xOffset = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
-        const toX = specRect.left + specRect.width * xOffset;
+        // Calculate specimen center (matches CreatureCanvas calculation)
+        // Center horizontally: 50% + 1% offset = 51% of width
+        const centerXPercent = 0.51;
+        // Center vertically: orb is at 65% down
+        const centerYPercent = 0.65;
         
-        // Randomize Y position (top 20% to 60% of height - within liquid area)
-        const yOffset = 0.2 + Math.random() * 0.4; // 0.2 to 0.6
-        const toY = specRect.top + specRect.height * yOffset;
+        // Base target at center of specimen
+        const centerX = specRect.left + specRect.width * centerXPercent;
+        const centerY = specRect.top + specRect.height * centerYPercent;
         
+        // Add random variation to strike different areas of the vessel
+        // Random offset: ±15% of canvas width/height for variety
+        const randomXOffset = (Math.random() - 0.5) * specRect.width * 0.3; // ±15%
+        const randomYOffset = (Math.random() - 0.5) * specRect.height * 0.3; // ±15%
+        
+        const toX = centerX + randomXOffset;
+        const toY = centerY + randomYOffset;
+        
+        // Set bolt immediately - the key will force remount
         setBolt({ from: {x: fromX, y: fromY}, to: {x: toX, y: toY} });
         
+        // Delay bolt-hit to match when lightning actually reaches target (animation is 400ms)
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('bolt-hit'));
-        }, 250);
+        }, 350);
       } else {
         // Fallback: still show lightning even if canvas not found
         const toX = window.innerWidth / 2;
@@ -88,9 +105,10 @@ export default function FrequencyReadout({ direction }: Props){
       </button>
       {bolt && (
         <BoltAnimation 
+          key={`${bolt.from.x.toFixed(1)}-${bolt.from.y.toFixed(1)}-${bolt.to.x.toFixed(1)}-${bolt.to.y.toFixed(1)}`}
           from={bolt.from} 
           to={bolt.to} 
-          onComplete={() => setBolt(null)} 
+          onComplete={handleBoltComplete} 
         />
       )}
     </div>

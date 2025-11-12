@@ -7,6 +7,7 @@
   min-width: 0; /* Allow flex shrinking */
   margin: 0; /* Parent flex container will center this */
   box-sizing: border-box;
+  overflow: hidden; /* Clip to container */
 }
 .header{ 
   display:flex; 
@@ -158,47 +159,7 @@
 /* Mobile responsive - scale down but maintain structure */
 @media (max-width: 768px) {
   .container {
-    width: 100%; /* Full width on mobile */
-    max-width: 100%;
-    gap: 5.4px;
-    margin: 0 auto; /* Center the container */
-  }
-  .header {
-    gap: 4.5px;
-    font-size: 0.85em; /* Scale down font sizes */
-  }
-  .headerLeft,
-  .headerRight {
-    flex: 1;
-    min-height: 30px;
-  }
-  .targetLabel {
-    font-size: 7.65px; /* 9 * 0.85 */
-  }
-  .targetValue {
-    font-size: 13.6px; /* 16 * 0.85 */
-  }
-  .currentLabel {
-    font-size: 7.65px; /* 9 * 0.85 */
-  }
-  .resonanceValue {
-    font-size: 13.6px; /* 16 * 0.85 */
-  }
-  .panel {
-    padding: 5.4px; /* Scale down padding */
-    height: 467.5px; /* Scale down from 550px (550 * 0.85) */
-    width: calc(467.5px * 932 / 1127); /* Maintain aspect ratio */
-    max-width: 100%;
-  }
-  .canvas {
-    height: 100%;
-    touch-action: none; /* Prevent default touch behaviors */
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    width: 100%; /* Full width on small mobile */
+    width: fit-content; /* Size to content */
     max-width: 100%;
     gap: 4.5px;
     margin: 0 auto; /* Center the container */
@@ -226,8 +187,48 @@
   }
   .panel {
     padding: 4.5px; /* Scale down padding */
-    height: 412.5px; /* Scale down from 550px (550 * 0.75) */
-    width: calc(412.5px * 932 / 1127); /* Maintain aspect ratio */
+    height: 385px; /* Scale down from 550px (550 * 0.7) - smaller on mobile */
+    width: calc(385px * 932 / 1127); /* Maintain aspect ratio */
+    max-width: 100%;
+  }
+  .canvas {
+    height: 100%;
+    touch-action: none; /* Prevent default touch behaviors */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: fit-content; /* Size to content */
+    max-width: 100%;
+    gap: 3.6px;
+    margin: 0 auto; /* Center the container */
+  }
+  .header {
+    gap: 2.7px;
+    font-size: 0.65em; /* Scale down font sizes even more */
+  }
+  .headerLeft,
+  .headerRight {
+    flex: 1;
+    min-height: 22px;
+  }
+  .targetLabel {
+    font-size: 5.85px; /* 9 * 0.65 */
+  }
+  .targetValue {
+    font-size: 10.4px; /* 16 * 0.65 */
+  }
+  .currentLabel {
+    font-size: 5.85px; /* 9 * 0.65 */
+  }
+  .resonanceValue {
+    font-size: 10.4px; /* 16 * 0.65 */
+  }
+  .panel {
+    padding: 3.6px; /* Scale down padding */
+    height: 330px; /* Scale down from 550px (550 * 0.6) - even smaller on small mobile */
+    width: calc(330px * 932 / 1127); /* Maintain aspect ratio */
     max-width: 100%;
   }
   .canvas {

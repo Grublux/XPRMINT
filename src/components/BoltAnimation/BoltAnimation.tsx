@@ -45,13 +45,19 @@ function generateLightningPath(from: {x: number, y: number}, to: {x: number, y: 
 export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
   const [progress, setProgress] = useState(0);
   const pathRef = useRef<{x: number, y: number}[]>([]);
+  const gradientIdRef = useRef(`lightningGradient-${Math.random().toString(36).substr(2, 9)}`);
+  const filterIdRef = useRef(`glow-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
+    // Reset progress when new bolt is triggered
+    setProgress(0);
+    
     // Generate path once
     pathRef.current = generateLightningPath(from, to, 25);
     
-    const duration = 400; // ms - slowed down from 200
+    const duration = 400; // ms
     const start = Date.now();
+    let rafId: number;
     
     const animate = () => {
       const elapsed = Date.now() - start;
@@ -59,14 +65,19 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
       setProgress(p);
       
       if (p < 1) {
-        requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animate);
       } else {
         setTimeout(onComplete, 50);
       }
     };
     
-    requestAnimationFrame(animate);
-  }, [from, to, onComplete]);
+    // Start animation immediately
+    rafId = requestAnimationFrame(animate);
+    
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [from.x, from.y, to.x, to.y, onComplete]); // Include onComplete but it should be stable
 
   // Calculate visible path up to current position
   const totalSegments = pathRef.current.length - 1;
@@ -76,8 +87,11 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
   const visiblePath: {x: number, y: number}[] = [];
   
   if (pathRef.current.length > 0) {
+    // Always include first point
+    visiblePath.push(pathRef.current[0]);
+    
     // Add all points up to current segment
-    for (let i = 0; i <= currentSegment && i < pathRef.current.length; i++) {
+    for (let i = 1; i <= currentSegment && i < pathRef.current.length; i++) {
       visiblePath.push(pathRef.current[i]);
     }
     
@@ -92,7 +106,15 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
     }
   }
 
-  if (visiblePath.length < 2) return null;
+  // Need at least 2 points to draw a line
+  if (visiblePath.length < 2) {
+    // If we have at least the start point, duplicate it so we can see something
+    if (visiblePath.length === 1) {
+      visiblePath.push({ x: visiblePath[0].x + 1, y: visiblePath[0].y + 1 });
+    } else {
+      return null;
+    }
+  }
 
   const pathData = `M ${visiblePath[0].x} ${visiblePath[0].y} ${visiblePath.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')}`;
 
@@ -106,28 +128,42 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: 1000,
+        zIndex: 9999, /* Very high z-index to ensure visibility */
       }}
     >
       <defs>
-        <linearGradient id="lightningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={gradientIdRef.current} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-          <stop offset="50%" stopColor="rgba(150,220,255,0.95)" />
-          <stop offset="100%" stopColor="rgba(100,180,255,0.9)" />
+          <stop offset="50%" stopColor="rgba(200,240,255,1)" />
+          <stop offset="100%" stopColor="rgba(150,220,255,1)" />
         </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+        <filter id={filterIdRef.current}>
+          <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
       </defs>
+      {/* Main bright lightning bolt */}
       <path
         d={pathData}
         className={styles.bolt}
         style={{
-          opacity: 1 - progress * 0.4,
+          stroke: `url(#${gradientIdRef.current})`,
+          filter: `url(#${filterIdRef.current})`,
+          opacity: 1 - progress * 0.2, /* Less fade for better visibility */
+        }}
+      />
+      {/* Additional brighter core for extra visibility */}
+      <path
+        d={pathData}
+        className={styles.bolt}
+        style={{
+          stroke: 'rgba(255,255,255,1)',
+          strokeWidth: 4,
+          opacity: (1 - progress * 0.2) * 0.8,
+          filter: 'none',
         }}
       />
     </svg>
