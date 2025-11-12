@@ -177,7 +177,7 @@
 .dialRow {
   display: flex;
   gap: calc(16px * (550px * 932 / 1127) / 752px); /* Scale gap proportionally */
-  align-items: stretch;
+  align-items: flex-end; /* Align all items to bottom so buttons align */
   justify-content: center;
   flex-wrap: nowrap;
   width: 100%;

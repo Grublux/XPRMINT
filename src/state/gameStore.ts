@@ -150,7 +150,7 @@ export const useGame = create<GameState>((set, get)=>({
       numbers: compactNumbers,
       used: compactUsed,
       lastMoveAt: Date.now(),
-      pot: Math.round(s.pot + 10),
+      pot: Math.round(s.pot + 25), // Increased from 10 to 25 - pot grows when frequency buttons are used
       status: win ? 'win' : s.status,
       recentMoves: newMoves,
       selectedIdx: null

@@ -12,7 +12,7 @@ type Props = {
 export default function FrequencyReadout({ direction }: Props){
   const { play, status, selectedIdx, used, numbers } = useGame();
   const [bolt, setBolt] = useState<{from: {x:number;y:number}, to: {x:number;y:number}} | null>(null);
-  const electrodeRef = useRef<HTMLDivElement>(null);
+  const electrodeRef = useRef<HTMLImageElement>(null);
   
   const disabled = status!=='active' || selectedIdx===null || (selectedIdx!==null && used[selectedIdx]);
   const canSelect = selectedIdx !== null && selectedIdx < numbers.length && !disabled;
@@ -82,8 +82,10 @@ export default function FrequencyReadout({ direction }: Props){
 
   return (
     <div className={styles.column}>
-      <div 
+      <img 
         ref={electrodeRef} 
+        src="/orb_transparent.png"
+        alt={direction === 'up' ? 'Anode' : 'Cathode'}
         className={direction === 'up' ? styles.anode : styles.cathode} 
       />
       <button

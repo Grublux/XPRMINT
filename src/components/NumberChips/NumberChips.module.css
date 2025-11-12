@@ -36,27 +36,31 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .row {
-    gap: 5.4px;
+    gap: 4.5px; /* Reduced from 5.4px */
   }
   .chip {
-    min-width: 44px;
-    width: 44px;
-    min-height: 40px;
-    padding: 5.4px 7.2px;
-    font-size: 11.7px;
+    min-width: 32px; /* Reduced from 44px */
+    width: 32px;
+    min-height: 28px; /* Reduced from 40px */
+    max-height: 32px; /* Added constraint */
+    padding: 4px 6px; /* Reduced from 5.4px 7.2px */
+    font-size: 9px; /* Reduced from 11.7px */
+    border-radius: 5.4px; /* Slightly smaller */
   }
 }
 
 @media (max-width: 480px) {
   .row {
-    gap: 4.5px;
+    gap: 3.6px; /* Reduced from 4.5px */
   }
   .chip {
-    min-width: 36px;
-    width: 36px;
-    min-height: 36px;
-    padding: 4.5px 7.2px;
-    font-size: 9.9px;
+    min-width: 28px; /* Reduced from 36px */
+    width: 28px;
+    min-height: 26px; /* Reduced from 36px */
+    max-height: 28px; /* Added constraint */
+    padding: 3.6px 5.4px; /* Reduced from 4.5px 7.2px */
+    font-size: 8px; /* Reduced from 9.9px */
+    border-radius: 4.5px; /* Slightly smaller */
   }
 }
 

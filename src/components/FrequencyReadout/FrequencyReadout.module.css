@@ -4,7 +4,7 @@
   align-items: center;
   gap: 7.2px;
   position: relative;
-  height: 100%; /* Take full height of parent */
+  height: auto; /* Let height be determined by content */
   justify-content: flex-end; /* Align buttons at bottom */
   width: 100%; /* Take full width to allow expansion */
   flex: 1 1 0; /* Allow flexible sizing */
@@ -12,61 +12,29 @@
 }
 
 .anode {
-  width: 54px; /* Restored original size */
-  height: 54px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(200,220,255,0.8));
-  border: 2.7px solid rgba(150,200,255,0.6);
-  box-shadow:
-    0 0 18px rgba(150,220,255,0.8),
-    0 0 36px rgba(100,180,255,0.6),
-    inset 0 0 18px rgba(255,255,255,0.3);
+  width: 82.62px; /* Reduced by another 15% from 97.2px */
+  height: 165.24px; /* Reduced by another 15% from 194.4px */
+  object-fit: contain; /* Use contain to prevent cropping, scale to fit */
+  object-position: center; /* Center the image vertically */
   position: relative;
   flex-shrink: 0;
   margin-top: auto;
   margin-bottom: 7.2px;
   order: -1;
-}
-
-.anode::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 7.2px;
-  height: 7.2px;
-  border-radius: 50%;
-  background: rgba(255,255,255,1);
-  box-shadow: 0 0 9px rgba(255,255,255,1);
+  display: block;
 }
 
 .cathode {
-  width: 45px; /* Restored original size */
-  height: 45px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(180,180,200,0.9), rgba(120,120,150,0.8));
-  border: 2.7px solid rgba(100,100,150,0.6);
-  box-shadow:
-    0 0 13.5px rgba(120,120,180,0.6),
-    inset 0 0 13.5px rgba(200,200,220,0.3);
+  width: 82.62px; /* Same size as anode - reduced by another 15% */
+  height: 165.24px; /* Same size as anode - reduced by another 15% */
+  object-fit: contain; /* Use contain to prevent cropping, scale to fit */
+  object-position: center; /* Center the image vertically */
   position: relative;
   flex-shrink: 0;
   margin-top: auto;
   margin-bottom: 7.2px;
   order: -1;
-}
-
-.cathode::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 5.4px;
-  height: 5.4px;
-  border-radius: 50%;
-  background: rgba(150,150,180,1);
+  display: block;
 }
 
 .container {
@@ -179,12 +147,12 @@
     font-size: 5.1px; /* 6 * 0.85 */
   }
   .anode {
-    width: 45.9px; /* 54 * 0.85 */
-    height: 45.9px;
+    width: 70.23px; /* 82.62 * 0.85 */
+    height: 140.45px; /* 165.24 * 0.85 */
   }
   .cathode {
-    width: 38.25px; /* 45 * 0.85 */
-    height: 38.25px;
+    width: 70.23px; /* 82.62 * 0.85 - same as anode */
+    height: 140.45px; /* 165.24 * 0.85 - same as anode */
   }
 }
 
@@ -211,11 +179,11 @@
     font-size: 4.5px; /* 6 * 0.75 */
   }
   .anode {
-    width: 40.5px; /* 54 * 0.75 */
-    height: 40.5px;
+    width: 61.97px; /* 82.62 * 0.75 */
+    height: 123.93px; /* 165.24 * 0.75 */
   }
   .cathode {
-    width: 33.75px; /* 45 * 0.75 */
-    height: 33.75px;
+    width: 61.97px; /* 82.62 * 0.75 - same as anode */
+    height: 123.93px; /* 165.24 * 0.75 - same as anode */
   }
 }
