@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../../state/gameStore';
+import { useTimer } from '../../hooks/useTimer';
 import styles from './CreatureCanvas.module.css';
 
 type Bubble = {
@@ -11,13 +12,32 @@ type Bubble = {
 };
 
 export default function CreatureCanvas(){
-  const { resonanceHz, targetHz } = useGame();
+  const { resonanceHz, targetHz, pot, lastMoveAt, status } = useGame();
+  const { label, remaining } = useTimer(lastMoveAt);
+  const danger = remaining <= 60_000 && status==='active';
   const ref = useRef<HTMLCanvasElement|null>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const lastBubbleSpawnRef = useRef<number>(0);
   const [shockIntensity, setShockIntensity] = useState(0);
   const shockRef = useRef<number>(0);
   const shockIntensityRef = useRef<number>(0);
+  const creatureImageRef = useRef<HTMLImageElement | null>(null);
+  const creatureShockedImageRef = useRef<HTMLImageElement | null>(null);
+
+  // Load creature images
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/creature_transparent.png';
+    img.onload = () => {
+      creatureImageRef.current = img;
+    };
+    
+    const shockedImg = new Image();
+    shockedImg.src = '/creature_shocked_transparent.png';
+    shockedImg.onload = () => {
+      creatureShockedImageRef.current = shockedImg;
+    };
+  }, []);
 
   // Listen for lightning strikes
   useEffect(() => {
@@ -83,14 +103,36 @@ export default function CreatureCanvas(){
       const normalizedResonance = Math.min(resonanceHz / 10000, 1); // 0 to 1
       const baseRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedResonance;
       
-      // Calculate target frequency circle size
-      const normalizedTarget = Math.min(targetHz / 10000, 1); // 0 to 1
-      const targetRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedTarget;
+      // Target ring size will be calculated later to match creature's current size
       
-      // Calculate closeness to target (0 = far, 1 = perfect match) - use base radius for stable calculation
-      const sizeDiff = Math.abs(baseRadius - targetRadius);
+      // Calculate initial orb breathing for closeness calculation
+      const initialBreathingAmplitude = 0.02;
+      const initialBreathingSpeed = 0.004;
+      const initialIntenseBreathing = 1 + initialBreathingAmplitude * Math.sin(t*initialBreathingSpeed);
+      const initialFinalR = baseRadius * initialIntenseBreathing;
+      
+      // Calculate creature size based on how close frequency is to target
+      // Size increases as frequency approaches target from either direction (above or below)
+      const baseImageSize = maxOrbRadius * 1.8;
+      const minImageSize = baseImageSize * 0.7; // Start at 70% when far from target
+      const maxImageSize = baseImageSize * 1.15; // Grow to 115% (15% larger) when matching target
+      
+      // Calculate closeness based on frequency difference (works from both directions)
+      const frequencyDiff = Math.abs(resonanceHz - targetHz); // Distance from target (always positive)
+      const maxFrequencyDiff = 10000; // Maximum possible difference (0 to 10000 Hz range)
+      // Closeness: 1.0 when matching (diff = 0), 0.0 when maximum difference
+      const frequencyCloseness = Math.max(0, 1 - (frequencyDiff / maxFrequencyDiff));
+      
+      // Creature size based on frequency closeness - grows as it approaches target from either direction
+      const creatureBaseSize = minImageSize + (maxImageSize - minImageSize) * frequencyCloseness;
+      
+      // Target ring size matches creature size (10% smaller)
+      const targetRadius = (creatureBaseSize / 2) * 0.9;
+      
+      // Calculate closeness for visual effects (orb vs target ring)
+      const sizeDiff = Math.abs(initialFinalR - targetRadius);
       const maxSizeDiff = maxOrbRadius - minOrbRadius;
-      const closeness = Math.max(0, 1 - (sizeDiff / (maxSizeDiff * 0.1))); // Close when within 10% of max range
+      const closeness = Math.max(0, 1 - (sizeDiff / (maxSizeDiff * 0.1)));
       const isClose = closeness > 0.7; // Threshold for "very close"
       
       // Intensity multiplier when close (1.0 to 2.0)
@@ -203,6 +245,41 @@ export default function CreatureCanvas(){
       ctx.arc(shockCx, shockCy, finalR, 0, Math.PI*2); 
       ctx.fill();
       
+      // Draw creature image - separate from orb, not clipped
+      // Use shocked image when shocked, normal image otherwise
+      const isShocked = currentShockIntensity > 0;
+      const creatureImg = isShocked && creatureShockedImageRef.current?.complete 
+        ? creatureShockedImageRef.current 
+        : creatureImageRef.current;
+      
+      if (creatureImg && creatureImg.complete) {
+        // Creature size is based on frequency closeness (calculated above)
+        // Add pulse animation to creature image (independent of orb pulse)
+        const creaturePulseAmplitude = 0.05; // Reduced from 0.08 to 0.05 (5% pulse)
+        const creaturePulseSpeed = 0.008; // Slightly faster than orb breathing
+        const creaturePulse = 1 + creaturePulseAmplitude * Math.sin(t * creaturePulseSpeed);
+        const imageSize = creatureBaseSize * creaturePulse;
+        
+        // Add vertical bounce animation
+        const bounceAmplitude = maxOrbRadius * 0.15; // 15% of max orb radius
+        const bounceSpeed = 0.005; // Bounce speed
+        const bounceOffset = bounceAmplitude * Math.sin(t * bounceSpeed);
+        
+        // Center image on orb with bounce offset, moved up slightly
+        const verticalOffset = -maxOrbRadius * 0.1; // Move up by 10% of max orb radius
+        const imageX = shockCx - imageSize / 2;
+        const imageY = shockCy - imageSize / 2 + bounceOffset + verticalOffset;
+        
+        // Draw the creature image (not clipped, so it remains visible even when orb is smaller)
+        ctx.drawImage(
+          creatureImg,
+          imageX,
+          imageY,
+          imageSize,
+          imageSize
+        );
+      }
+      
       // Hard edge/membrane - brighter when shocked
       const edgeAlpha = isClose 
         ? Math.min(0.7, (0.5 + 0.2*normalizedResonance) * closeIntensity * (1 + currentShockIntensity * 0.15))
@@ -274,6 +351,16 @@ export default function CreatureCanvas(){
 
   return (
     <div className={styles.container}>
+      <div className={styles.infoBar}>
+        <div className={styles.potSection}>
+          <div className={styles.potLabel}>Pot Size</div>
+          <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
+        </div>
+        <div className={styles.timerSection}>
+          <div className={styles.timerLabel}>Experiment Fails In:</div>
+          <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
+        </div>
+      </div>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           {isBelow ? (

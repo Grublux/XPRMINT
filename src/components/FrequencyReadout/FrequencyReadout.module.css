@@ -9,7 +9,7 @@
   width: 100%; /* Take full width to allow expansion */
   flex: 1 1 0; /* Allow flexible sizing */
   min-width: 0; /* Allow shrinking */
-  margin-top: -20px; /* Negative top margin to pull cathode orbs up */
+  margin-top: 0; /* Removed negative margin */
 }
 
 .anode {
@@ -44,12 +44,10 @@
   flex-direction: column;
   align-items: center;
   padding: 7.2px; /* Reduced by 1/3 (10.8 * 2/3) */
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 2px solid #0f3460;
-  border-radius: 7.2px;
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.4);
+  background: transparent; /* Transparent since parent container has background */
+  border: none; /* Remove border - parent container handles styling */
+  border-radius: 0; /* Remove border radius - parent container handles it */
+  box-shadow: none; /* Remove shadow - parent container handles it */
   width: 100%; /* Take full width of column */
   min-width: 0;
   flex: 1 1 0; /* Allow flexible sizing to match specimen width */
@@ -131,30 +129,33 @@
     width: 100%;
     flex: 1 1 0;
     min-width: 0;
+    max-width: none; /* Remove max-width constraint */
   }
   .container {
     width: 100%;
-    padding: 6.12px; /* 7.2 * 0.85 */
-    max-height: 68px; /* 80 * 0.85 */
+    padding: 3.5px; /* Further scaled down to fit narrower width */
+    max-height: 47.6px; /* Keep same height */
   }
   .readout {
-    padding: 6.12px 8.16px; /* Scale down */
-    min-height: 30.6px; /* 36 * 0.85 */
+    padding: 3.5px 4.5px; /* Further scaled down */
+    min-height: 20px; /* Slightly smaller */
   }
   .value {
-    font-size: 10.2px; /* 12 * 0.85 */
-    min-width: 40.8px; /* 48 * 0.85 */
+    font-size: 6.5px; /* Slightly smaller */
+    min-width: 26px; /* Slightly smaller */
   }
   .label {
-    font-size: 5.1px; /* 6 * 0.85 */
+    font-size: 3.2px; /* Slightly smaller */
   }
   .anode {
-    width: 70.23px; /* 82.62 * 0.85 */
-    height: 140.45px; /* 165.24 * 0.85 */
+    width: 42px; /* Further scaled down to fit narrower width */
+    height: 84px; /* Maintain aspect ratio */
+    margin-bottom: 4.5px; /* Slightly reduced */
   }
   .cathode {
-    width: 70.23px; /* 82.62 * 0.85 - same as anode */
-    height: 140.45px; /* 165.24 * 0.85 - same as anode */
+    width: 42px; /* Same as anode */
+    height: 84px; /* Same as anode */
+    margin-bottom: 4.5px; /* Slightly reduced */
   }
 }
 
@@ -163,29 +164,32 @@
     width: 100%;
     flex: 1 1 0;
     min-width: 0;
+    max-width: none; /* Remove max-width constraint */
   }
   .container {
     width: 100%;
-    padding: 5.4px; /* 7.2 * 0.75 */
-    max-height: 60px; /* 80 * 0.75 */
+    padding: 2.7px; /* Further scaled down to fit narrower width */
+    max-height: 36px; /* Keep same height */
   }
   .readout {
-    padding: 5.4px 7.2px; /* Scale down */
-    min-height: 27px; /* 36 * 0.75 */
+    padding: 2.7px 3.6px; /* Further scaled down */
+    min-height: 15px; /* Slightly smaller */
   }
   .value {
-    font-size: 9px; /* 12 * 0.75 */
-    min-width: 36px; /* 48 * 0.75 */
+    font-size: 4.8px; /* Slightly smaller */
+    min-width: 20px; /* Slightly smaller */
   }
   .label {
-    font-size: 4.5px; /* 6 * 0.75 */
+    font-size: 2.4px; /* Slightly smaller */
   }
   .anode {
-    width: 61.97px; /* 82.62 * 0.75 */
-    height: 123.93px; /* 165.24 * 0.75 */
+    width: 32px; /* Further scaled down to fit narrower width */
+    height: 64px; /* Maintain aspect ratio */
+    margin-bottom: 3.6px; /* Slightly reduced */
   }
   .cathode {
-    width: 61.97px; /* 82.62 * 0.75 - same as anode */
-    height: 123.93px; /* 165.24 * 0.75 - same as anode */
+    width: 32px; /* Same as anode */
+    height: 64px; /* Same as anode */
+    margin-bottom: 3.6px; /* Slightly reduced */
   }
 }

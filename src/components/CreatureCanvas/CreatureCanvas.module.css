@@ -9,6 +9,94 @@
   box-sizing: border-box;
   overflow: hidden; /* Clip to container */
 }
+.infoBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  gap: 9px;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 7.2px;
+  box-sizing: border-box;
+}
+
+.potSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3.6px;
+  padding: 12.6px 10.8px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
+  border-radius: var(--radius);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(255, 215, 0, 0.1);
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.potLabel {
+  font-size: 11.7px;
+  color: rgba(255, 215, 0, 0.9);
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.potValue {
+  font-size: 24px;
+  color: #FFD700;
+  text-align: left;
+  font-weight: 900;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.timerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.timerLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: right;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timerValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: right;
+  font-weight: 700;
+}
+
+.timerDanger {
+  color: #e87474;
+  animation: blink 0.8s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .header{ 
   display:flex; 
   align-items:center; 
@@ -128,10 +216,13 @@
   border: none;
 }
 .panel{
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); /* Match knob and frequency areas */
+  background:var(--panel);
   border-radius:var(--radius);
-  box-shadow:var(--shadow);
+  border-bottom-left-radius: 0; /* Remove bottom border radius to connect seamlessly */
+  border-bottom-right-radius: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Standard shadow */
   padding:10.8px;
+  padding-bottom: 0; /* Remove bottom padding to eliminate visible line */
   display:flex;
   flex-direction:column;
   gap:7.2px;
@@ -144,7 +235,6 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-blend-mode: overlay; /* Blend the image with the gradient */
   overflow: hidden; /* Clip to container */
 }
 .canvas{
@@ -164,6 +254,33 @@
     max-width: 100%;
     gap: 4.5px;
     margin: 0 auto; /* Center the container */
+  }
+  .infoBar {
+    gap: 4.5px; /* Scaled down gap */
+    margin-bottom: 3.6px; /* Scaled down margin */
+    flex-wrap: nowrap; /* Prevent wrapping */
+  }
+  .potSection {
+    padding: 6.3px 5.4px; /* Scaled down padding */
+    flex: 0 1 auto; /* Allow shrinking */
+    min-width: 0; /* Allow flex shrinking */
+  }
+  .potLabel {
+    font-size: 8.19px; /* Scaled down (11.7 * 0.7) */
+  }
+  .potValue {
+    font-size: 16.8px; /* Scaled down (24 * 0.7) */
+  }
+  .timerSection {
+    padding: 7.56px 6.3px; /* Scaled down padding */
+    flex: 0 1 auto; /* Allow shrinking */
+    min-width: 0; /* Allow flex shrinking */
+  }
+  .timerLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) */
+  }
+  .timerValue {
+    font-size: 12.6px; /* Scaled down (18 * 0.7) */
   }
   .header {
     gap: 3.6px;
@@ -187,10 +304,13 @@
     font-size: 12px; /* 16 * 0.75 */
   }
   .panel {
-    padding: 4.5px; /* Scale down padding */
+    padding: 4.5px 4.5px 0 4.5px; /* Remove bottom padding to eliminate gap */
     height: 385px; /* Scale down from 550px (550 * 0.7) - smaller on mobile */
     width: calc(385px * 932 / 1127); /* Maintain aspect ratio */
     max-width: 100%;
+    border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
+    border-bottom-right-radius: 0;
+    box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
   }
   .canvas {
     height: 100%;
@@ -204,6 +324,33 @@
     max-width: 100%;
     gap: 3.6px;
     margin: 0 auto; /* Center the container */
+  }
+  .infoBar {
+    gap: 3.6px; /* Scaled down gap */
+    margin-bottom: 2.7px; /* Scaled down margin */
+    flex-wrap: nowrap; /* Prevent wrapping */
+  }
+  .potSection {
+    padding: 4.5px 3.6px; /* Scaled down padding */
+    flex: 0 1 auto; /* Allow shrinking */
+    min-width: 0; /* Allow flex shrinking */
+  }
+  .potLabel {
+    font-size: 7.02px; /* Scaled down (11.7 * 0.6) */
+  }
+  .potValue {
+    font-size: 14.4px; /* Scaled down (24 * 0.6) */
+  }
+  .timerSection {
+    padding: 6.48px 5.4px; /* Scaled down padding */
+    flex: 0 1 auto; /* Allow shrinking */
+    min-width: 0; /* Allow flex shrinking */
+  }
+  .timerLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .timerValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) */
   }
   .header {
     gap: 2.7px;
@@ -227,10 +374,13 @@
     font-size: 10.4px; /* 16 * 0.65 */
   }
   .panel {
-    padding: 3.6px; /* Scale down padding */
+    padding: 3.6px 3.6px 0 3.6px; /* Remove bottom padding to eliminate gap */
     height: 330px; /* Scale down from 550px (550 * 0.6) - even smaller on small mobile */
     width: calc(330px * 932 / 1127); /* Maintain aspect ratio */
     max-width: 100%;
+    border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
+    border-bottom-right-radius: 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
   }
   .canvas {
     touch-action: none; /* Prevent default touch behaviors */

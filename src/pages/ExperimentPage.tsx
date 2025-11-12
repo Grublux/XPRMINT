@@ -28,17 +28,9 @@ export default function ExperimentPage(){
 
   return (
     <div className={styles.grid}>
-      <div className={styles.infoRow}>
-        <div className={styles.potSection}>
-          <div className={styles.potLabel}>Pot Size</div>
-          <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
-        </div>
+      <div className={styles.titleRow}>
         <div className={styles.titleSection}>
           <h1 className={styles.title}>XPRMINT</h1>
-        </div>
-        <div className={styles.timerSection}>
-          <div className={styles.timerLabel}>Experiment Fails In:</div>
-          <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
         </div>
       </div>
 

@@ -4,13 +4,11 @@
   align-items: center;
   gap: 7.2px; /* Increased gap to use extra space */
   padding: 35px 7.2px 7.2px 7.2px; /* Increased top padding to give more space above half-moon scale */
-  margin-top: -40px; /* Negative top margin to pull control up (-10px + -20px + -10px) */
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 2px solid #0f3460;
-  border-radius: 8px;
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.4);
+  margin-top: 0; /* Removed negative margin */
+  background: transparent; /* Transparent since parent container has background */
+  border: none; /* Remove border - parent container handles styling */
+  border-radius: 0; /* Remove border radius - parent container handles it */
+  box-shadow: none; /* Remove shadow - parent container handles it */
   min-width: 0;
   max-width: calc(280px * (550px * 932 / 1127) / 752px); /* Scale proportionally to match dialRow */
   width: auto;
@@ -138,7 +136,7 @@
   appearance: none;
   border: 0;
   border-radius: 5.4px;
-  padding: 3.6px 9.6px; /* Reduced by 1/3 */
+  padding: 3.6px 19.2px; /* Doubled horizontal padding (9.6px * 2) */
   color: #111;
   background: var(--gold);
   font-weight: 600;
@@ -167,71 +165,73 @@
 @media (max-width: 768px) {
   .container {
     width: 100%;
-    flex: 1.27 1 0; /* Maintain ratio */
+    flex: 1 1 0; /* Reduced flex to allow narrower width */
     min-width: 0;
-    padding: 25px 6.12px 6.12px 6.12px; /* Increased top padding for extra space above scale on mobile */
-    gap: 5px; /* Increased gap to use extra space */
-    max-height: 185px; /* Increased by 15px to allow more spacing */
+    max-width: none; /* Remove max-width constraint */
+    padding: 15px 3.5px 3.5px 3.5px; /* Further scaled down to fit narrower width */
+    gap: 3px; /* Further reduced gap */
+    max-height: 129.5px; /* Keep same height */
   }
   .dial {
-    width: 48px; /* Scaled down further to fit */
-    height: 48px;
-    margin-top: 4px; /* Reduced margin */
+    width: 30px; /* Further scaled down to fit narrower width */
+    height: 30px;
+    margin-top: 2.5px; /* Slightly reduced */
   }
   .analogSvg {
-    height: 48px; /* Scaled down to fit */
-    top: -5px; /* Less negative to add padding above scale and move lower */
+    height: 30px; /* Match dial size */
+    top: -3px; /* Adjusted */
   }
   .analogLabel {
-    font-size: 5.1px; /* Scale down */
-    margin-top: 2px; /* Reduced margin */
+    font-size: 3.2px; /* Slightly smaller */
+    margin-top: 1.2px; /* Slightly reduced */
   }
   .dialNeedle {
-    height: 40px; /* Scaled down further */
+    height: 25px; /* Slightly smaller */
   }
   .buyButton {
-    padding: 2.5px 7px; /* Reduced padding */
-    font-size: 5.5px; /* Smaller font */
-    min-height: 20px; /* Reduced height */
-    margin-bottom: 2px; /* Reduced margin */
+    padding: 1.5px 8px; /* Doubled horizontal padding (4px * 2) */
+    font-size: 3.5px; /* Slightly smaller */
+    min-height: 12px; /* Slightly smaller */
+    margin-bottom: 1.2px; /* Slightly reduced */
   }
   .numbersSection {
-    min-height: 20px; /* Reduced height */
+    min-height: 12px; /* Slightly smaller */
   }
 }
 
 @media (max-width: 480px) {
   .container {
     width: 100%;
-    flex: 1.27 1 0; /* Maintain ratio */
+    flex: 1 1 0; /* Reduced flex to allow narrower width */
     min-width: 0;
-    padding: 22px 5.4px 5.4px 5.4px; /* Increased top padding for extra space above scale on mobile */
-    gap: 4px; /* Increased gap to use extra space */
-    max-height: 165px; /* Increased by 15px to allow more spacing */
+    max-width: none; /* Remove max-width constraint */
+    padding: 11px 2.7px 2.7px 2.7px; /* Further scaled down to fit narrower width */
+    gap: 2px; /* Further reduced gap */
+    max-height: 99px; /* Keep same height */
   }
   .dial {
-    width: 42px; /* Scaled down further to fit */
-    height: 42px;
-    margin-top: 3px; /* Reduced margin */
+    width: 22px; /* Further scaled down to fit narrower width */
+    height: 22px;
+    margin-top: 1.5px; /* Slightly reduced */
   }
   .analogSvg {
-    height: 42px; /* Scaled down to fit */
-    top: -3px; /* Less negative to add padding above scale and move lower */
+    height: 22px; /* Match dial size */
+    top: -1.5px; /* Adjusted */
   }
   .analogLabel {
-    font-size: 4.5px; /* Scale down */
-    margin-top: 1.5px; /* Reduced margin */
+    font-size: 2.4px; /* Slightly smaller */
+    margin-top: 0.8px; /* Slightly reduced */
   }
   .dialNeedle {
-    height: 35px; /* Scaled down further */
+    height: 18px; /* Slightly smaller */
   }
   .buyButton {
-    padding: 2px 6px; /* Reduced padding */
-    font-size: 4.8px; /* Smaller font */
-    min-height: 18px; /* Reduced height */
-    margin-bottom: 2px; /* Reduced margin */
+    padding: 1px 6px; /* Doubled horizontal padding (3px * 2) */
+    font-size: 2.6px; /* Slightly smaller */
+    min-height: 10px; /* Slightly smaller */
+    margin-bottom: 1px; /* Slightly reduced */
   }
   .numbersSection {
-    min-height: 18px; /* Reduced height */
+    min-height: 10.8px; /* Scaled down by 0.6 (18 * 0.6) */
   }
 }

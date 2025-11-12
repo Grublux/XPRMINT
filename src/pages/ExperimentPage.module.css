@@ -1,6 +1,6 @@
 .grid{ 
   display:grid; 
-  gap:16px; 
+  gap:0; /* Remove gap to create uniform background */
   grid-template-columns:1fr; 
   width: 100%;
   max-width: 100%;
@@ -10,11 +10,11 @@
   overflow-x: visible; /* Allow content to be visible */
 }
 .topRow{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
-.infoRow {
+.titleRow {
   display: flex;
   gap: 16px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -28,6 +28,7 @@
   width: 100%;
   max-width: 752px; /* Match dialRow max width */
   margin: 0 auto; /* Center the row */
+  margin-bottom: 0; /* Remove bottom margin to eliminate gap */
   box-sizing: border-box;
   flex-wrap: nowrap;
   position: relative; /* For absolute positioning of MovesTicker */
@@ -183,9 +184,19 @@
   width: 100%;
   max-width: calc(550px * 932 / 1127); /* Match specimen panel width */
   margin: 0 auto; /* Center the row */
+  margin-top: 0; /* Remove top margin to eliminate gap */
   box-sizing: border-box;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  background: var(--panel); /* Shared background to match specimen area */
+  border-radius: 0; /* Remove all border radius to connect seamlessly */
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: var(--radius); /* Match specimen top radius */
+  border-bottom-right-radius: var(--radius);
+  padding: 10.8px; /* Match specimen area padding */
+  padding-top: 0; /* Remove top padding to eliminate visible line */
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Match specimen area shadow exactly */
 }
 
 .sliderRow {
@@ -250,7 +261,7 @@
 /* Mobile responsive - maintain exact layout, scale down */
 @media (max-width: 768px) {
   .grid {
-    gap: 12px;
+    gap: 0; /* Keep gap at 0 to maintain uniform background */
     padding: 0 12px;
   }
   .infoRow {
@@ -267,6 +278,7 @@
     gap: 12px;
     flex-wrap: nowrap; /* Keep layout structure */
     max-width: 100%; /* Allow full width on mobile */
+    margin-bottom: 0; /* Ensure no gap on mobile */
   }
   
   .potSection {
@@ -312,12 +324,15 @@
     display: none; /* Hide MovesTicker on mobile to save space */
   }
   .dialRow {
-    gap: 5.1px; /* Scale gap (16 * 0.85 * (550px * 932 / 1127) / 752px) */
+    gap: 2.5px; /* Further reduced to fit narrower width */
     flex-wrap: nowrap; /* Keep layout structure */
     overflow-x: visible; /* Don't scroll */
-    padding: 0 8px;
-    max-width: 100%;
+    padding: 0 4.5px 4.5px 4.5px; /* Remove top padding to eliminate gap */
+    max-width: calc(385px * 932 / 1127); /* Match specimen panel width on mobile */
+    width: 100%; /* Take full width of container */
     box-sizing: border-box;
+    margin-top: -1px; /* Slight overlap to eliminate any visible gap */
+    box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Match specimen shadow exactly */
   }
   .sliderRow {
     padding: 7.2px 12px;
@@ -334,7 +349,7 @@
 
 @media (max-width: 480px) {
   .grid {
-    gap: 8px;
+    gap: 0; /* Keep gap at 0 to maintain uniform background */
     padding: 0 8px;
   }
   .infoRow {
@@ -352,6 +367,7 @@
     flex-wrap: nowrap; /* Keep layout structure */
     max-width: 100%; /* Allow full width on small mobile */
     justify-content: center; /* Center the specimen */
+    margin-bottom: 0; /* Ensure no gap on mobile */
   }
   .specimenRow > *:nth-child(1) {
     flex: 0 0 auto;
@@ -364,12 +380,15 @@
     display: none; /* Hide MovesTicker on mobile to save space */
   }
   .dialRow {
-    gap: 4.5px; /* Scale gap (16 * 0.75 * (550px * 932 / 1127) / 752px) */
+    gap: 1.8px; /* Further reduced to fit narrower width */
     flex-wrap: nowrap; /* Keep layout structure */
     overflow-x: visible; /* Don't scroll */
-    padding: 0 4px;
-    max-width: 100%;
+    padding: 0 3.6px 3.6px 3.6px; /* Remove top padding to eliminate gap */
+    max-width: calc(330px * 932 / 1127); /* Match specimen panel width on mobile */
+    width: 100%; /* Take full width of container */
     box-sizing: border-box;
+    margin-top: -1px; /* Slight overlap to eliminate any visible gap */
+    box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Match specimen shadow exactly */
   }
   .potSection {
     padding: 4.5px 3.6px;
