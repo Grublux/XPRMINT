@@ -5,7 +5,7 @@ import { winSound } from '../../lib/audio';
 import { buzzWin } from '../../lib/haptics';
 
 export default function WinOverlay(){
-  const { status, targetHz, resonanceHz, resetRound, soundOn } = useGame();
+  const { status, targetHz, resetRound, soundOn } = useGame();
   
   useEffect(()=>{
     if (status === 'win' && soundOn) {

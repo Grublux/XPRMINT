@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useGame } from '../state/gameStore';
 
 export function useRoundJudge(windowMs = 600_000) {
-  const { lastMoveAt, status, goal, resonance, resetRound } = useGame();
+  const { lastMoveAt, status } = useGame();
   useEffect(() => {
     if (status !== 'active') return;
     let raf = 0;

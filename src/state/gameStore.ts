@@ -17,10 +17,6 @@ function randTargetHz(){
   return Math.floor(Math.random()*10001); // 0..10000 Hz
 }
 
-function randResonanceHz(){
-  return Math.floor(Math.random()*10001); // 0..10000 Hz
-}
-
 type GameState = {
   // core game
   targetHz: number;           // "Target Frequency"

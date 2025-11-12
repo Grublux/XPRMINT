@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
 import { useGame } from '../../state/gameStore';
 import styles from './JoinOverlay.module.css';
 
 export default function JoinOverlay(){
-  const { status, hasJoined, ngtBalance, initialPackCost, joinWithInitialPack } = useGame();
+  const { hasJoined, ngtBalance, initialPackCost, joinWithInitialPack } = useGame();
 
   if (hasJoined) return null;
   // show overlay whenever not joined; status will be 'idle' after resetRound

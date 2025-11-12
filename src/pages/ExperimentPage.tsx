@@ -4,19 +4,15 @@ import CenterDial from '../components/CenterDial/CenterDial';
 import WinOverlay from '../components/Overlays/WinOverlay';
 import TimeoutOverlay from '../components/Overlays/TimeoutOverlay';
 import JoinOverlay from '../components/Overlays/JoinOverlay';
-import MovesTicker from '../components/MovesTicker/MovesTicker';
 import { useRoundJudge } from '../hooks/useRoundJudge';
 import { useKeyboardControls } from '../hooks/useKeyboardControls';
-import { useTimer } from '../hooks/useTimer';
 import { useGame } from '../state/gameStore';
 import styles from './ExperimentPage.module.css';
 
 export default function ExperimentPage(){
   useRoundJudge();
   useKeyboardControls();
-  const { pot, lastMoveAt, status, resonanceHz, setResonance } = useGame();
-  const { label, remaining } = useTimer(lastMoveAt);
-  const danger = remaining <= 60_000 && status==='active';
+  const { resonanceHz, setResonance } = useGame();
   
   // Orb size slider logic
   const sliderValue = 0.1 + (resonanceHz / 10000) * 1.9;
