@@ -128,7 +128,7 @@
   border: none;
 }
 .panel{
-  background:var(--panel);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); /* Match knob and frequency areas */
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:10.8px;
@@ -144,6 +144,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-blend-mode: overlay; /* Blend the image with the gradient */
   overflow: hidden; /* Clip to container */
 }
 .canvas{

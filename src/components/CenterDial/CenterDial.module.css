@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9.6px; /* Reduced by 1/3 (14.4 * 2/3) */
-  padding: 3.6px 7.2px 7.2px 7.2px; /* Reduced top padding from 7.2px to 3.6px */
+  gap: 7.2px; /* Increased gap to use extra space */
+  padding: 35px 7.2px 7.2px 7.2px; /* Increased top padding to give more space above half-moon scale */
   margin-top: -40px; /* Negative top margin to pull control up (-10px + -20px + -10px) */
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border: 2px solid #0f3460;
@@ -18,49 +18,53 @@
   box-sizing: border-box;
   min-height: 0; /* Allow height to scale */
   height: auto; /* Allow height to scale */
-  max-height: 200px; /* Reduce overall height by 1/3 (from ~300px) */
-}
-
-.waveformWindow {
-  position: relative;
-  width: 100%;
-  height: 36px; /* Reduced by 1/3 (54 * 2/3) */
-  background: #000;
-  border: 1px solid #0f3460;
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.waveformCanvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.waveformLabel {
-  position: absolute;
-  top: 3.6px;
-  right: 7.2px;
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  color: #4a9eff;
-  opacity: 0.8;
+  max-height: 215px; /* Increased by 15px to allow more spacing */
+  overflow: visible; /* Allow scale to be visible within padding */
 }
 
 .dialSection {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   flex-shrink: 0;
+  overflow: visible; /* Allow scale to be fully visible */
+  min-height: 0; /* Remove min-height to close gap */
+  gap: 0; /* Remove gap between scale, dial, and label */
+  padding-bottom: 0; /* Remove any bottom padding */
+  margin-bottom: 0; /* Remove any bottom margin */
+}
+
+.analogSvg {
+  position: absolute;
+  top: -10px; /* Position slightly above to show full arc */
+  width: 120%;
+  height: 60px; /* Increased to show full scale */
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none; /* Allow clicks to pass through */
+  z-index: 0;
+  overflow: visible; /* Ensure nothing is clipped */
+}
+
+.analogLabel {
+  margin-top: 0; /* Remove margin to close gap under knob */
+  margin-bottom: 0; /* Remove bottom margin */
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  color: #4a9eff;
+  opacity: 0.8;
+  z-index: 3;
 }
 
 .dial {
   position: relative;
   width: 61.2px; /* Reduced by 15% from 72px (72 * 0.85) */
   height: 61.2px;
+  margin-bottom: 0; /* Remove any default margin */
   flex-shrink: 0;
+  z-index: 1; /* Above the SVG scale */
 }
 
 .dialFace {
@@ -114,11 +118,11 @@
   left: 50%;
   transform: translate(-50%, -100%) rotate(0deg);
   width: 2.7px;
-  height: 45px;
+  height: 50px; /* Extended to reach the scale */
   background: linear-gradient(to bottom, #00ff88, #4a9eff);
   box-shadow: 0 0 5.4px rgba(0, 255, 136, 0.8);
   transform-origin: bottom center;
-  z-index: 1;
+  z-index: 2; /* Above dial face, below label */
   border-radius: 2px;
   transition: transform 0.3s ease;
 }
@@ -127,7 +131,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  min-height: 30px; /* Reduced by 1/3 (45 * 2/3) */
+  min-height: 24px; /* Reduced to close gap */
   flex-shrink: 0;
 }
 .buyButton {
@@ -165,28 +169,34 @@
     width: 100%;
     flex: 1.27 1 0; /* Maintain ratio */
     min-width: 0;
-    padding: 3.06px 6.12px 6.12px 6.12px; /* Reduced top padding - 3.6px * 0.85 */
-    gap: 8.16px; /* 9.6 * 0.85 */
-    max-height: 170px; /* 200 * 0.85 */
+    padding: 25px 6.12px 6.12px 6.12px; /* Increased top padding for extra space above scale on mobile */
+    gap: 5px; /* Increased gap to use extra space */
+    max-height: 185px; /* Increased by 15px to allow more spacing */
   }
   .dial {
-    width: 52.02px; /* 61.2 * 0.85 */
-    height: 52.02px;
+    width: 48px; /* Scaled down further to fit */
+    height: 48px;
+    margin-top: 4px; /* Reduced margin */
   }
-  .waveformWindow {
-    height: 30.6px; /* 36 * 0.85 */
+  .analogSvg {
+    height: 48px; /* Scaled down to fit */
+    top: -5px; /* Less negative to add padding above scale and move lower */
   }
-  .waveformLabel {
+  .analogLabel {
     font-size: 5.1px; /* Scale down */
+    margin-top: 2px; /* Reduced margin */
+  }
+  .dialNeedle {
+    height: 40px; /* Scaled down further */
   }
   .buyButton {
-    padding: 3.06px 8.16px; /* Scale down */
-    font-size: 6.12px; /* 7.2 * 0.85 */
-    min-height: 24.65px; /* 29 * 0.85 */
-    margin-bottom: 4.5px; /* Add space below button on narrow viewports */
+    padding: 2.5px 7px; /* Reduced padding */
+    font-size: 5.5px; /* Smaller font */
+    min-height: 20px; /* Reduced height */
+    margin-bottom: 2px; /* Reduced margin */
   }
   .numbersSection {
-    min-height: 25.5px; /* 30 * 0.85 */
+    min-height: 20px; /* Reduced height */
   }
 }
 
@@ -195,27 +205,33 @@
     width: 100%;
     flex: 1.27 1 0; /* Maintain ratio */
     min-width: 0;
-    padding: 2.7px 5.4px 5.4px 5.4px; /* Reduced top padding - 3.6px * 0.75 */
-    gap: 7.2px; /* 9.6 * 0.75 */
-    max-height: 150px; /* 200 * 0.75 */
+    padding: 22px 5.4px 5.4px 5.4px; /* Increased top padding for extra space above scale on mobile */
+    gap: 4px; /* Increased gap to use extra space */
+    max-height: 165px; /* Increased by 15px to allow more spacing */
   }
   .dial {
-    width: 45.9px; /* 61.2 * 0.75 */
-    height: 45.9px;
+    width: 42px; /* Scaled down further to fit */
+    height: 42px;
+    margin-top: 3px; /* Reduced margin */
   }
-  .waveformWindow {
-    height: 27px; /* 36 * 0.75 */
+  .analogSvg {
+    height: 42px; /* Scaled down to fit */
+    top: -3px; /* Less negative to add padding above scale and move lower */
   }
-  .waveformLabel {
+  .analogLabel {
     font-size: 4.5px; /* Scale down */
+    margin-top: 1.5px; /* Reduced margin */
+  }
+  .dialNeedle {
+    height: 35px; /* Scaled down further */
   }
   .buyButton {
-    padding: 2.7px 7.2px; /* Scale down */
-    font-size: 5.4px; /* 7.2 * 0.75 */
-    min-height: 21.75px; /* 29 * 0.75 */
-    margin-bottom: 3.6px; /* Add space below button on very narrow viewports */
+    padding: 2px 6px; /* Reduced padding */
+    font-size: 4.8px; /* Smaller font */
+    min-height: 18px; /* Reduced height */
+    margin-bottom: 2px; /* Reduced margin */
   }
   .numbersSection {
-    min-height: 22.5px; /* 30 * 0.75 */
+    min-height: 18px; /* Reduced height */
   }
 }
