@@ -180,11 +180,14 @@
     min-height: 15px; /* Slightly smaller */
   }
   .value {
-    font-size: 4.8px; /* Slightly smaller */
+    font-size: 9px; /* Increased from 4.8px for better mobile readability */
     min-width: 20px; /* Slightly smaller */
+    font-weight: 900; /* Increased weight for prominence */
   }
   .label {
-    font-size: 2.4px; /* Slightly smaller */
+    font-size: 5px; /* Increased from 2.4px for better mobile readability */
+    opacity: 1; /* Full opacity for better visibility */
+    font-weight: 700; /* Added weight for prominence */
   }
   .anode {
     width: 32px; /* Further scaled down to fit narrower width */
