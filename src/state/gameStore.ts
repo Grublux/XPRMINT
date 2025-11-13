@@ -16,6 +16,20 @@ function randNum1to500(){
 function randTargetHz(){
   return Math.floor(Math.random() * 4001) + 3000; // 3000..7000 Hz (3k to 7k)
 }
+function randResonanceHz(targetHz: number){
+  // Generate specimen frequency that is at least 3k Hz away from target
+  const minDistance = 3000;
+  let resonanceHz;
+  let attempts = 0;
+  do {
+    resonanceHz = Math.floor(Math.random() * 10001); // 0..10000 Hz
+    attempts++;
+    // Safety check to prevent infinite loop
+    if (attempts > 100) break;
+  } while (Math.abs(resonanceHz - targetHz) < minDistance);
+  
+  return resonanceHz;
+}
 
 type GameState = {
   // core game
@@ -55,8 +69,14 @@ type GameState = {
 
 export const useGame = create<GameState>((set, get)=>({
   // start in idle until join; random target in reset
-  targetHz: randTargetHz(),
-  resonanceHz: 10000, // TEST: Max orb size
+  // Generate target first, then specimen at least 3k away
+  ...(() => {
+    const target = randTargetHz();
+    return {
+      targetHz: target,
+      resonanceHz: randResonanceHz(target), // Random starting frequency, at least 3k away from target
+    };
+  })(),
   pot: 12000,
   lastMoveAt: Date.now(),
   numbers: [randNum1to500(), randNum1to500(), randNum1to500()],
@@ -94,7 +114,7 @@ export const useGame = create<GameState>((set, get)=>({
       lastMoveAt: Date.now(),
       selectedIdx: 0,
       // fresh round: random target already set in state; keep it
-      resonanceHz: 10000, // TEST: Max orb size
+      resonanceHz: randResonanceHz(s.targetHz), // Random starting frequency, at least 3k away from target
     });
   },
 
@@ -153,16 +173,19 @@ export const useGame = create<GameState>((set, get)=>({
     });
   },
 
-  resetRound:()=> set({
-    targetHz: randTargetHz(),
-    resonanceHz: 10000, // TEST: Max orb size
-    numbers: [randNum1to500(), randNum1to500(), randNum1to500()],
-    used: [false, false, false],
-    status: 'active',
-    lastMoveAt: Date.now(),
-    recentMoves: [],
-    selectedIdx: 0,
-    // keep ngtBalance as-is; TEST_INFINITE_NGT means it never depletes
-  })
+  resetRound:()=> {
+    const newTarget = randTargetHz();
+    set({
+      targetHz: newTarget,
+      resonanceHz: randResonanceHz(newTarget), // Random starting frequency, at least 3k away from target
+      numbers: [randNum1to500(), randNum1to500(), randNum1to500()],
+      used: [false, false, false],
+      status: 'active',
+      lastMoveAt: Date.now(),
+      recentMoves: [],
+      selectedIdx: 0,
+      // keep ngtBalance as-is; TEST_INFINITE_NGT means it never depletes
+    });
+  }
 }));
 

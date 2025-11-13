@@ -86,11 +86,11 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Scale factor for mobile - normalize to base canvas size (550px height reference)
       const canvasScale = Math.min(clientW, clientH) / 550;
 
-      // Update shock intensity (fade out over 300ms)
+      // Update shock intensity (fade out over 600ms - reduced by 0.2 seconds)
       // Use ref to avoid re-renders every frame
       if (shockIntensityRef.current > 0) {
         const shockAge = Date.now() - shockRef.current;
-        const newIntensity = Math.max(0, 1 - (shockAge / 300));
+        const newIntensity = Math.max(0, 1 - (shockAge / 600));
         shockIntensityRef.current = newIntensity;
         // Only update state occasionally to avoid too many re-renders
         if (Math.abs(newIntensity - shockIntensity) > 0.1 || newIntensity === 0) {
@@ -128,9 +128,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Shock effect: add random shake offset when shocked
       // Use ref value for smooth animation without re-renders
       const currentShockIntensity = shockIntensityRef.current;
-      const shockShake = currentShockIntensity > 0 ? (Math.random() - 0.5) * currentShockIntensity * 4 : 0; // Reduced from 8 to 4
-      const shockCx = cx + shockShake;
-      const shockCy = cy + shockShake;
+      const shockShakeX = currentShockIntensity > 0 ? (Math.random() - 0.5) * currentShockIntensity * 6 : 0; // Increased from 4 to 6 for more side-to-side shake
+      const shockShakeY = currentShockIntensity > 0 ? (Math.random() - 0.5) * currentShockIntensity * 2 : 0; // Less vertical shake
+      const shockCx = cx + shockShakeX;
+      const shockCy = cy + shockShakeY;
 
       // Scale orb size based on resonanceHz (0 to 10,000 Hz)
       // At 10,000 Hz, orb should fit exactly in the tank
@@ -230,11 +231,13 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const intenseBreathing = 1 + breathingAmplitude * Math.sin(t*breathingSpeed);
       const finalR = baseRadius * intenseBreathing;
 
-      // Bubble system - spawn rate increases with frequency
-      // Spawn rate: 0 Hz = 1 bubble per 3 seconds, 10k Hz = 20 bubbles per second (faster boiling)
-      const minSpawnInterval = 3000; // 3 seconds at 0 Hz
-      const maxSpawnInterval = 50; // 0.05 seconds at 10k Hz (faster)
-      const spawnInterval = minSpawnInterval - (minSpawnInterval - maxSpawnInterval) * normalizedResonance;
+      // Bubble system - spawn rate based on frequency closeness
+      // Most rapid when frequencies match, very little when furthest apart
+      // Calculate frequency closeness (already calculated above)
+      const bubbleCloseness = frequencyCloseness; // 1.0 when matching, 0.0 when furthest
+      const minSpawnInterval = 5000; // 5 seconds when furthest from match (very little bubbling)
+      const maxSpawnInterval = 50; // 0.05 seconds when matching (most rapid bubbling)
+      const spawnInterval = minSpawnInterval - (minSpawnInterval - maxSpawnInterval) * bubbleCloseness;
       
       // Liquid area bounds - bubbles should stay within liquid
       // Orb is at 65% down, keep bubbles in lower liquid area
@@ -485,7 +488,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             <div className={styles.targetLabel}>Target</div>
             <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
           </div>
-          <div className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
+          <div key={`resonance-${resonanceHz}`} className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
             <div className={styles.currentLabel}>Specimen</div>
             <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
           </div>

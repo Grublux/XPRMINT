@@ -87,9 +87,9 @@
 }
 
 .titleText {
-  font-size: 21.6px;
+  font-size: 17.28px; /* Scaled by 0.8 from 21.6px */
   font-weight: 900;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.44px; /* Scaled by 0.8 from 1.8px */
   color: var(--gold);
   text-transform: uppercase;
   margin: 0;
@@ -412,8 +412,8 @@
     flex: 1; /* 40% placeholder */
   }
   .titleText {
-    font-size: 18px;
-    letter-spacing: 1.35px;
+    font-size: 14.4px; /* Scaled by 0.8 from 18px */
+    letter-spacing: 1.08px; /* Scaled by 0.8 from 1.35px */
   }
   .targetSection {
     padding: 7.56px 6.3px; /* Scaled down padding */
@@ -536,8 +536,8 @@
     flex: 1; /* 40% placeholder */
   }
   .titleText {
-    font-size: 16.2px;
-    letter-spacing: 0.9px;
+    font-size: 12.96px; /* Scaled by 0.8 from 16.2px */
+    letter-spacing: 0.72px; /* Scaled by 0.8 from 0.9px */
   }
   .targetSection {
     padding: 6.48px 5.4px; /* Scaled down padding */
