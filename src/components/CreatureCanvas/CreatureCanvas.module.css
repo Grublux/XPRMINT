@@ -1,6 +1,7 @@
 .container{
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center all children horizontally */
   gap: 3.6px; /* Reduced from 7.2px to bring things closer */
   width: 90%; /* Take up 90% of viewport width */
   max-width: 900px; /* Cap at 900px when too wide */
@@ -233,6 +234,7 @@
   max-width: 100%; /* Don't exceed container */
   min-height: 288px;
   position: relative;
+  margin: 0 auto; /* Center the panel within container */
   background-image: url('/jug2.png');
   background-size: 89%; /* Scale jug image to 89% */
   background-position: center top; /* Keep top aligned, allow bottom and sides to overflow */
