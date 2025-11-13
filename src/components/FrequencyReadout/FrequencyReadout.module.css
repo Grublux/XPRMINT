@@ -57,7 +57,7 @@
   box-shadow: none; /* Remove shadow - parent container handles it */
   width: 100%; /* Take full width of column */
   min-width: 0;
-  flex: 1 1 0; /* Allow flexible sizing to match specimen width */
+  flex: 0.9 1 0; /* Reduced to give more space to meter area */
   height: auto; /* Size to content */
   max-height: 80px; /* Reduced by 1/3 (120 * 2/3) */
   cursor: pointer;
