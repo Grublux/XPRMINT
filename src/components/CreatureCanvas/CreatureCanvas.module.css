@@ -264,6 +264,13 @@
   background-repeat: no-repeat;
   overflow: visible; /* Allow image to overflow bottom and sides */
 }
+
+/* Cap jug width at 900px viewport size (900px * 0.9 * 1.02 = 826.2px) */
+@media (min-width: 900px) {
+  .panel {
+    background-size: 826px 100%; /* Fixed width at max viewport size, don't stretch further */
+  }
+}
 .canvas{
   width:100%;
   height:100%;
