@@ -135,7 +135,7 @@
 @media (max-width: 768px) {
   .column {
     width: 100%;
-    flex: 1 1 0;
+    flex: 0.9 1 0; /* Reduced to give more space to meter area */
     min-width: 0;
     max-width: none; /* Remove max-width constraint */
   }
@@ -173,7 +173,7 @@
 @media (max-width: 480px) {
   .column {
     width: 100%;
-    flex: 1 1 0;
+    flex: 0.9 1 0; /* Reduced to give more space to meter area */
     min-width: 0;
     max-width: none; /* Remove max-width constraint */
   }
