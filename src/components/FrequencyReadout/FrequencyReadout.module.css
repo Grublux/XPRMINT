@@ -183,7 +183,7 @@
     max-height: 36px; /* Keep same height */
   }
   .readout {
-    padding: 2.7px 3.6px; /* Further scaled down */
+    padding: 2.7px 2.5px; /* Reduced horizontal padding from 3.6px to 2.5px */
     min-height: 15px; /* Slightly smaller */
   }
   .value {
@@ -192,7 +192,7 @@
     font-weight: 900; /* Increased weight for prominence */
   }
   .label {
-    font-size: 5px; /* Increased from 2.4px for better mobile readability */
+    font-size: 7px; /* Increased from 5px for better readability */
     opacity: 1; /* Full opacity for better visibility */
     font-weight: 700; /* Added weight for prominence */
   }
