@@ -139,8 +139,11 @@ export default function CreatureCanvas(){
       // Creature size based on frequency closeness - grows as it approaches target from either direction
       const creatureBaseSize = minImageSize + (maxImageSize - minImageSize) * frequencyCloseness;
       
-      // Target ring size matches creature size (10% smaller)
-      const targetRadius = (creatureBaseSize / 2) * 0.9;
+      // Target ring size should be based on TARGET frequency, not creature size
+      // Calculate target frequency size (0 to 10,000 Hz)
+      const normalizedTarget = Math.min(targetHz / 10000, 1); // 0 to 1
+      const targetBaseRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedTarget;
+      const targetRadius = targetBaseRadius; // Target circle represents target frequency size
       
       // Calculate closeness for visual effects (orb vs target ring)
       const sizeDiff = Math.abs(initialFinalR - targetRadius);
