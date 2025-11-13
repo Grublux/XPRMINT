@@ -309,8 +309,8 @@
   }
   .panel {
     padding: 4.5px 4.5px 12px 4.5px; /* Add bottom padding to show more of jug stand */
-    height: 370px; /* Reduced from 385px to move bottom up without cutting off jug stand */
-    width: calc(370px * 932 / 1127); /* Maintain aspect ratio */
+    height: 440px; /* Increased from 370px to reduce squished feeling */
+    width: calc(440px * 932 / 1127); /* Maintain aspect ratio */
     max-width: 100%;
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
@@ -380,8 +380,8 @@
   }
   .panel {
     padding: 3.6px 3.6px 10px 3.6px; /* Add bottom padding to show more of jug stand */
-    height: 320px; /* Reduced from 330px to move bottom up without cutting off jug stand */
-    width: calc(320px * 932 / 1127); /* Maintain aspect ratio */
+    height: 380px; /* Increased from 320px to reduce squished feeling */
+    width: calc(380px * 932 / 1127); /* Maintain aspect ratio */
     max-width: 100%;
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
