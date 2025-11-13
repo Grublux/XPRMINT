@@ -37,11 +37,11 @@
 .analogSvg {
   position: relative; /* Changed from absolute to relative for better positioning */
   width: 120%;
-  height: 80px; /* Increased height for better visibility */
+  height: 50px; /* Only show top half - reduced height */
   margin: 0 auto; /* Center horizontally */
   pointer-events: none; /* Allow clicks to pass through */
   z-index: 0;
-  overflow: visible; /* Ensure nothing is clipped */
+  overflow: hidden; /* Clip to show only top half */
 }
 
 .analogLabel {
