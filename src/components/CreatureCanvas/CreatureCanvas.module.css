@@ -230,7 +230,7 @@
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
   height: 400px; /* Reduced from 550px to shrink bottom more */
-  width: calc(550px * 932 / 1127); /* Keep original width calculation */
+  width: 100%; /* Match dialRow width (90% with max 900px) */
   max-width: 100%; /* Don't exceed container */
   min-height: 288px;
   position: relative;

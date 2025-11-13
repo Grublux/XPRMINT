@@ -13,27 +13,34 @@
 }
 
 .anode {
-  width: 82.62px; /* Reduced by another 15% from 97.2px */
-  height: 165.24px; /* Reduced by another 15% from 194.4px */
-  object-fit: contain; /* Use contain to prevent cropping, scale to fit */
-  object-position: center; /* Center the image vertically */
+  width: 36px; /* Smaller orb size */
+  height: 36px; /* Circular orb */
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.8), rgba(0, 200, 100, 0.6));
+  border: 2px solid rgba(0, 255, 136, 0.9);
+  box-shadow: 
+    0 0 12px rgba(0, 255, 136, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
   position: relative;
   flex-shrink: 0;
-  margin-top: 0; /* Remove auto margin */
+  margin-top: 0; /* Position at very top */
   margin-bottom: 7.2px;
   order: -1;
   display: block;
 }
 
 .cathode {
-  width: 82.62px; /* Same size as anode - reduced by another 15% */
-  height: 165.24px; /* Same size as anode - reduced by another 15% */
-  object-fit: contain; /* Use contain to prevent cropping, scale to fit */
-  object-position: center; /* Center the image vertically */
-  transform: scaleX(-1); /* Flip horizontally to create mirror image */
+  width: 36px; /* Same size as anode */
+  height: 36px; /* Circular orb */
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 107, 107, 0.8), rgba(200, 80, 80, 0.6));
+  border: 2px solid rgba(255, 107, 107, 0.9);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 107, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
   position: relative;
   flex-shrink: 0;
-  margin-top: 0; /* Remove auto margin */
+  margin-top: 0; /* Position at very top */
   margin-bottom: 7.2px;
   order: -1;
   display: block;
@@ -152,13 +159,13 @@
     font-weight: 700; /* Added weight for prominence */
   }
   .anode {
-    width: 42px; /* Further scaled down to fit narrower width */
-    height: 84px; /* Maintain aspect ratio */
+    width: 28px; /* Smaller orb for mobile */
+    height: 28px; /* Circular orb */
     margin-bottom: 4.5px; /* Slightly reduced */
   }
   .cathode {
-    width: 42px; /* Same as anode */
-    height: 84px; /* Same as anode */
+    width: 28px; /* Same as anode */
+    height: 28px; /* Circular orb */
     margin-bottom: 4.5px; /* Slightly reduced */
   }
 }
@@ -190,13 +197,13 @@
     font-weight: 700; /* Added weight for prominence */
   }
   .anode {
-    width: 32px; /* Further scaled down to fit narrower width */
-    height: 64px; /* Maintain aspect ratio */
+    width: 24px; /* Smaller orb for small mobile */
+    height: 24px; /* Circular orb */
     margin-bottom: 3.6px; /* Slightly reduced */
   }
   .cathode {
-    width: 32px; /* Same as anode */
-    height: 64px; /* Same as anode */
+    width: 24px; /* Same as anode */
+    height: 24px; /* Circular orb */
     margin-bottom: 3.6px; /* Slightly reduced */
   }
 }
