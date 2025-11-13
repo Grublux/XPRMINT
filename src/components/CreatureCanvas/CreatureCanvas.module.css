@@ -1,7 +1,7 @@
 .container{
   display: flex;
   flex-direction: column;
-  gap: 7.2px;
+  gap: 3.6px; /* Reduced from 7.2px to bring things closer */
   width: fit-content; /* Size to content */
   max-width: 752px; /* Match dialRow width */
   min-width: 0; /* Allow flex shrinking */
@@ -17,7 +17,7 @@
   gap: 9px;
   width: 100%;
   max-width: 100%;
-  margin-bottom: 7.2px;
+  margin-bottom: 3.6px; /* Reduced from 7.2px to bring knob controls up */
   box-sizing: border-box;
 }
 
@@ -104,7 +104,7 @@
   align-items:center; 
   justify-content:space-between; 
   flex-direction: row;
-  gap: 9px;
+  gap: 4.5px; /* Reduced from 9px to bring things closer */
   width: 100%;
 }
 
@@ -227,15 +227,15 @@
   padding-bottom: 0; /* Remove bottom padding to eliminate visible line */
   display:flex;
   flex-direction:column;
-  gap:7.2px;
-  height: 550px; /* Slightly taller */
-  width: calc(550px * 932 / 1127); /* Width scales proportionally to height */
+  gap:3.6px; /* Reduced from 7.2px to bring things closer */
+  height: 450px; /* Reduced from 550px to shrink bottom */
+  width: calc(450px * 932 / 1127); /* Width scales proportionally to height */
   max-width: 100%; /* Don't exceed container */
   min-height: 288px;
   position: relative;
   background-image: url('/jug2.png');
   background-size: 85%; /* Scale jug image to 0.85 (85%) */
-  background-position: center bottom; /* Move down and forward in container */
+  background-position: center top; /* Shift jug to top of container */
   background-repeat: no-repeat;
   overflow: hidden; /* Clip to container */
 }
