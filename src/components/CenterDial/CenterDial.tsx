@@ -1,97 +1,108 @@
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useGame } from '../../state/gameStore';
 import NumberChips from '../NumberChips/NumberChips';
+import BoltAnimation from '../BoltAnimation/BoltAnimation';
+import { click } from '../../lib/audio';
+import { buzz } from '../../lib/haptics';
 import styles from './CenterDial.module.css';
 
 export default function CenterDial(){
-  const { selectedIdx, numbers, canBuyNumber, buyNumber } = useGame();
+  const { selectedIdx, numbers, canBuyNumber, buyNumber, play, status, used } = useGame();
   const hasSelection = selectedIdx !== null && selectedIdx < numbers.length;
-  const svgRef = useRef<SVGSVGElement|null>(null);
+  const [bolt, setBolt] = useState<{from: {x:number;y:number}, to: {x:number;y:number}} | null>(null);
+  const minusButtonRef = useRef<HTMLButtonElement>(null);
+  const plusButtonRef = useRef<HTMLButtonElement>(null);
   
-  // Map number (1-500) to rotation angle (-90 to +90 degrees)
-  // Center (250) = 0 degrees, 1 = -90, 500 = +90
-  let rotation = 0;
+  const disabled = status!=='active' || selectedIdx===null || (selectedIdx!==null && used[selectedIdx]);
+  const canSelect = selectedIdx !== null && selectedIdx < numbers.length && !disabled;
+  
   let selectedNumber = 0;
   if (hasSelection) {
     selectedNumber = numbers[selectedIdx];
-    // Normalize to -1 to 1 range (1 -> -1, 250 -> 0, 500 -> 1)
-    const normalized = (selectedNumber - 250) / 250;
-    // Map to -90 to +90 degrees
-    rotation = normalized * 90;
   }
 
   const can = canBuyNumber();
 
+  const handleBoltComplete = useCallback(() => {
+    setBolt(null);
+  }, []);
+
+  const handleClick = (direction: 'up' | 'down') => {
+    if (disabled || selectedIdx === null) return;
+    
+    const dir = direction === 'up' ? 'add' : 'sub';
+    
+    const cathodeBottomImg = document.querySelector('[data-cathode-bottom="true"]') as HTMLImageElement;
+    
+    let fromX: number;
+    let fromY: number;
+    
+    if (cathodeBottomImg) {
+      const rect = cathodeBottomImg.getBoundingClientRect();
+      fromX = rect.left + rect.width * 0.75;
+      fromY = rect.top + rect.height * 0.2;
+    } else {
+      const buttonRef = direction === 'down' ? minusButtonRef : plusButtonRef;
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        fromX = rect.left + rect.width / 2;
+        fromY = rect.top + rect.height / 2;
+      } else {
+        return;
+      }
+    }
+    
+    const specimenCanvas = document.querySelector('[data-specimen-canvas="true"]') as HTMLCanvasElement;
+      
+    if (specimenCanvas) {
+      const specRect = specimenCanvas.getBoundingClientRect();
+      const centerXPercent = 0.51;
+      const centerYPercent = 0.65;
+      const centerX = specRect.left + specRect.width * centerXPercent;
+      const centerY = specRect.top + specRect.height * centerYPercent;
+      const randomXOffset = (Math.random() - 0.5) * specRect.width * 0.3;
+      const randomYOffset = (Math.random() - 0.5) * specRect.height * 0.3;
+      const toX = centerX + randomXOffset;
+      const toY = centerY + randomYOffset;
+      setBolt({ from: {x: fromX, y: fromY}, to: {x: toX, y: toY} });
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('bolt-hit'));
+      }, 350);
+    } else {
+      const toX = window.innerWidth / 2;
+      const toY = window.innerHeight / 2;
+      setBolt({ from: {x: fromX, y: fromY}, to: {x: toX, y: toY} });
+    }
+    
+    play(selectedIdx, dir); click(); buzz(10);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.dialSection}>
-        {/* Half-moon scale with speedometer-style needle - top half only */}
-        <svg ref={svgRef} className={styles.analogSvg} viewBox="0 -10 200 60" preserveAspectRatio="xMidYTop meet">
-          <defs>
-            <clipPath id="halfCircleClip">
-              <rect x="0" y="-10" width="200" height="60" />
-            </clipPath>
-          </defs>
-          <g clipPath="url(#halfCircleClip)">
-            {/* Half-moon arc - positioned to align with needle rotation (-90 to +90 degrees) */}
-            {/* Arc spans from -90 to +90 degrees relative to center (left to right) */}
-            <path
-              d="M 20 50 A 80 80 0 0 1 180 50"
-              fill="none"
-              stroke="rgba(74, 158, 255, 0.3)"
-              strokeWidth="2"
-            />
-            {/* Tick marks along the arc - aligned with needle rotation range */}
-            {Array.from({ length: 11 }, (_, i) => {
-              // Map from -90 to +90 degrees (matching needle rotation)
-              const angle = -90 + (i * 18); // -90 to +90 degrees
-              const rad = (angle * Math.PI) / 180;
-              const centerX = 100;
-              const centerY = 50; // Center vertically in viewBox (bottom of arc)
-              const radius = 80;
-              const x1 = centerX + radius * Math.cos(rad);
-              const y1 = centerY + radius * Math.sin(rad);
-              const tickLength = i % 5 === 0 ? 8 : 4; // Longer ticks every 5
-              const x2 = centerX + (radius - tickLength) * Math.cos(rad);
-              const y2 = centerY + (radius - tickLength) * Math.sin(rad);
-              return (
-                <line
-                  key={i}
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke="rgba(74, 158, 255, 0.6)"
-                  strokeWidth={i % 5 === 0 ? 2 : 1}
-                />
-              );
-            })}
-            {/* Speedometer needle - rotates from center bottom of arc */}
-            {hasSelection && (
-              <g transform={`translate(100, 50) rotate(${rotation})`}>
-                <line
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="-75"
-                  stroke="#4a9eff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Small circle at pivot point */}
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="3"
-                  fill="#4a9eff"
-                />
-              </g>
-            )}
-          </g>
-        </svg>
-        {hasSelection && (
-          <div className={styles.analogLabel}>{selectedNumber} Hz</div>
-        )}
+        <div className={styles.buttonsRow}>
+          <button
+            ref={minusButtonRef}
+            className={`${styles.orbButton} ${styles.minusButton} ${canSelect ? styles.selectable : ''} ${disabled ? styles.disabled : ''}`}
+            onClick={() => handleClick('down')}
+            disabled={disabled}
+            aria-label="Minus frequency"
+          >
+            <span className={styles.buttonSign}>-</span>
+          </button>
+          <button
+            ref={plusButtonRef}
+            className={`${styles.orbButton} ${styles.plusButton} ${canSelect ? styles.selectable : ''} ${disabled ? styles.disabled : ''}`}
+            onClick={() => handleClick('up')}
+            disabled={disabled}
+            aria-label="Plus frequency"
+          >
+            <span className={styles.buttonSign}>+</span>
+          </button>
+        </div>
+        <div className={styles.frequencyReadout}>
+          {hasSelection ? `${selectedNumber} Hz` : '-- Hz'}
+        </div>
       </div>
       <div className={styles.numbersSection}>
         <NumberChips/>
@@ -104,6 +115,15 @@ export default function CenterDial(){
       >
         Buy
       </button>
+      
+      {bolt && (
+        <BoltAnimation 
+          key={`${bolt.from.x.toFixed(1)}-${bolt.from.y.toFixed(1)}-${bolt.to.x.toFixed(1)}-${bolt.to.y.toFixed(1)}`}
+          from={bolt.from} 
+          to={bolt.to} 
+          onComplete={handleBoltComplete} 
+        />
+      )}
     </div>
   );
 }

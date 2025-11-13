@@ -7,7 +7,7 @@
   margin: 0 auto;
   padding: 0 16px;
   box-sizing: border-box;
-  overflow-x: visible; /* Allow content to be visible */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 .topRow{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
 .titleRow {
@@ -32,7 +32,7 @@
   box-sizing: border-box;
   flex-wrap: nowrap;
   position: relative; /* For absolute positioning of MovesTicker */
-  overflow-x: visible; /* Allow content to be visible */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .potSection {
@@ -175,19 +175,20 @@
   min-width: 0;
   box-sizing: border-box;
 }
+
 .dialRow {
   display: flex;
   gap: calc(16px * (550px * 932 / 1127) / 752px); /* Scale gap proportionally */
-  align-items: flex-end; /* Align all items to bottom so buttons align */
+  align-items: center; /* Center items vertically */
   justify-content: center;
   flex-wrap: nowrap;
   width: 90%; /* Take up 90% of viewport width */
   max-width: 900px; /* Cap at 900px when too wide */
   margin: 0 auto; /* Center the row */
-  margin-top: 0; /* Remove top margin to eliminate gap */
+  margin-top: -1px; /* Pull up to connect with specimen area */
   box-sizing: border-box;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-y: visible; /* Allow vertical expansion to show all content */
   background: var(--panel); /* Shared background to match specimen area */
   border-radius: 0; /* Remove all border radius to connect seamlessly */
   border-top-left-radius: 0;
@@ -195,7 +196,7 @@
   border-bottom-left-radius: var(--radius); /* Match specimen top radius */
   border-bottom-right-radius: var(--radius);
   padding: 10.8px; /* Match specimen area padding */
-  padding-top: 0; /* Remove top padding to eliminate visible line */
+  padding-top: 0; /* Remove top padding so anode/cathode are at very top */
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Match specimen area shadow exactly */
 }
 
@@ -360,11 +361,11 @@
     justify-content: center; /* Center the specimen */
   }
   .specimenRow > *:nth-child(1) {
-    flex: 0 0 auto;
-    width: fit-content; /* Size to content */
+    flex: 1 1 100%; /* Fill parent completely */
+    width: 100%; /* Fill parent completely */
     max-width: 100%;
     min-width: 0;
-    margin: 0 auto; /* Center */
+    margin: 0; /* No margin - fill parent */
   }
   .specimenRow > *:nth-child(2) {
     display: none; /* Hide MovesTicker on mobile to save space */
@@ -372,7 +373,7 @@
   .dialRow {
     gap: 2.5px; /* Further reduced to fit narrower width */
     flex-wrap: nowrap; /* Keep layout structure */
-    overflow-x: visible; /* Don't scroll */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     padding: 0 4.5px 4.5px 4.5px; /* Remove top padding to eliminate gap */
     width: 90%; /* Take up 90% of viewport width */
     max-width: 900px; /* Cap at 900px when too wide */
@@ -418,11 +419,11 @@
     margin-bottom: 0; /* Ensure no gap on mobile */
   }
   .specimenRow > *:nth-child(1) {
-    flex: 0 0 auto;
-    width: fit-content; /* Size to content */
+    flex: 1 1 100%; /* Fill parent completely */
+    width: 100%; /* Fill parent completely */
     max-width: 100%;
     min-width: 0;
-    margin: 0 auto; /* Center */
+    margin: 0; /* No margin - fill parent */
   }
   .specimenRow > *:nth-child(2) {
     display: none; /* Hide MovesTicker on mobile to save space */
@@ -430,7 +431,7 @@
   .dialRow {
     gap: 1.8px; /* Further reduced to fit narrower width */
     flex-wrap: nowrap; /* Keep layout structure */
-    overflow-x: visible; /* Don't scroll */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     padding: 0 3.6px 3.6px 3.6px; /* Remove top padding to eliminate gap */
     width: 90%; /* Take up 90% of viewport width */
     max-width: 900px; /* Cap at 900px when too wide */

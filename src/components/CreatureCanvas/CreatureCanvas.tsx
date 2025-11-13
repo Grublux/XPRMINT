@@ -28,6 +28,7 @@ type CreatureCanvasProps = {
 
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
   const { resonanceHz, targetHz, pot, lastMoveAt, status } = useGame();
+  const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const { label, remaining } = useTimer(lastMoveAt);
   const danger = remaining <= 60_000 && status==='active';
   const ref = useRef<HTMLCanvasElement|null>(null);
@@ -113,11 +114,11 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const isWide = clientW > 900; // Detect wide viewport
       let verticalPercent;
       if (isMobile) {
-        verticalPercent = 0.55; // Higher position on mobile
+        verticalPercent = 0.57; // Slightly downward from 0.55 for mobile
       } else if (isWide) {
         verticalPercent = 0.50; // Shift up more on wider viewports (reduced from 0.58)
       } else {
-        verticalPercent = 0.65; // Default for medium viewports
+        verticalPercent = 0.58; // Default for desktop - moved up from 0.65 to keep within jug
       }
       const refCy = refHeight * verticalPercent;
       const cy = refCy * scaleY;
@@ -137,12 +138,35 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const maxOrbDiameter = Math.min(tankWidth, tankHeight); // Use smaller dimension to ensure it fits
       const maxOrbRadius = maxOrbDiameter / 2;
       
-      // Scale from 0 Hz (min size) to 10,000 Hz (max size)
-      const minOrbRadius = maxOrbRadius * 0.1; // Minimum 10% of max size at 0 Hz
-      const normalizedResonance = Math.min(resonanceHz / 10000, 1); // 0 to 1
-      const baseRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedResonance;
+      // Calculate base creature image size (needed for target circle calculation)
+      // Make creature 1.5x larger across entire gradient
+      const baseImageSize = maxOrbRadius * 1.8 * 1.5; // 1.5x larger
       
-      // Target ring size will be calculated later to match creature's current size
+      // Orb size range
+      const minOrbRadius = maxOrbRadius * 0.1; // Minimum 10% of max size at 0 Hz
+      const normalizedResonance = Math.min(resonanceHz / 10000, 1); // 0 to 1 - used for visual effects
+      
+      // Target ring size is always the same - 80% of base creature size (diameter)
+      // Radius is 40% of baseImageSize to create a circle that's 80% of the base creature size
+      const targetRadius = baseImageSize * 0.4; // Fixed size, independent of target frequency
+      
+      // Calculate orb size: scale proportionally with frequency ratio
+      // When resonanceHz = targetHz, orb should match target circle size exactly
+      // When resonanceHz > targetHz, orb should be proportionally larger
+      // When resonanceHz < targetHz, orb should be proportionally smaller
+      let baseRadius;
+      if (targetHz > 0) {
+        // Scale proportionally: if specimen is 2x target, orb should be 2x the target circle
+        const frequencyRatio = resonanceHz / targetHz;
+        baseRadius = targetRadius * frequencyRatio;
+        
+        // Only clamp minimum to prevent negative/zero sizes
+        // Allow orb to exceed maxOrbRadius when frequency is higher (user said it's ok to go outside liquid)
+        baseRadius = Math.max(minOrbRadius, baseRadius);
+      } else {
+        // Fallback: use normalized resonance if target is 0
+        baseRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedResonance;
+      }
       
       // Calculate initial orb breathing for closeness calculation
       const initialBreathingAmplitude = 0.02;
@@ -152,8 +176,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       
       // Calculate creature size based on how close frequency is to target
       // Size increases as frequency approaches target from either direction (above or below)
-      // Make creature 1.5x larger across entire gradient
-      const baseImageSize = maxOrbRadius * 1.8 * 1.5; // 1.5x larger
       const minImageSize = baseImageSize * 0.7; // Start at 70% when far from target
       const maxImageSize = baseImageSize * 1.15; // Grow to 115% (15% larger) when matching target
       
@@ -166,24 +188,43 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Creature size based on frequency closeness - grows as it approaches target from either direction
       const creatureBaseSize = minImageSize + (maxImageSize - minImageSize) * frequencyCloseness;
       
-      // Target ring size should be based on TARGET frequency, not creature size
-      // Calculate target frequency size (0 to 10,000 Hz)
-      const normalizedTarget = Math.min(targetHz / 10000, 1); // 0 to 1
-      const targetBaseRadius = minOrbRadius + (maxOrbRadius - minOrbRadius) * normalizedTarget;
-      const targetRadius = targetBaseRadius; // Target circle represents target frequency size
+      // Calculate match percentage based on frequency difference
+      // Match percentage: 100% when frequencies match exactly, 0% when maximum difference
+      const matchPercentage = frequencyCloseness * 100; // 0-100%
+      
+      // Determine match thresholds
+      const isWithin10Percent = matchPercentage >= 90; // Within 10% of target
+      const isWithin5Percent = matchPercentage >= 95; // Within 5% of target
       
       // Calculate closeness for visual effects (orb vs target ring)
+      // targetRadius is already defined above
       const sizeDiff = Math.abs(initialFinalR - targetRadius);
       const maxSizeDiff = maxOrbRadius - minOrbRadius;
       const closeness = Math.max(0, 1 - (sizeDiff / (maxSizeDiff * 0.1)));
       const isClose = closeness > 0.7; // Threshold for "very close"
       
-      // Intensity multiplier when close (1.0 to 2.0)
-      const closeIntensity = 1.0 + (closeness * 1.0);
+      // Intensity multiplier based on match percentage
+      // Within 10%: 1.5x to 2.0x intensity
+      // Within 5%: 2.5x to 3.5x intensity (VERY intense)
+      let closeIntensity = 1.0;
+      if (isWithin5Percent) {
+        // Very intense: 2.5x to 3.5x based on how close (95-100%)
+        const fivePercentProgress = (matchPercentage - 95) / 5; // 0 to 1
+        closeIntensity = 2.5 + (fivePercentProgress * 1.0); // 2.5 to 3.5
+      } else if (isWithin10Percent) {
+        // More intense: 1.5x to 2.5x based on how close (90-95%)
+        const tenPercentProgress = (matchPercentage - 90) / 5; // 0 to 1
+        closeIntensity = 1.5 + (tenPercentProgress * 1.0); // 1.5 to 2.5
+      } else if (isClose) {
+        // Original close intensity
+        closeIntensity = 1.0 + (closeness * 1.0);
+      }
       
-      // Recalculate breathing with intensity when close
-      const breathingAmplitude = isClose ? 0.04 * closeIntensity : 0.02;
-      const breathingSpeed = isClose ? 0.006 : 0.004; // Faster breathing when close
+      // Recalculate breathing with intensity based on match percentage
+      // Use match percentage thresholds for breathing intensity
+      const useIntenseBreathing = isWithin10Percent || isClose;
+      const breathingAmplitude = useIntenseBreathing ? 0.04 * closeIntensity : 0.02;
+      const breathingSpeed = useIntenseBreathing ? (isWithin5Percent ? 0.008 : 0.006) : 0.004; // Faster breathing when close, even faster within 5%
       const intenseBreathing = 1 + breathingAmplitude * Math.sin(t*breathingSpeed);
       const finalR = baseRadius * intenseBreathing;
 
@@ -241,15 +282,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Pulse rings - number increases with resonance, intensity increases when close
       // Scale line width based on canvas size for proper mobile scaling
       const baseLineWidth = Math.max(1, 3 * devicePixelRatio * canvasScale);
-      const ringCount = 2 + Math.floor(5 * normalizedResonance);
-      const pulseSpeed = isClose ? 0.0025 : 0.0015; // Faster pulses when close
+      const ringCount = 2 + Math.floor(5 * normalizedResonance) + (isWithin10Percent ? 2 : 0); // More rings when close
+      const useIntensePulses = isWithin10Percent || isClose;
+      const pulseSpeed = useIntensePulses ? (isWithin5Percent ? 0.0035 : 0.0025) : 0.0015; // Faster pulses when close, even faster within 5%
       // Shock effect: more intense pulses when shocked (reduced from 0.5 to 0.25)
       const shockPulseBoost = 1 + currentShockIntensity * 0.25;
       for (let i=0; i<ringCount; i++){
         const k = (i + (t*pulseSpeed)) % 1;
         const rr = finalR * (1.4 + k*1.1);
         const baseAlpha = (1-k) * (0.25 + 0.40*normalizedResonance);
-        const alpha = isClose 
+        const alpha = useIntensePulses 
           ? Math.min(1, baseAlpha * closeIntensity * shockPulseBoost)
           : baseAlpha * shockPulseBoost;
         ctx.beginPath();
@@ -257,7 +299,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         ctx.strokeStyle = currentShockIntensity > 0
           ? `rgba(200, 240, 255, ${Math.min(1, alpha)})`
           : `rgba(255,255,255,${alpha})`;
-        const lineWidth = isClose 
+        const lineWidth = useIntensePulses 
           ? Math.max(1, baseLineWidth * (0.7 + 0.7*normalizedResonance) * closeIntensity * shockPulseBoost)
           : Math.max(1, baseLineWidth * (0.7 + 0.7*normalizedResonance) * shockPulseBoost);
         ctx.lineWidth = lineWidth;
@@ -272,9 +314,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const coreGradient = ctx.createRadialGradient(shockCx, shockCy, finalR*0.25, shockCx, shockCy, finalR);
       // More transparent - cell-like appearance (0.25 to 0.45 opacity)
       const baseIntensity = 0.25 + 0.2 * normalizedResonance;
-      const intensity = isClose ? Math.min(0.5, baseIntensity * closeIntensity) : baseIntensity;
-      const coreAlpha = isClose 
-        ? Math.min(0.5, (0.3 + 0.15*normalizedResonance) * closeIntensity * shockBrightness)
+      const useIntenseOrb = isWithin10Percent || isClose;
+      const intensity = useIntenseOrb ? Math.min(0.7, baseIntensity * closeIntensity) : baseIntensity;
+      const coreAlpha = useIntenseOrb 
+        ? Math.min(0.7, (0.3 + 0.15*normalizedResonance) * closeIntensity * shockBrightness)
         : (0.3 + 0.15*normalizedResonance) * shockBrightness;
       // Brighter, more electric colors when shocked
       const shockR = currentShockIntensity > 0 ? 255 : 255;
@@ -339,9 +382,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         ctx.globalAlpha = 1.0; // Reset to full opacity
       }
       
-      // Hard edge/membrane - brighter when shocked
-      const edgeAlpha = isClose 
-        ? Math.min(0.7, (0.5 + 0.2*normalizedResonance) * closeIntensity * (1 + currentShockIntensity * 0.15))
+      // Hard edge/membrane - brighter when shocked or close
+      const useIntenseEdge = isWithin10Percent || isClose;
+      const edgeAlpha = useIntenseEdge 
+        ? Math.min(0.9, (0.5 + 0.2*normalizedResonance) * closeIntensity * (1 + currentShockIntensity * 0.15))
         : (0.5 + 0.2*normalizedResonance) * (1 + currentShockIntensity * 0.15);
       ctx.beginPath();
       ctx.arc(shockCx, shockCy, finalR, 0, Math.PI*2);
@@ -352,7 +396,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       ctx.stroke();
 
       // Draw target frequency circle - red when orb is larger, gold when smaller
-      // Intensity increases when close
+      // Intensity increases when close, blinking when within 10%
       const orbLarger = finalR > targetRadius;
       const overshootAmount = orbLarger ? Math.min(1, (finalR - targetRadius) / (maxOrbRadius * 0.2)) : 0; // How much larger (0-1)
       
@@ -361,14 +405,27 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const targetR = 255;
       const targetG = orbLarger ? Math.floor(215 * (1 - overshootAmount)) : 215;
       const targetB = orbLarger ? 0 : (currentShockIntensity > 0 ? Math.floor(currentShockIntensity * 50) : 0);
-      const targetAlpha = isClose 
-        ? Math.min(1, 0.8 * closeIntensity * (1 + currentShockIntensity * 0.15))
-        : 0.8 * (1 + currentShockIntensity * 0.15);
+      
+      // Blinking effect when within 10% - faster blink within 5%
+      let targetAlpha;
+      if (isWithin10Percent) {
+        const blinkSpeed = isWithin5Percent ? 0.02 : 0.015; // Faster blink within 5%
+        const blinkPhase = Math.sin(t * blinkSpeed);
+        const blinkAmount = (blinkPhase + 1) / 2; // 0 to 1
+        const baseAlpha = 0.8 * closeIntensity * (1 + currentShockIntensity * 0.15);
+        targetAlpha = baseAlpha * (0.5 + blinkAmount * 0.5); // Blink between 50% and 100% of base alpha
+      } else {
+        const useIntenseTarget = isClose;
+        targetAlpha = useIntenseTarget 
+          ? Math.min(1, 0.8 * closeIntensity * (1 + currentShockIntensity * 0.15))
+          : 0.8 * (1 + currentShockIntensity * 0.15);
+      }
       
       ctx.beginPath();
       ctx.arc(shockCx, shockCy, targetRadius, 0, Math.PI*2);
       ctx.strokeStyle = `rgba(${targetR}, ${targetG}, ${targetB}, ${targetAlpha})`;
-      const targetLineWidth = isClose 
+      const useIntenseTarget = isWithin10Percent || isClose;
+      const targetLineWidth = useIntenseTarget 
         ? Math.max(2, 5 * devicePixelRatio * closeIntensity * (1 + currentShockIntensity * 0.1))
         : Math.max(2, 4 * devicePixelRatio * (1 + currentShockIntensity * 0.1));
       ctx.lineWidth = targetLineWidth;
@@ -405,8 +462,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     return ()=> cancelAnimationFrame(raf);
   }, [resonanceHz, targetHz]);
 
-  const isAbove = resonanceHz > targetHz;
-
   return (
     <div className={styles.container}>
       <div className={styles.infoBar}>
@@ -415,32 +470,34 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
         </div>
         <div className={styles.headerCenter}>
+          <div className={styles.titleText}>XPRMINT</div>
         </div>
-        <div className={styles.targetSection}>
-          <div className={styles.targetLabel}>Target Frequency</div>
-          <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
-        </div>
-      </div>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.timerSection}>
-            <div className={styles.timerLabel}>Experiment Fails In:</div>
-            <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
-          </div>
-        </div>
-        <div className={styles.headerCenter}>
-        </div>
-        <div className={styles.headerRight}>
-          {isAbove ? (
-            <div className={styles.resonanceDisplay}>
-              <div className={styles.currentLabel}>Specimen Frequency</div>
-              <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
-            </div>
-          ) : null}
+        <div className={styles.timerSection}>
+          <div className={styles.timerLabel}>XPRMINT Fails In:</div>
+          <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
         </div>
       </div>
       <div className={styles.panel}>
+        <div className={styles.frequencyTopLeft}>
+          <div className={styles.targetSection}>
+            <div className={styles.targetLabel}>Target</div>
+            <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
+          </div>
+        </div>
+        <div className={styles.frequencyTopRight}>
+          <div className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
+            <div className={styles.currentLabel}>Specimen</div>
+            <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
+          </div>
+        </div>
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />
+        <img 
+          ref={cathodeBottomRef}
+          src="/cathode_bottom.png" 
+          alt="Cathode bottom" 
+          className={styles.cathodeBottom}
+          data-cathode-bottom="true"
+        />
       </div>
     </div>
   );

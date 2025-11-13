@@ -10,13 +10,13 @@
   border-radius: 0; /* Remove border radius - parent container handles it */
   box-shadow: none; /* Remove shadow - parent container handles it */
   min-width: 0;
-  max-width: calc(280px * (550px * 932 / 1127) / 752px); /* Scale proportionally to match dialRow */
+  max-width: none; /* Remove max-width constraint to allow doubling the width */
   width: auto;
-  flex: 1.4 1 0; /* Increased from 1.27 to 1.4 (10% more width) */
+  flex: 3.08 1 0; /* Doubled from 1.54 to make knob area twice as wide */
   box-sizing: border-box;
   min-height: 0; /* Allow height to scale */
   height: auto; /* Allow height to scale */
-  max-height: 230px; /* Increased to allow more vertical space */
+  max-height: none; /* Remove height constraint - let container expand to fit content */
   overflow: visible; /* Allow scale to be visible within padding */
 }
 
@@ -29,9 +29,88 @@
   flex-shrink: 0;
   overflow: visible; /* Allow scale to be fully visible */
   min-height: 0; /* Remove min-height to close gap */
-  gap: 0; /* Remove gap between scale, dial, and label */
+  gap: 7.2px; /* Gap between buttons and frequency readout */
   padding-bottom: 0; /* Remove any bottom padding */
   margin-bottom: 0; /* Remove any bottom margin */
+}
+
+.buttonsRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.orbButton {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  flex-shrink: 0;
+  padding: 0; /* Remove any default padding */
+  line-height: 1; /* Ensure line-height doesn't affect centering */
+}
+
+.minusButton {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 107, 107, 0.8), rgba(200, 80, 80, 0.6));
+  border-color: rgba(255, 107, 107, 0.9);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 107, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.plusButton {
+  background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.8), rgba(0, 200, 100, 0.6));
+  border-color: rgba(0, 255, 136, 0.9);
+  box-shadow: 
+    0 0 12px rgba(0, 255, 136, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton:hover:not(.disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 
+    0 0 16px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton.selectable {
+  box-shadow: 
+    0 0 20px rgba(0, 255, 136, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonSign {
+  font-size: 36px; /* Scaled for 55px button */
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  line-height: 1;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .analogSvg {
@@ -54,6 +133,22 @@
   z-index: 3;
 }
 
+.frequencyReadout {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  color: #4a9eff;
+  text-align: center;
+  min-width: 80px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
 /* Dial removed - using SVG speedometer needle instead */
 
 .numbersSection {
@@ -66,18 +161,18 @@
 .buyButton {
   appearance: none;
   border: 0;
-  border-radius: 8px; /* Increased from 5.4px */
-  padding: 6px 24px; /* Increased from 3.6px 19.2px */
+  border-radius: 8px;
+  padding: 8px 28px; /* Increased from 6px 24px */
   color: #111;
   background: var(--gold);
-  font-weight: 700; /* Increased from 600 */
+  font-weight: 700;
   cursor: pointer;
-  font-size: 10px; /* Increased from 7.2px */
+  font-size: 12px; /* Increased from 10px */
   margin-top: auto;
   margin-bottom: 0; /* Will be overridden in mobile */
   flex-shrink: 0;
   transition: all 0.2s ease;
-  min-height: 38px; /* Increased from 29px */
+  min-height: 44px; /* Increased from 38px */
   touch-action: manipulation; /* Optimize touch interactions */
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4); /* Added shadow for prominence */
@@ -99,12 +194,12 @@
 @media (max-width: 768px) {
   .container {
     width: 100%;
-    flex: 1 1 0; /* Reduced flex to allow narrower width */
+    flex: 2.2 1 0; /* Doubled from 1.1 to make knob area twice as wide on mobile */
     min-width: 0;
     max-width: none; /* Remove max-width constraint */
     padding: 15px 3.5px 3.5px 3.5px; /* Further scaled down to fit narrower width */
     gap: 3px; /* Further reduced gap */
-    max-height: 129.5px; /* Keep same height */
+    max-height: none; /* Remove height constraint - let container expand to fit content */
   }
   .analogSvg {
     height: 50px; /* Scaled down for mobile */
@@ -114,12 +209,24 @@
     font-size: 6.3px; /* Scaled down (9 * 0.7) */
     margin-top: 2.5px;
   }
+  .frequencyReadout {
+    font-size: 14px; /* Scaled down for mobile */
+    min-width: 60px;
+    min-height: 20px;
+  }
+  .orbButton {
+    width: 43px; /* Scaled down for mobile (55px * 0.78) */
+    height: 43px;
+  }
+  .buttonSign {
+    font-size: 28px; /* Scaled down for mobile (36px * 0.78) */
+  }
   .buyButton {
-    padding: 4px 16px; /* Increased from 1.5px 8px */
-    font-size: 7px; /* Increased from 3.5px */
-    min-height: 24px; /* Increased from 12px */
+    padding: 6px 20px; /* Increased from 4px 16px */
+    font-size: 9px; /* Increased from 7px */
+    min-height: 32px; /* Increased from 24px */
     margin-bottom: 1.2px; /* Slightly reduced */
-    border-radius: 6px; /* Increased */
+    border-radius: 7px; /* Increased from 6px */
   }
   .numbersSection {
     min-height: 12px; /* Slightly smaller */
@@ -129,12 +236,12 @@
 @media (max-width: 480px) {
   .container {
     width: 100%;
-    flex: 1 1 0; /* Reduced flex to allow narrower width */
+    flex: 2.2 1 0; /* Doubled from 1.1 to make knob area twice as wide on smaller mobile */
     min-width: 0;
     max-width: none; /* Remove max-width constraint */
     padding: 11px 2.7px 2.7px 2.7px; /* Further scaled down to fit narrower width */
     gap: 2px; /* Further reduced gap */
-    max-height: 99px; /* Keep same height */
+    max-height: none; /* Remove height constraint - let container expand to fit content */
   }
   .analogSvg {
     height: 40px; /* Scaled down for smaller mobile */
@@ -144,12 +251,24 @@
     font-size: 5.4px; /* Scaled down (9 * 0.6) */
     margin-top: 2px;
   }
+  .frequencyReadout {
+    font-size: 12px; /* Scaled down for smaller mobile */
+    min-width: 50px;
+    min-height: 18px;
+  }
+  .orbButton {
+    width: 37px; /* Scaled down for smaller mobile (55px * 0.67) */
+    height: 37px;
+  }
+  .buttonSign {
+    font-size: 24px; /* Scaled down for smaller mobile (36px * 0.67) */
+  }
   .buyButton {
-    padding: 3px 12px; /* Increased from 1px 6px */
-    font-size: 6px; /* Increased from 2.6px */
-    min-height: 20px; /* Increased from 10px */
+    padding: 5px 16px; /* Increased from 3px 12px */
+    font-size: 8px; /* Increased from 6px */
+    min-height: 28px; /* Increased from 20px */
     margin-bottom: 1px; /* Slightly reduced */
-    border-radius: 5px; /* Increased */
+    border-radius: 6px; /* Increased from 5px */
   }
   .numbersSection {
     min-height: 10.8px; /* Scaled down by 0.6 (18 * 0.6) */

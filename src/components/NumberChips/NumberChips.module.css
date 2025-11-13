@@ -4,17 +4,17 @@
 }
 .chip{
   background:#2a2f3d; color:var(--text); font-weight:700;
-  padding: 8px 11px; /* Increased from 6px 8.4px */
+  padding: 10px 13px; /* Increased from 8px 11px */
   border:0; 
-  border-radius: 9px; /* Increased from 7.2px */
+  border-radius: 10px; /* Increased from 9px */
   cursor:pointer;
-  min-width: 50px; /* Increased from 40px */
-  width: 50px;
-  min-height: 36px; /* Increased from 29px */
-  max-height: 50px; /* Increased from 40px */
+  min-width: 56px; /* Increased from 50px */
+  width: 56px;
+  min-height: 42px; /* Increased from 36px */
+  max-height: 56px; /* Increased from 50px */
   text-align: center;
   box-sizing: border-box;
-  font-size: 0.75em; /* Increased from 0.6em */
+  font-size: 0.85em; /* Increased from 0.75em */
   touch-action: manipulation; /* Optimize touch interactions */
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
 }
@@ -39,13 +39,13 @@
     gap: 4.5px; /* Reduced from 5.4px */
   }
   .chip {
-    min-width: 42px; /* Increased from 32px */
-    width: 42px;
-    min-height: 32px; /* Increased from 28px */
-    max-height: 42px; /* Increased from 32px */
-    padding: 5px 8px; /* Increased from 4px 6px */
-    font-size: 10px; /* Increased from 9px */
-    border-radius: 7px; /* Increased from 5.4px */
+    min-width: 48px; /* Increased from 42px */
+    width: 48px;
+    min-height: 36px; /* Increased from 32px */
+    max-height: 48px; /* Increased from 42px */
+    padding: 6px 9px; /* Increased from 5px 8px */
+    font-size: 11px; /* Increased from 10px */
+    border-radius: 8px; /* Increased from 7px */
   }
 }
 
@@ -54,13 +54,13 @@
     gap: 3.6px; /* Reduced from 4.5px */
   }
   .chip {
-    min-width: 36px; /* Increased from 28px */
-    width: 36px;
-    min-height: 30px; /* Increased from 26px */
-    max-height: 36px; /* Increased from 28px */
-    padding: 4.5px 7px; /* Increased from 3.6px 5.4px */
-    font-size: 9px; /* Increased from 8px */
-    border-radius: 6px; /* Increased from 4.5px */
+    min-width: 42px; /* Increased from 36px */
+    width: 42px;
+    min-height: 34px; /* Increased from 30px */
+    max-height: 42px; /* Increased from 36px */
+    padding: 5px 8px; /* Increased from 4.5px 7px */
+    font-size: 10px; /* Increased from 9px */
+    border-radius: 7px; /* Increased from 6px */
   }
 }
 

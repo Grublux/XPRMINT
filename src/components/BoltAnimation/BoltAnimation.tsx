@@ -118,6 +118,14 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
 
   const pathData = `M ${visiblePath[0].x} ${visiblePath[0].y} ${visiblePath.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')}`;
 
+  // Calculate gradient direction based on path direction
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const gradientX1 = from.x;
+  const gradientY1 = from.y;
+  const gradientX2 = to.x;
+  const gradientY2 = to.y;
+
   return (
     <svg 
       className={styles.boltContainer}
@@ -132,9 +140,16 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
       }}
     >
       <defs>
-        <linearGradient id={gradientIdRef.current} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-          <stop offset="50%" stopColor="rgba(200,240,255,1)" />
+        <linearGradient 
+          id={gradientIdRef.current} 
+          x1={gradientX1} 
+          y1={gradientY1} 
+          x2={gradientX2} 
+          y2={gradientY2}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
+          <stop offset="10%" stopColor="rgba(150,220,255,1)" />
           <stop offset="100%" stopColor="rgba(150,220,255,1)" />
         </linearGradient>
         <filter id={filterIdRef.current}>
@@ -155,14 +170,14 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
           opacity: 1 - progress * 0.2, /* Less fade for better visibility */
         }}
       />
-      {/* Additional brighter core for extra visibility */}
+      {/* Additional brighter core for extra visibility - also with gradient intensity */}
       <path
         d={pathData}
         className={styles.bolt}
         style={{
           stroke: 'rgba(255,255,255,1)',
           strokeWidth: 4,
-          opacity: (1 - progress * 0.2) * 0.8,
+          opacity: (1 - progress * 0.2) * (0.2 + Math.min(progress * 8, 0.8)), // Start at 20% opacity, reach 100% by 10% of path
           filter: 'none',
         }}
       />

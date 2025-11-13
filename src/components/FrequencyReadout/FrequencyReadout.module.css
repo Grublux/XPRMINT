@@ -1,20 +1,152 @@
+.buttonsRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  flex: 0.855 1 0; /* Match the old column flex value */
+}
+
+.orbButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.minusButton {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 107, 107, 0.8), rgba(200, 80, 80, 0.6));
+  border-color: rgba(255, 107, 107, 0.9);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 107, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.plusButton {
+  background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.8), rgba(0, 200, 100, 0.6));
+  border-color: rgba(0, 255, 136, 0.9);
+  box-shadow: 
+    0 0 12px rgba(0, 255, 136, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton:hover:not(.disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 
+    0 0 16px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton.selectable {
+  box-shadow: 
+    0 0 20px rgba(0, 255, 136, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.orbButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonSign {
+  font-size: 24px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  line-height: 1;
+  user-select: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .frequencyContainer {
+    gap: 5px;
+  }
+  
+  .frequencyReadout {
+    padding: 4.5px;
+  }
+  
+  .readoutValue {
+    font-size: 14px;
+    min-width: 60px;
+    min-height: 20px;
+  }
+  
+  .buttonsRow {
+    gap: 12px;
+  }
+  
+  .orbButton {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .buttonSign {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .frequencyContainer {
+    gap: 4px;
+  }
+  
+  .frequencyReadout {
+    padding: 3.6px;
+  }
+  
+  .readoutValue {
+    font-size: 12px;
+    min-width: 50px;
+    min-height: 18px;
+  }
+  
+  .buttonsRow {
+    gap: 10px;
+  }
+  
+  .orbButton {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .buttonSign {
+    font-size: 16px;
+  }
+}
+
+/* Legacy styles - keeping for backwards compatibility if needed */
 .column {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 7.2px;
   position: relative;
-  height: auto; /* Let height be determined by content */
-  justify-content: flex-end; /* Align buttons at bottom */
-  width: 100%; /* Take full width to allow expansion */
-  flex: 0.9 1 0; /* Reduced from 1.0 to give more space to meter area (10% reduction) */
-  min-width: 0; /* Allow shrinking */
-  margin-top: 0; /* Removed negative margin */
+  height: auto;
+  justify-content: center;
+  width: 100%;
+  flex: 0.855 1 0;
+  min-width: 0;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .anode {
-  width: 36px; /* Smaller orb size */
-  height: 36px; /* Circular orb */
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.8), rgba(0, 200, 100, 0.6));
   border: 2px solid rgba(0, 255, 136, 0.9);
@@ -23,15 +155,17 @@
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
   position: relative;
   flex-shrink: 0;
-  margin-top: 0; /* Position at very top */
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
   margin-bottom: 7.2px;
   order: -1;
   display: block;
 }
 
 .cathode {
-  width: 36px; /* Same size as anode */
-  height: 36px; /* Circular orb */
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255, 107, 107, 0.8), rgba(200, 80, 80, 0.6));
   border: 2px solid rgba(255, 107, 107, 0.9);
@@ -40,32 +174,36 @@
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
   position: relative;
   flex-shrink: 0;
-  margin-top: 0; /* Position at very top */
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
   margin-bottom: 7.2px;
   order: -1;
   display: block;
 }
 
 .container {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
-  padding: 7.2px; /* Reduced by 1/3 (10.8 * 2/3) */
-  background: transparent; /* Transparent since parent container has background */
-  border: none; /* Remove border - parent container handles styling */
-  border-radius: 0; /* Remove border radius - parent container handles it */
-  box-shadow: none; /* Remove shadow - parent container handles it */
-  width: 100%; /* Take full width of column */
-  min-width: 0;
-  flex: 0.9 1 0; /* Reduced to give more space to meter area */
-  height: auto; /* Size to content */
-  max-height: 80px; /* Reduced by 1/3 (120 * 2/3) */
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  width: fit-content;
+  min-width: 60px;
+  max-width: fit-content;
+  height: fit-content;
+  flex: 0 0 auto;
+  margin: 0 auto;
+  margin-top: auto;
   cursor: pointer;
   transition: all 0.2s ease;
   appearance: none;
   box-sizing: border-box;
-  touch-action: manipulation; /* Optimize touch interactions */
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .container:hover:not(.disabled) {
@@ -76,11 +214,24 @@
 }
 
 .container.selectable {
+  padding: 0;
   border: 2px solid #00ff88;
+  border-radius: 3.6px;
   box-shadow: 
     inset 0 2px 4px rgba(0, 0, 0, 0.3),
     0 4px 8px rgba(0, 0, 0, 0.4),
     0 0 12px rgba(0, 255, 136, 0.4);
+  box-sizing: border-box;
+}
+
+.container.selectable .readout {
+  padding: 7.2px 5px;
+  border: none;
+  background: transparent;
+  margin: 0;
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
 }
 
 .container.disabled {
@@ -92,32 +243,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.4px; /* Reduced by 1/3 (3.6 * 2/3) */
-  padding: 7.2px 5px; /* Reduced horizontal padding from 9.6px to 5px */
+  gap: 2.4px;
+  padding: 7.2px 5px;
   background: #000;
   border: 1px solid #0f3460;
   border-radius: 3.6px;
-  width: 100%;
+  width: 60px;
+  min-width: 60px;
   font-family: 'Courier New', monospace;
-  min-height: 36px; /* Reduced by 1/3 (54 * 2/3) */
+  min-height: 36px;
   box-sizing: border-box;
 }
 
 .label {
-  font-size: 11px; /* Increased from 7px for better readability */
+  font-size: 11px;
   color: #4a9eff;
   text-transform: uppercase;
-  letter-spacing: 0.6px; /* Reduced by 1/3 */
-  opacity: 1; /* Increased from 0.8 for better visibility */
-  min-height: 8.4px; /* Reduced by 1/3 (12.6 * 2/3) */
-  font-weight: 700; /* Added weight for prominence */
+  letter-spacing: 0.6px;
+  opacity: 1;
+  min-height: 8.4px;
+  font-weight: 700;
 }
 
 .value {
-  font-size: 14px; /* Increased from 12px for better readability */
-  font-weight: 900; /* Increased from bold for more prominence */
+  font-size: 14px;
+  font-weight: 900;
   line-height: 1;
-  min-width: 48px; /* Reduced by 1/3 (72 * 2/3) */
+  min-width: 55px;
   text-align: center;
 }
 
@@ -135,75 +287,81 @@
 @media (max-width: 768px) {
   .column {
     width: 100%;
-    flex: 0.9 1 0; /* Reduced to give more space to meter area */
+    flex: 0.855 1 0;
     min-width: 0;
-    max-width: none; /* Remove max-width constraint */
+    max-width: none;
   }
   .container {
-    width: 100%;
-    padding: 3.5px; /* Further scaled down to fit narrower width */
-    max-height: 47.6px; /* Keep same height */
+    width: fit-content;
+    min-width: 50px;
+    padding: 0;
+    max-height: 47.6px;
   }
   .readout {
-    padding: 3.5px 3px; /* Reduced horizontal padding from 4.5px to 3px */
-    min-height: 20px; /* Slightly smaller */
+    padding: 3.5px 3px;
+    min-height: 20px;
+    width: 50px;
+    min-width: 50px;
   }
   .value {
-    font-size: 10px; /* Increased from 6.5px for better mobile readability */
-    min-width: 26px; /* Slightly smaller */
-    font-weight: 900; /* Increased weight for prominence */
+    font-size: 10px;
+    min-width: 26px;
+    font-weight: 900;
   }
   .label {
-    font-size: 8px; /* Increased from 5.5px for better readability */
-    opacity: 1; /* Full opacity for better visibility */
-    font-weight: 700; /* Added weight for prominence */
+    font-size: 8px;
+    opacity: 1;
+    font-weight: 700;
   }
   .anode {
-    width: 28px; /* Smaller orb for mobile */
-    height: 28px; /* Circular orb */
-    margin-bottom: 4.5px; /* Slightly reduced */
+    width: 28px;
+    height: 28px;
+    margin-bottom: 4.5px;
   }
   .cathode {
-    width: 28px; /* Same as anode */
-    height: 28px; /* Circular orb */
-    margin-bottom: 4.5px; /* Slightly reduced */
+    width: 28px;
+    height: 28px;
+    margin-bottom: 4.5px;
   }
 }
 
 @media (max-width: 480px) {
   .column {
     width: 100%;
-    flex: 0.9 1 0; /* Reduced to give more space to meter area */
+    flex: 0.855 1 0;
     min-width: 0;
-    max-width: none; /* Remove max-width constraint */
+    max-width: none;
   }
   .container {
-    width: 100%;
-    padding: 2.7px; /* Further scaled down to fit narrower width */
-    max-height: 36px; /* Keep same height */
+    width: fit-content;
+    min-width: 45px;
+    padding: 0;
+    max-height: 36px;
   }
   .readout {
-    padding: 2.7px 2.5px; /* Reduced horizontal padding from 3.6px to 2.5px */
-    min-height: 15px; /* Slightly smaller */
+    padding: 2.7px 2.5px;
+    min-height: 15px;
+    width: 45px;
+    min-width: 45px;
   }
   .value {
-    font-size: 9px; /* Increased from 4.8px for better mobile readability */
-    min-width: 20px; /* Slightly smaller */
-    font-weight: 900; /* Increased weight for prominence */
+    font-size: 9px;
+    min-width: 20px;
+    font-weight: 900;
   }
   .label {
-    font-size: 7px; /* Increased from 5px for better readability */
-    opacity: 1; /* Full opacity for better visibility */
-    font-weight: 700; /* Added weight for prominence */
+    font-size: 7px;
+    opacity: 1;
+    font-weight: 700;
   }
   .anode {
-    width: 24px; /* Smaller orb for small mobile */
-    height: 24px; /* Circular orb */
-    margin-bottom: 3.6px; /* Slightly reduced */
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3.6px;
   }
   .cathode {
-    width: 24px; /* Same as anode */
-    height: 24px; /* Circular orb */
-    margin-bottom: 3.6px; /* Slightly reduced */
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3.6px;
   }
 }

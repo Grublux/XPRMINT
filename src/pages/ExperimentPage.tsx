@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CreatureCanvas from '../components/CreatureCanvas/CreatureCanvas';
-import FrequencyReadout from '../components/FrequencyReadout/FrequencyReadout';
+import FrequencyReadout, { PlusButton } from '../components/FrequencyReadout/FrequencyReadout';
 import CenterDial from '../components/CenterDial/CenterDial';
 import WinOverlay from '../components/Overlays/WinOverlay';
 import TimeoutOverlay from '../components/Overlays/TimeoutOverlay';
@@ -26,20 +26,14 @@ export default function ExperimentPage(){
 
   return (
     <div className={styles.grid}>
-      <div className={styles.titleRow}>
-        <div className={styles.titleSection}>
-          <h1 className={styles.title}>XPRMINT</h1>
-        </div>
-      </div>
-
       <div className={styles.specimenRow}>
         <CreatureCanvas creature={selectedCreature}/>
       </div>
       
       <div className={styles.dialRow}>
-        <FrequencyReadout direction="down"/>
+        <FrequencyReadout/>
         <CenterDial/>
-        <FrequencyReadout direction="up"/>
+        <PlusButton/>
       </div>
 
       <div className={styles.sliderRow}>

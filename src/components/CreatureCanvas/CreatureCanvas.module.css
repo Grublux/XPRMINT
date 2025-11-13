@@ -3,12 +3,16 @@
   flex-direction: column;
   align-items: center; /* Center all children horizontally */
   gap: 3.6px; /* Reduced from 7.2px to bring things closer */
-  width: 90%; /* Take up 90% of viewport width */
-  max-width: 900px; /* Cap at 900px when too wide */
+  width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
+  max-width: 100%; /* Don't exceed parent */
   min-width: 0; /* Allow flex shrinking */
-  margin: 0 auto; /* Center the container */
+  margin: 0; /* No margin - fill parent */
   box-sizing: border-box;
   overflow: hidden; /* Clip to container */
+  position: relative; /* Ensure stable positioning */
+  padding: 0; /* No padding to match dialRow outer width */
+  flex-shrink: 0; /* Prevent shrinking */
+  flex-grow: 0; /* Prevent growing */
 }
 .infoBar {
   display: flex;
@@ -18,8 +22,10 @@
   gap: 9px;
   width: 100%;
   max-width: 100%;
+  min-width: 0; /* Prevent expansion */
   margin-bottom: 3.6px; /* Reduced from 7.2px to bring knob controls up */
   box-sizing: border-box;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .potSection {
@@ -35,11 +41,59 @@
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(255, 215, 0, 0.1);
   flex: 0 0 30%; /* 30% width */
   min-width: 0;
+  max-width: 30%; /* Prevent expansion */
+  overflow: hidden; /* Clip content that might expand */
 }
 
 .infoBar .headerCenter {
   flex: 1; /* 40% placeholder in center */
   min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 0 0 30%; /* 30% width on right */
+  min-width: 0;
+  max-width: 30%; /* Prevent expansion */
+  overflow: hidden; /* Clip content that might expand */
+  text-overflow: ellipsis;
+}
+
+.timerLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timerValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+  font-weight: 700;
+}
+
+.titleText {
+  font-size: 21.6px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
 }
 
 .potLabel {
@@ -58,6 +112,11 @@
   text-align: center;
   font-weight: 700;
   text-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap; /* Prevent wrapping that could change width */
+  overflow: hidden; /* Clip if too long */
+  text-overflow: ellipsis; /* Show ellipsis if too long */
+  width: 100%; /* Take full width of parent */
+  max-width: 100%; /* Don't exceed parent */
 }
 
 .targetSection {
@@ -74,20 +133,6 @@
   min-width: 0;
 }
 
-.timerSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3.6px;
-  padding: 10.8px 9px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  width: 100%; /* Fill headerLeft container */
-  min-width: 0;
-}
-
 .targetSection .targetLabel {
   font-size: 10.8px;
   color: var(--muted);
@@ -100,22 +145,6 @@
 .targetSection .targetValue {
   font-size: 18px;
   color: var(--accent);
-  text-align: center;
-  font-weight: 700;
-}
-
-.timerLabel {
-  font-size: 10.8px;
-  color: var(--muted);
-  text-align: center;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.timerValue {
-  font-size: 18px;
-  color: var(--text);
   text-align: center;
   font-weight: 700;
 }
@@ -203,6 +232,14 @@
   text-align: center;
   font-weight: 700;
 }
+
+.resonanceAbove .resonanceValue {
+  color: #ff4444; /* Red when above target */
+}
+
+.resonanceBelow .resonanceValue {
+  color: #ffd700; /* Gold when below target */
+}
 .sizeControl{
   display: flex;
   flex-direction: column;
@@ -253,34 +290,87 @@
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
   height: 550px; /* Increased from 480px for wider viewports */
-  width: 100%; /* Match dialRow width (90% with max 900px) */
+  width: 100%; /* Fill container completely to match dialRow */
   max-width: 100%; /* Don't exceed container */
+  min-width: 100%; /* Force to match container width exactly */
   min-height: 288px;
   position: relative;
-  margin: 0 auto; /* Center the panel within container */
+  margin: 0; /* Remove auto margin to fill container */
+  flex-shrink: 0; /* Prevent shrinking */
+  flex-grow: 0; /* Prevent growing */
   background-image: url('/jug2.png');
-  background-size: min(102%, 750px) 100%; /* Cap at 750px max width, use 102% for smaller panels */
+  background-size: min(102%, 750px) 115%; /* Cap at 750px max width, height 115% (reduced by 5% from 120%) */
   background-position: center top; /* Keep top aligned, allow bottom and sides to overflow */
   background-repeat: no-repeat;
-  overflow: visible; /* Allow image to overflow bottom and sides */
+  overflow: hidden; /* Prevent content from causing layout shifts */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
+
+.frequencyTopLeft {
+  position: absolute;
+  top: 10.8px;
+  left: 10.8px;
+  z-index: 10; /* Above canvas */
+  pointer-events: none; /* Allow clicks to pass through to canvas */
+}
+
+.frequencyTopLeft .targetSection {
+  pointer-events: auto; /* Re-enable pointer events for the section */
+}
+
+.frequencyTopRight {
+  position: absolute;
+  top: 10.8px;
+  right: 10.8px;
+  z-index: 10; /* Above canvas */
+  pointer-events: none; /* Allow clicks to pass through to canvas */
+}
+
+.frequencyTopRight .resonanceDisplay {
+  pointer-events: auto; /* Re-enable pointer events for the section */
+}
+
+.cathodeBottom {
+  position: absolute;
+  bottom: 0;
+  left: max(10.8px, calc(50% - 375px)); /* Position at jug2 left edge: center (50%) minus half max jug width (375px), but never less than padding */
+  z-index: 1000; /* Highest z-index to be on top of everything */
+  pointer-events: none; /* Allow clicks to pass through */
+  display: block;
+  width: auto;
+  height: auto;
+  transform: scale(0.1); /* Scale down to 10% of original size */
+  transform-origin: bottom left; /* Scale from bottom left corner */
+}
+
 .canvas{
   width:100%;
   height:100%;
   border-radius:var(--radius);
   display:block;
   background: transparent;
-  position: relative;
+  position: absolute; /* Absolute positioning to prevent layout shifts */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1;
+  pointer-events: none; /* Prevent canvas from affecting layout */
+  max-width: 100%; /* Prevent overflow */
+  max-height: 100%; /* Prevent overflow */
+  box-sizing: border-box;
 }
 
 /* Mobile responsive - scale down but maintain structure */
 @media (max-width: 768px) {
   .container {
-    width: 90%; /* Take up 90% of viewport width */
-    max-width: 900px; /* Cap at 900px when too wide */
+    width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
+    max-width: 100%; /* Don't exceed parent */
     gap: 4.5px;
-    margin: 0 auto; /* Center the container */
+    margin: 0; /* No margin - fill parent */
+    position: relative; /* Ensure stable positioning */
+    min-width: 0; /* Prevent expansion */
+    flex-shrink: 0; /* Prevent shrinking */
   }
   .infoBar {
     gap: 4.5px; /* Scaled down gap */
@@ -300,6 +390,10 @@
   }
   .infoBar .headerCenter {
     flex: 1; /* 40% placeholder */
+  }
+  .titleText {
+    font-size: 18px;
+    letter-spacing: 1.35px;
   }
   .targetSection {
     padding: 7.56px 6.3px; /* Scaled down padding */
@@ -350,25 +444,52 @@
   .panel {
     padding: 4.5px 4.5px 12px 4.5px; /* Add bottom padding to show more of jug stand */
     height: 440px; /* Increased from 370px to reduce squished feeling */
-    width: calc(440px * 932 / 1127); /* Maintain aspect ratio */
-    max-width: 100%;
+    width: 100%; /* Use 100% to match container width - prevent panning */
+    max-width: 100%; /* Don't exceed container */
+    min-width: 0; /* Prevent expansion */
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 106.8% 100%; /* Width: 20% wider, Height: 100% - match desktop */
+    background-size: 106.8% 115%; /* Width: 20% wider, Height: 115% (reduced by 5% from 120%) */
+    flex-shrink: 0; /* Prevent shrinking */
+    flex-grow: 0; /* Prevent growing */
+    overflow: hidden; /* Prevent content from causing layout shifts */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  .frequencyTopLeft {
+    top: 4.5px;
+    left: 4.5px;
+  }
+  .frequencyTopRight {
+    top: 4.5px;
+    right: 4.5px;
   }
   .canvas {
     height: 100%;
     touch-action: none; /* Prevent default touch behaviors */
+    position: absolute; /* Absolute positioning to prevent layout shifts */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100%; /* Prevent overflow */
+    max-height: 100%; /* Prevent overflow */
+    pointer-events: auto; /* Re-enable for touch */
+  }
+  .cathodeBottom {
+    transform: scale(0.15); /* Scale to 15% on mobile (768px) */
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    width: 90%; /* Take up 90% of viewport width */
-    max-width: 900px; /* Cap at 900px when too wide */
+    position: relative; /* Ensure stable positioning */
+    min-width: 0; /* Prevent expansion */
+    flex-shrink: 0; /* Prevent shrinking */
+    width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
+    max-width: 100%; /* Don't exceed parent */
     gap: 3.6px;
-    margin: 0 auto; /* Center the container */
+    margin: 0; /* No margin - fill parent */
   }
   .infoBar {
     gap: 3.6px; /* Scaled down gap */
@@ -388,6 +509,10 @@
   }
   .infoBar .headerCenter {
     flex: 1; /* 40% placeholder */
+  }
+  .titleText {
+    font-size: 16.2px;
+    letter-spacing: 0.9px;
   }
   .targetSection {
     padding: 6.48px 5.4px; /* Scaled down padding */
@@ -438,15 +563,39 @@
   .panel {
     padding: 3.6px 3.6px 10px 3.6px; /* Add bottom padding to show more of jug stand */
     height: 380px; /* Increased from 320px to reduce squished feeling */
-    width: calc(380px * 932 / 1127); /* Maintain aspect ratio */
-    max-width: 100%;
+    width: 100%; /* Use 100% to match container width - prevent panning */
+    max-width: 100%; /* Don't exceed container */
+    min-width: 0; /* Prevent expansion */
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 106.8% 100%; /* Width: 20% wider, Height: 100% - match desktop */
+    background-size: 106.8% 115%; /* Width: 20% wider, Height: 115% (reduced by 5% from 120%) */
+    flex-shrink: 0; /* Prevent shrinking */
+    flex-grow: 0; /* Prevent growing */
+    overflow: hidden; /* Prevent content from causing layout shifts */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  .frequencyTopLeft {
+    top: 3.6px;
+    left: 3.6px;
+  }
+  .frequencyTopRight {
+    top: 3.6px;
+    right: 3.6px;
   }
   .canvas {
     touch-action: none; /* Prevent default touch behaviors */
+    position: absolute; /* Absolute positioning to prevent layout shifts */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100%; /* Prevent overflow */
+    max-height: 100%; /* Prevent overflow */
+    pointer-events: auto; /* Re-enable for touch */
+  }
+  .cathodeBottom {
+    transform: scale(0.15); /* Scale to 15% on mobile (480px) */
   }
 }
 
