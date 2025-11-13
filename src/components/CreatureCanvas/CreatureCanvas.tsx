@@ -50,7 +50,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   
   // Calculate player's rank (using same logic as MovesTicker)
   // Use a seeded random generator based on targetHz to keep mock players stable
-  const { rank: playerRank, distance: playerDistance } = useMemo(() => {
+  const playerRank = useMemo(() => {
     // Seed-based random function for consistent mock players per target
     const seededRandom = (seed: number) => {
       const x = Math.sin(seed) * 10000;
@@ -74,7 +74,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     // Sort by distance (closest first) and find player's rank
     const sorted = [...allPlayers].sort((a, b) => a.distance - b.distance);
     const rank = sorted.findIndex(p => p.distance === playerDistance) + 1;
-    return { rank, distance: playerDistance };
+    return rank;
   }, [resonanceHz, targetHz]);
   
   // Format player distance from target
