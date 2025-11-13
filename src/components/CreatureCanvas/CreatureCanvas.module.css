@@ -236,7 +236,7 @@
   position: relative;
   margin: 0 auto; /* Center the panel within container */
   background-image: url('/jug2.png');
-  background-size: 106.8% 100%; /* Width: 89% * 1.2 = 106.8% (20% wider), Height: 100% */
+  background-size: 102% 100%; /* Reduced width stretch from 106.8% to 102% for less distortion */
   background-position: center top; /* Keep top aligned, allow bottom and sides to overflow */
   background-repeat: no-repeat;
   overflow: visible; /* Allow image to overflow bottom and sides */
