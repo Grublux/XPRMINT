@@ -356,8 +356,8 @@
     flex-wrap: nowrap; /* Prevent wrapping */
   }
   .potSection {
-    padding: 4.5px 3.6px; /* Scaled down padding */
-    flex: 0 1 auto; /* Allow shrinking */
+    padding: 5.4px 4.5px; /* Scaled down padding */
+    flex: 0 0 30%; /* 30% width */
     min-width: 0; /* Allow flex shrinking */
   }
   .potLabel {
@@ -366,9 +366,20 @@
   .potValue {
     font-size: 9.6px; /* Scaled down (16 * 0.6) */
   }
+  .targetSection {
+    padding: 6.48px 5.4px; /* Scaled down padding */
+    flex: 1; /* Takes remaining space */
+    min-width: 0;
+  }
+  .targetSection .targetLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .targetSection .targetValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) */
+  }
   .timerSection {
     padding: 6.48px 5.4px; /* Scaled down padding */
-    flex: 0 1 auto; /* Allow shrinking */
+    flex: 0 0 30%; /* 30% width */
     min-width: 0; /* Allow flex shrinking */
   }
   .timerLabel {
@@ -385,18 +396,6 @@
   .headerRight {
     flex: 1;
     min-height: 22px;
-  }
-  .targetFloating {
-    top: 3.6px;
-    left: 3.6px;
-    padding: 4.5px 6.75px;
-    gap: 2.25px;
-  }
-  .targetLabel {
-    font-size: 5.85px; /* 9 * 0.65 */
-  }
-  .targetValue {
-    font-size: 10.4px; /* 16 * 0.65 */
   }
   .currentLabel {
     font-size: 5.85px; /* 9 * 0.65 */
