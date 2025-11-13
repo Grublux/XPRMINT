@@ -78,10 +78,19 @@ export default function CreatureCanvas(){
         }
       }
 
+      // Use fixed reference dimensions (550px height) for consistent positioning across viewports
+      const refHeight = 550;
+      const refWidth = 550 * 932 / 1127; // Maintain aspect ratio
+      const scaleX = w / refWidth;
+      const scaleY = h / refHeight;
+      
+      // Calculate position based on reference size, then scale to actual canvas
       // Center horizontally (adjust offset if background tank appears off-center)
-      const cx = w/2 + (w * 0.01); // +1% offset to right (adjust as needed)
-      // Position orb lower to sit in the liquid area of the jug (around 65% down)
-      const cy = h * 0.65;
+      const refCx = refWidth / 2 + (refWidth * 0.01); // +1% offset to right
+      const cx = refCx * scaleX;
+      // Position orb lower to sit in the liquid area of the jug (around 65% down from reference)
+      const refCy = refHeight * 0.65;
+      const cy = refCy * scaleY;
       
       // Shock effect: add random shake offset when shocked
       // Use ref value for smooth animation without re-renders
