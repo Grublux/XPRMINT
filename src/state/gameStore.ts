@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 type GameStatus = 'idle'|'active'|'win'|'timeout';
-export type MoveItem = { delta:number; at:number };
+export type MoveItem = { delta:number; at:number; frequency:number };
 
 const INITIAL_PACK_COST = 2000; // NGT
 const SINGLE_NUMBER_COST = 500; // NGT
@@ -151,7 +151,7 @@ export const useGame = create<GameState>((set, get)=>({
     const delta = dir==='add' ? n : -n;
     const next = s.resonanceHz + delta;
 
-    const newMoves = [{ delta, at: Date.now() }, ...s.recentMoves].slice(0,10);
+    const newMoves = [{ delta, at: Date.now(), frequency: next }, ...s.recentMoves].slice(0,10);
 
     // remove the used number (so player can purchase new)
     const compactNumbers:number[] = [];

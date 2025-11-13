@@ -289,7 +289,7 @@
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
-  height: 550px; /* Increased from 480px for wider viewports */
+  height: 605px; /* Increased by 10% from 550px for desktop */
   width: 100%; /* Fill container completely to match dialRow */
   max-width: 100%; /* Don't exceed container */
   min-width: 100%; /* Force to match container width exactly */
@@ -331,6 +331,9 @@
   right: 10.8px;
   z-index: 10; /* Above canvas */
   pointer-events: none; /* Allow clicks to pass through to canvas */
+  display: flex;
+  flex-direction: column;
+  gap: 7.2px; /* Space between Closest and Current */
 }
 
 .frequencyTopRight .resonanceDisplay {

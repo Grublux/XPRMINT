@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useGame } from '../../state/gameStore';
 import { useTimer } from '../../hooks/useTimer';
 import styles from './CreatureCanvas.module.css';
@@ -27,11 +27,38 @@ type CreatureCanvasProps = {
 };
 
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
-  const { resonanceHz, targetHz, pot, lastMoveAt, status } = useGame();
+  const { resonanceHz, targetHz, pot, lastMoveAt, status, recentMoves } = useGame();
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   const { label, remaining } = useTimer(lastMoveAt);
   const danger = remaining <= 60_000 && status==='active';
+  
+  // Calculate closest hit from recent moves
+  const closestHit = useMemo(() => {
+    if (recentMoves.length === 0) return null;
+    let closestDistance = Infinity;
+    let closestFreq = null;
+    recentMoves.forEach(move => {
+      const distance = Math.abs(move.frequency - targetHz);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestFreq = move.frequency;
+      }
+    });
+    return closestFreq;
+  }, [recentMoves, targetHz]);
+  
+  // Format closest hit distance - always show ± format
+  const closestHitDistance = closestHit !== null ? Math.abs(closestHit - targetHz) : 0;
+  const closestHitFormatted = closestHit !== null
+    ? `±${Math.round(closestHitDistance)} Hz`
+    : '±-- Hz';
+  
+  // Calculate current distance from target
+  const currentDistance = resonanceHz - targetHz;
+  const currentDistanceFormatted = currentDistance >= 0 
+    ? `+${Math.round(currentDistance)} Hz` 
+    : `${Math.round(currentDistance)} Hz`;
   const ref = useRef<HTMLCanvasElement|null>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const lastBubbleSpawnRef = useRef<number>(0);
@@ -491,6 +518,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div key={`resonance-${resonanceHz}`} className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
             <div className={styles.currentLabel}>Specimen</div>
             <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
+          </div>
+        </div>
+        <div className={styles.frequencyTopRight}>
+          <div className={`${styles.resonanceDisplay} ${closestHit !== null && closestHit > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
+            <div className={styles.currentLabel}>Closest</div>
+            <div className={styles.resonanceValue}>{closestHitFormatted}</div>
+          </div>
+          <div className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
+            <div className={styles.currentLabel}>Current</div>
+            <div className={styles.resonanceValue}>{currentDistanceFormatted}</div>
           </div>
         </div>
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />

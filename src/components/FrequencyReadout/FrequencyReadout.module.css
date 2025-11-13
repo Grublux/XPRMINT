@@ -9,8 +9,8 @@
 }
 
 .orbButton {
-  width: 36px;
-  height: 36px;
+  width: 81px; /* 50% larger: 54px * 1.5 */
+  height: 81px; /* 50% larger: 54px * 1.5 */
   border-radius: 50%;
   border: 2px solid;
   display: flex;
@@ -24,6 +24,8 @@
   -webkit-tap-highlight-color: transparent;
   position: relative;
   flex-shrink: 0;
+  margin: 0; /* Remove all margins */
+  padding: 0; /* Remove all padding */
 }
 
 .minusButton {
@@ -61,7 +63,7 @@
 }
 
 .buttonSign {
-  font-size: 24px;
+  font-size: 54px; /* 50% larger: 36px * 1.5 */
   font-weight: 900;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
@@ -90,12 +92,12 @@
   }
   
   .orbButton {
-    width: 28px;
-    height: 28px;
+    width: 63px; /* 50% larger: 42px * 1.5 */
+    height: 63px; /* 50% larger: 42px * 1.5 */
   }
   
   .buttonSign {
-    font-size: 18px;
+    font-size: 40.5px; /* 50% larger: 27px * 1.5 */
   }
 }
 
@@ -119,12 +121,12 @@
   }
   
   .orbButton {
-    width: 24px;
-    height: 24px;
+    width: 54px; /* 50% larger: 36px * 1.5 */
+    height: 54px; /* 50% larger: 36px * 1.5 */
   }
   
   .buttonSign {
-    font-size: 16px;
+    font-size: 36px; /* 50% larger: 24px * 1.5 */
   }
 }
 
@@ -132,16 +134,18 @@
 .column {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 7.2px;
+  align-items: center; /* Center horizontally */
+  gap: 0; /* Remove gap */
   position: relative;
   height: auto;
-  justify-content: center;
+  justify-content: flex-start; /* Align to top */
   width: 100%;
   flex: 0.855 1 0;
   min-width: 0;
   margin-top: 0;
+  margin-bottom: 0;
   padding-top: 0;
+  padding-bottom: 0;
 }
 
 .anode {
