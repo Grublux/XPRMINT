@@ -312,9 +312,16 @@
   left: 10.8px;
   z-index: 10; /* Above canvas */
   pointer-events: none; /* Allow clicks to pass through to canvas */
+  display: flex;
+  flex-direction: column;
+  gap: 7.2px; /* Space between Target and Specimen */
 }
 
 .frequencyTopLeft .targetSection {
+  pointer-events: auto; /* Re-enable pointer events for the section */
+}
+
+.frequencyTopLeft .resonanceDisplay {
   pointer-events: auto; /* Re-enable pointer events for the section */
 }
 
@@ -341,6 +348,19 @@
   height: auto;
   transform: scale(0.1); /* Scale down to 10% of original size */
   transform-origin: bottom left; /* Scale from bottom left corner */
+}
+
+.cathodeBottomRight {
+  position: absolute;
+  bottom: 0;
+  left: 50%; /* Center horizontally */
+  z-index: 1000; /* Highest z-index to be on top of everything */
+  pointer-events: none; /* Allow clicks to pass through */
+  display: block;
+  width: auto;
+  height: auto;
+  transform: scale(0.1) translateX(-50%) scaleX(-1); /* Scale down to 10%, center horizontally, and flip horizontally */
+  transform-origin: bottom center; /* Scale from bottom center */
 }
 
 .canvas{
@@ -479,6 +499,11 @@
   .cathodeBottom {
     transform: scale(0.15); /* Scale to 15% on mobile (768px) */
   }
+  .cathodeBottomRight {
+    left: 50%; /* Center horizontally */
+    transform: scale(0.15) translateX(-50%) scaleX(-1); /* Scale to 15%, center horizontally, and flip horizontally on mobile (768px) */
+    transform-origin: bottom center; /* Scale from bottom center */
+  }
 }
 
 @media (max-width: 480px) {
@@ -596,6 +621,11 @@
   }
   .cathodeBottom {
     transform: scale(0.15); /* Scale to 15% on mobile (480px) */
+  }
+  .cathodeBottomRight {
+    left: 50%; /* Center horizontally */
+    transform: scale(0.15) translateX(-50%) scaleX(-1); /* Scale to 15%, center horizontally, and flip horizontally on mobile (480px) */
+    transform-origin: bottom center; /* Scale from bottom center */
   }
 }
 

@@ -32,14 +32,20 @@ export default function CenterDial(){
     
     const dir = direction === 'up' ? 'add' : 'sub';
     
-    const cathodeBottomImg = document.querySelector('[data-cathode-bottom="true"]') as HTMLImageElement;
+    // Use left cathode for "-" (down) and right cathode for "+" (up)
+    const cathodeSelector = direction === 'down' 
+      ? '[data-cathode-bottom="true"]' 
+      : '[data-cathode-bottom-right="true"]';
+    const cathodeBottomImg = document.querySelector(cathodeSelector) as HTMLImageElement;
     
     let fromX: number;
     let fromY: number;
     
     if (cathodeBottomImg) {
       const rect = cathodeBottomImg.getBoundingClientRect();
-      fromX = rect.left + rect.width * 0.75;
+      // For left cathode (down), bulb is at 75% from left; for right cathode (up, rotated 180deg), bulb is at 25% from left (which is 75% from right in original)
+      const xPercent = direction === 'down' ? 0.75 : 0.25;
+      fromX = rect.left + rect.width * xPercent;
       fromY = rect.top + rect.height * 0.2;
     } else {
       const buttonRef = direction === 'down' ? minusButtonRef : plusButtonRef;

@@ -29,6 +29,7 @@ type CreatureCanvasProps = {
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
   const { resonanceHz, targetHz, pot, lastMoveAt, status } = useGame();
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
+  const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   const { label, remaining } = useTimer(lastMoveAt);
   const danger = remaining <= 60_000 && status==='active';
   const ref = useRef<HTMLCanvasElement|null>(null);
@@ -177,8 +178,8 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       
       // Calculate creature size based on how close frequency is to target
       // Size increases as frequency approaches target from either direction (above or below)
-      const minImageSize = baseImageSize * 0.7; // Start at 70% when far from target
-      const maxImageSize = baseImageSize * 1.15; // Grow to 115% (15% larger) when matching target
+      const minImageSize = baseImageSize * 0.33; // Start at 33% when far from target
+      const maxImageSize = baseImageSize * 1.33; // Grow to 133% (33% larger) when matching target
       
       // Calculate closeness based on frequency difference (works from both directions)
       const frequencyDiff = Math.abs(resonanceHz - targetHz); // Distance from target (always positive)
@@ -484,8 +485,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             <div className={styles.targetLabel}>Target</div>
             <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
           </div>
-        </div>
-        <div className={styles.frequencyTopRight}>
           <div className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
             <div className={styles.currentLabel}>Specimen</div>
             <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
@@ -495,9 +494,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         <img 
           ref={cathodeBottomRef}
           src="/cathode_bottom.png" 
-          alt="Cathode bottom" 
+          alt="Cathode bottom left" 
           className={styles.cathodeBottom}
           data-cathode-bottom="true"
+        />
+        <img 
+          ref={cathodeBottomRightRef}
+          src="/cathode_bottom.png" 
+          alt="Cathode bottom right" 
+          className={styles.cathodeBottomRight}
+          data-cathode-bottom-right="true"
         />
       </div>
     </div>
