@@ -22,7 +22,12 @@
 .chip.placeholder {
   background: #1a1f2e;
   cursor: default;
-  opacity: 0.3;
+  opacity: 0.5; /* Increased from 0.3 to make placeholders more visible */
+  display: flex; /* Ensure placeholder is always displayed */
+  visibility: visible; /* Explicitly ensure visibility */
+  flex-shrink: 0; /* Prevent placeholder from shrinking */
+  min-width: 56px; /* Explicitly set min-width to prevent collapse */
+  width: 56px; /* Explicitly set width to prevent collapse */
 }
 .chip.placeholder:hover {
   background: #1a1f2e;

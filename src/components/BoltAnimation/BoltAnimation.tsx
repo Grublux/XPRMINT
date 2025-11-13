@@ -119,8 +119,6 @@ export default function BoltAnimation({ from, to, onComplete }: BoltProps) {
   const pathData = `M ${visiblePath[0].x} ${visiblePath[0].y} ${visiblePath.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')}`;
 
   // Calculate gradient direction based on path direction
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
   const gradientX1 = from.x;
   const gradientY1 = from.y;
   const gradientX2 = to.x;
