@@ -1,5 +1,31 @@
-.scrim{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; }
-.box{ background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; width:min(520px, 92vw); }
+.scrim{ 
+  position:fixed; 
+  inset:0; 
+  background:rgba(0,0,0,.55); 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  z-index: 10000; /* Above BoltAnimation (9999) and other overlays */
+}
+.box{ 
+  background:var(--panel); 
+  border-radius:var(--radius); 
+  box-shadow:var(--shadow); 
+  padding:20px; 
+  width:min(520px, 92vw);
+  position: relative;
+  z-index: 10001;
+}
 .title{ margin:0 0 8px 0; }
 .row{ display:flex; gap:12px; margin-top:12px; }
-.btn{ appearance:none; border:0; border-radius:12px; padding:12px 18px; color:#111; background:var(--gold); font-weight:800; cursor:pointer; }
+.btn{ 
+  appearance:none; 
+  border:0; 
+  border-radius:12px; 
+  padding:12px 18px; 
+  color:#111; 
+  background:var(--gold); 
+  font-weight:800; 
+  cursor:pointer;
+  pointer-events: auto; /* Ensure button is clickable */
+}
