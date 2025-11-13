@@ -11,7 +11,22 @@ type Bubble = {
   opacity: number;
 };
 
-export default function CreatureCanvas(){
+// Creature mapping: name -> image file
+const CREATURE_IMAGES: Record<string, string> = {
+  'Ruevee': '/creature_transparent.png',
+  'Rose': '/rose_trans.png',
+};
+
+const CREATURE_SHOCKED_IMAGES: Record<string, string> = {
+  'Ruevee': '/creature_shocked_transparent.png',
+  'Rose': '/rose_trans.png', // Use same image for shocked (or add shocked version later)
+};
+
+type CreatureCanvasProps = {
+  creature?: string;
+};
+
+export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
   const { resonanceHz, targetHz, pot, lastMoveAt, status } = useGame();
   const { label, remaining } = useTimer(lastMoveAt);
   const danger = remaining <= 60_000 && status==='active';
@@ -24,20 +39,23 @@ export default function CreatureCanvas(){
   const creatureImageRef = useRef<HTMLImageElement | null>(null);
   const creatureShockedImageRef = useRef<HTMLImageElement | null>(null);
 
-  // Load creature images
+  // Load creature images based on selected creature
   useEffect(() => {
+    const creatureImg = CREATURE_IMAGES[creature] || CREATURE_IMAGES['Ruevee'];
+    const shockedImg = CREATURE_SHOCKED_IMAGES[creature] || CREATURE_SHOCKED_IMAGES['Ruevee'];
+    
     const img = new Image();
-    img.src = '/creature_transparent.png';
+    img.src = creatureImg;
     img.onload = () => {
       creatureImageRef.current = img;
     };
     
-    const shockedImg = new Image();
-    shockedImg.src = '/creature_shocked_transparent.png';
-    shockedImg.onload = () => {
-      creatureShockedImageRef.current = shockedImg;
+    const shockedImage = new Image();
+    shockedImage.src = shockedImg;
+    shockedImage.onload = () => {
+      creatureShockedImageRef.current = shockedImage;
     };
-  }, []);
+  }, [creature]);
 
   // Listen for lightning strikes
   useEffect(() => {

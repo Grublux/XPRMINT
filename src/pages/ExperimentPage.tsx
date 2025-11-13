@@ -33,7 +33,7 @@ export default function ExperimentPage(){
       </div>
 
       <div className={styles.specimenRow}>
-        <CreatureCanvas/>
+        <CreatureCanvas creature={selectedCreature}/>
       </div>
       
       <div className={styles.dialRow}>
@@ -69,6 +69,7 @@ export default function ExperimentPage(){
             className={styles.creatureSelect}
           >
             <option value="Ruevee">Ruevee</option>
+            <option value="Rose">Rose</option>
           </select>
         </div>
       </div>
