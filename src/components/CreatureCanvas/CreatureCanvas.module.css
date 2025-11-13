@@ -224,7 +224,7 @@
   border-bottom-right-radius: 0;
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Standard shadow */
   padding:10.8px;
-  padding-bottom: 0; /* Remove bottom padding to eliminate visible line */
+  padding-bottom: 20px; /* Add bottom padding to show more of the jug bottom */
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */

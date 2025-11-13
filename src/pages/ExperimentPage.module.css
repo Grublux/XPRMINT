@@ -201,14 +201,14 @@
 
 .sliderRow {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 18px;
+  gap: 9px;
   padding: 9px 16px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  flex-wrap: wrap;
 }
 
 .sizeControl {
