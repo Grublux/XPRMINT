@@ -396,7 +396,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     return ()=> cancelAnimationFrame(raf);
   }, [resonanceHz, targetHz]);
 
-  const isBelow = resonanceHz < targetHz;
   const isAbove = resonanceHz > targetHz;
 
   return (
@@ -406,19 +405,13 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.potLabel}>Pot Size</div>
           <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
         </div>
-        <div className={styles.timerSection}>
-          <div className={styles.timerLabel}>Experiment Fails In:</div>
-          <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
-        </div>
       </div>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          {isBelow ? (
-            <div className={styles.resonanceDisplay}>
-              <div className={styles.currentLabel}>Pulse</div>
-              <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
-            </div>
-          ) : null}
+          <div className={styles.timerSection}>
+            <div className={styles.timerLabel}>Experiment Fails In:</div>
+            <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
+          </div>
         </div>
         <div className={styles.headerCenter}>
         </div>
