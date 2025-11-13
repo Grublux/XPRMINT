@@ -113,7 +113,8 @@ export default function CreatureCanvas(){
       
       // Calculate creature size based on how close frequency is to target
       // Size increases as frequency approaches target from either direction (above or below)
-      const baseImageSize = maxOrbRadius * 1.8;
+      // Make creature 1.5x larger across entire gradient
+      const baseImageSize = maxOrbRadius * 1.8 * 1.5; // 1.5x larger
       const minImageSize = baseImageSize * 0.7; // Start at 70% when far from target
       const maxImageSize = baseImageSize * 1.15; // Grow to 115% (15% larger) when matching target
       
@@ -270,6 +271,10 @@ export default function CreatureCanvas(){
         const imageX = shockCx - imageSize / 2;
         const imageY = shockCy - imageSize / 2 + bounceOffset + verticalOffset;
         
+        // Make creature brighter - draw with lighter composite mode
+        const savedComposite = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = 'lighten'; // Makes image brighter while preserving colors
+        ctx.globalAlpha = 1.0; // Full opacity for brightness
         // Draw the creature image (not clipped, so it remains visible even when orb is smaller)
         ctx.drawImage(
           creatureImg,
@@ -278,6 +283,18 @@ export default function CreatureCanvas(){
           imageSize,
           imageSize
         );
+        // Draw again with normal mode for full visibility
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.8; // Additional pass for brightness
+        ctx.drawImage(
+          creatureImg,
+          imageX,
+          imageY,
+          imageSize,
+          imageSize
+        );
+        ctx.globalCompositeOperation = savedComposite;
+        ctx.globalAlpha = 1.0; // Reset to full opacity
       }
       
       // Hard edge/membrane - brighter when shocked
