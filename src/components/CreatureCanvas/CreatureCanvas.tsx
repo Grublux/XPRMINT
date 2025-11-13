@@ -424,7 +424,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         <div className={styles.headerRight}>
           {isAbove ? (
             <div className={styles.resonanceDisplay}>
-              <div className={styles.currentLabel}>Pulse</div>
+              <div className={styles.currentLabel}>Specimen Frequency</div>
               <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
             </div>
           ) : null}

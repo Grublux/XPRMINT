@@ -49,7 +49,9 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .potValue {
@@ -59,7 +61,9 @@
   font-weight: 900;
   text-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.5px;
-  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .targetSection {
@@ -178,19 +182,21 @@
 .resonanceDisplay {
   display: flex;
   flex-direction: column;
-  align-items: inherit; /* Inherit from parent (flex-start for left, flex-end for right) */
+  align-items: center;
   justify-content: center;
-  width: 100%;
-  flex: 1;
-  min-height: 20px;
-  border: 1px solid transparent; /* Helps visualize the divs */
   gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  width: 100%;
+  min-width: 0;
 }
 
 .currentLabel {
-  font-size: 9.9px;
+  font-size: 10.8px;
   color: var(--muted);
-  text-align: inherit; /* Inherit from parent alignment */
+  text-align: center;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -198,18 +204,9 @@
 
 .resonanceValue {
   font-size: 18px;
+  color: var(--accent);
+  text-align: center;
   font-weight: 700;
-  text-align: inherit; /* Inherit from parent alignment */
-}
-
-.headerLeft .resonanceValue {
-  color: #4a9eff; /* Blue when below target */
-  text-align: left;
-}
-
-.headerRight .resonanceValue {
-  color: #ff6b6b; /* Red when above target */
-  text-align: right;
 }
 .sizeControl{
   display: flex;
@@ -346,11 +343,14 @@
     flex: 0 0 30%; /* 30% width */
     min-height: 26px;
   }
+  .resonanceDisplay {
+    padding: 7.56px 6.3px; /* Scaled down padding to match targetSection */
+  }
   .currentLabel {
-    font-size: 6.75px; /* 9 * 0.75 */
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) to match targetLabel */
   }
   .resonanceValue {
-    font-size: 12px; /* 16 * 0.75 */
+    font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
   }
   .panel {
     padding: 4.5px 4.5px 12px 4.5px; /* Add bottom padding to show more of jug stand */
@@ -431,11 +431,14 @@
     flex: 0 0 30%; /* 30% width */
     min-height: 22px;
   }
+  .resonanceDisplay {
+    padding: 6.48px 5.4px; /* Scaled down padding to match targetSection */
+  }
   .currentLabel {
-    font-size: 5.85px; /* 9 * 0.65 */
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) to match targetLabel */
   }
   .resonanceValue {
-    font-size: 10.4px; /* 16 * 0.65 */
+    font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
   }
   .panel {
     padding: 3.6px 3.6px 10px 3.6px; /* Add bottom padding to show more of jug stand */
