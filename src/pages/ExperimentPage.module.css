@@ -209,6 +209,7 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  margin-top: 18px; /* Add margin to prevent overlap with buy button */
 }
 
 .sizeControl {
@@ -381,6 +382,7 @@
   }
   .sliderRow {
     padding: 7.2px 12px;
+    margin-top: 12px; /* Add margin to prevent overlap with buy button on mobile */
   }
   .sizeControl {
     min-width: 180px;
@@ -460,6 +462,7 @@
   }
   .sliderRow {
     padding: 5.4px 8px;
+    margin-top: 10px; /* Add margin to prevent overlap with buy button on smaller mobile */
   }
   .sizeControl {
     min-width: 160px;
