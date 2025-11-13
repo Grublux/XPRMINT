@@ -110,15 +110,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Position orb lower to sit in the liquid area of the jug
       // On mobile (smaller canvas), position higher (smaller percentage) to keep creature in jug
       // On wider viewports, position higher to shift creature up
+      // Shifted lower to accommodate taller jug2 image (115% height)
       const isMobile = clientH < 450; // Detect mobile viewport
       const isWide = clientW > 900; // Detect wide viewport
       let verticalPercent;
       if (isMobile) {
-        verticalPercent = 0.57; // Slightly downward from 0.55 for mobile
+        verticalPercent = 0.65; // Mobile positioning
       } else if (isWide) {
-        verticalPercent = 0.50; // Shift up more on wider viewports (reduced from 0.58)
+        verticalPercent = 0.65; // Wide viewport positioning
       } else {
-        verticalPercent = 0.58; // Default for desktop - moved up from 0.65 to keep within jug
+        verticalPercent = 0.65; // Desktop positioning
       }
       const refCy = refHeight * verticalPercent;
       const cy = refCy * scaleY;
