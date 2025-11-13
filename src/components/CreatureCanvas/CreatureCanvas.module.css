@@ -144,25 +144,34 @@
   width: 100%;
 }
 
-.headerLeft,
-.headerRight {
-  flex: 0 0 120px;
+.headerLeft {
+  flex: 0 0 30%; /* 30% width */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 3.6px;
   min-height: 48px;
 }
 
 .headerCenter {
-  flex: 1;
+  flex: 1; /* 40% placeholder in center */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3.6px;
   text-align: center;
+}
+
+.headerRight {
+  flex: 0 0 30%; /* 30% width */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3.6px;
+  min-height: 48px;
 }
 
 
@@ -295,9 +304,12 @@
   .potValue {
     font-size: 11.2px; /* Scaled down (16 * 0.7) */
   }
+  .infoBar .headerCenter {
+    flex: 1; /* 40% placeholder */
+  }
   .targetSection {
     padding: 7.56px 6.3px; /* Scaled down padding */
-    flex: 1; /* Takes remaining space */
+    flex: 0 0 30%; /* 30% width */
     min-width: 0;
   }
   .targetSection .targetLabel {
@@ -321,9 +333,15 @@
     gap: 3.6px;
     font-size: 0.75em; /* Scale down font sizes more */
   }
-  .headerLeft,
+  .headerLeft {
+    flex: 0 0 30%; /* 30% width */
+    min-height: 26px;
+  }
+  .headerCenter {
+    flex: 1; /* 40% placeholder */
+  }
   .headerRight {
-    flex: 1;
+    flex: 0 0 30%; /* 30% width */
     min-height: 26px;
   }
   .currentLabel {
@@ -371,9 +389,12 @@
   .potValue {
     font-size: 9.6px; /* Scaled down (16 * 0.6) */
   }
+  .infoBar .headerCenter {
+    flex: 1; /* 40% placeholder */
+  }
   .targetSection {
     padding: 6.48px 5.4px; /* Scaled down padding */
-    flex: 1; /* Takes remaining space */
+    flex: 0 0 30%; /* 30% width */
     min-width: 0;
   }
   .targetSection .targetLabel {
@@ -397,9 +418,15 @@
     gap: 2.7px;
     font-size: 0.65em; /* Scale down font sizes even more */
   }
-  .headerLeft,
+  .headerLeft {
+    flex: 0 0 30%; /* 30% width */
+    min-height: 22px;
+  }
+  .headerCenter {
+    flex: 1; /* 40% placeholder */
+  }
   .headerRight {
-    flex: 1;
+    flex: 0 0 30%; /* 30% width */
     min-height: 22px;
   }
   .currentLabel {
