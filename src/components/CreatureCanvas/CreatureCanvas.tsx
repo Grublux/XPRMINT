@@ -405,17 +405,19 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.potLabel}>Pot Size</div>
           <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
         </div>
+        <div className={styles.headerCenter}>
+        </div>
         <div className={styles.targetSection}>
           <div className={styles.targetLabel}>Target Frequency</div>
           <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
         </div>
-        <div className={styles.timerSection}>
-          <div className={styles.timerLabel}>Experiment Fails In:</div>
-          <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
-        </div>
       </div>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
+          <div className={styles.timerSection}>
+            <div className={styles.timerLabel}>Experiment Fails In:</div>
+            <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
+          </div>
         </div>
         <div className={styles.headerCenter}>
         </div>

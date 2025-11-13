@@ -36,6 +36,11 @@
   min-width: 0;
 }
 
+.infoBar .headerCenter {
+  flex: 1; /* 40% placeholder in center */
+  min-width: 0;
+}
+
 .potLabel {
   font-size: 11.7px;
   color: rgba(255, 215, 0, 0.9);
@@ -67,20 +72,20 @@
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  flex: 1; /* Takes remaining space in middle */
+  flex: 0 0 30%; /* 30% width on right */
   min-width: 0;
 }
 
 .timerSection {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 3.6px;
   padding: 10.8px 9px;
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  flex: 0 0 30%; /* 30% width */
+  width: 100%; /* Fill headerLeft container */
   min-width: 0;
 }
 
@@ -103,7 +108,7 @@
 .timerLabel {
   font-size: 10.8px;
   color: var(--muted);
-  text-align: right;
+  text-align: left;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -112,7 +117,7 @@
 .timerValue {
   font-size: 18px;
   color: var(--text);
-  text-align: right;
+  text-align: left;
   font-weight: 700;
 }
 
