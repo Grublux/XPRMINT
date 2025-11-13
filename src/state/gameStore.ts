@@ -14,7 +14,7 @@ function randNum1to500(){
   return Math.floor(Math.random()*500)+1;
 }
 function randTargetHz(){
-  return Math.floor(Math.random()*10001); // 0..10000 Hz
+  return Math.floor(Math.random() * 4001) + 3000; // 3000..7000 Hz (3k to 7k)
 }
 
 type GameState = {
