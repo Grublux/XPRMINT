@@ -88,8 +88,11 @@ export default function CreatureCanvas(){
       // Center horizontally (adjust offset if background tank appears off-center)
       const refCx = refWidth / 2 + (refWidth * 0.01); // +1% offset to right
       const cx = refCx * scaleX;
-      // Position orb lower to sit in the liquid area of the jug (around 65% down from reference)
-      const refCy = refHeight * 0.65;
+      // Position orb lower to sit in the liquid area of the jug
+      // On mobile (smaller canvas), position higher (smaller percentage) to keep creature in jug
+      const isMobile = clientH < 450; // Detect mobile viewport
+      const verticalPercent = isMobile ? 0.55 : 0.65; // Higher position on mobile
+      const refCy = refHeight * verticalPercent;
       const cy = refCy * scaleY;
       
       // Shock effect: add random shake offset when shocked
