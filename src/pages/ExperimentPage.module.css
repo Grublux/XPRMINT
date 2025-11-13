@@ -15,10 +15,79 @@
   gap: 16px;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  max-width: 100%;
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 12px 0;
   box-sizing: border-box;
   flex-wrap: nowrap;
+}
+
+.titleLeft {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.howToPlayLink {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.howToPlayLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.titleCenter {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleText {
+  font-size: 21.6px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+}
+
+.titleRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.walletButton {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.15));
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+
+.walletButton:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 200, 100, 0.25));
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  transform: translateY(-1px);
 }
 .specimenRow{ 
   display:flex; 
@@ -310,6 +379,10 @@
     gap: 0; /* Keep gap at 0 to maintain uniform background */
     padding: 0 12px;
   }
+  .walletButton {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
   .infoRow {
     gap: 12px;
     flex-wrap: nowrap;
@@ -399,6 +472,10 @@
   .grid {
     gap: 0; /* Keep gap at 0 to maintain uniform background */
     padding: 0 8px;
+  }
+  .walletButton {
+    padding: 5px 10px;
+    font-size: 9px;
   }
   .infoRow {
     gap: 8px;

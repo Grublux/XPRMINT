@@ -48,6 +48,41 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     return closestFreq;
   }, [recentMoves, targetHz]);
   
+  // Calculate player's rank (using same logic as MovesTicker)
+  // Use a seeded random generator based on targetHz to keep mock players stable
+  const { rank: playerRank, distance: playerDistance } = useMemo(() => {
+    // Seed-based random function for consistent mock players per target
+    const seededRandom = (seed: number) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+    
+    const seed = targetHz; // Use targetHz as seed so mock players are consistent per round
+    
+    // Generate 6 stable mock players based on targetHz seed
+    const randomPlayers: Array<{ distance: number }> = [];
+    for (let i = 0; i < 6; i++) {
+      const frequency = Math.floor(seededRandom(seed + i) * 10000);
+      const distance = Math.abs(frequency - targetHz);
+      randomPlayers.push({ distance });
+    }
+    
+    // Add player
+    const playerDistance = Math.abs(resonanceHz - targetHz);
+    const allPlayers = [...randomPlayers, { distance: playerDistance }];
+    
+    // Sort by distance (closest first) and find player's rank
+    const sorted = [...allPlayers].sort((a, b) => a.distance - b.distance);
+    const rank = sorted.findIndex(p => p.distance === playerDistance) + 1;
+    return { rank, distance: playerDistance };
+  }, [resonanceHz, targetHz]);
+  
+  // Format player distance from target
+  const playerDistanceFormatted = (() => {
+    const diff = resonanceHz - targetHz;
+    return diff >= 0 ? `+${Math.round(diff)} Hz` : `${Math.round(diff)} Hz`;
+  })();
+  
   // Format closest hit distance - always show ± format
   const closestHitDistance = closestHit !== null ? Math.abs(closestHit - targetHz) : 0;
   const closestHitFormatted = closestHit !== null
@@ -67,6 +102,19 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   const shockIntensityRef = useRef<number>(0);
   const creatureImageRef = useRef<HTMLImageElement | null>(null);
   const creatureShockedImageRef = useRef<HTMLImageElement | null>(null);
+  const rueveeRef = useRef<{ width: number; height: number } | null>(null);
+
+  // Load Ruevee first to get reference dimensions
+  useEffect(() => {
+    const rueveeImg = new Image();
+    rueveeImg.src = CREATURE_IMAGES['Ruevee'];
+    rueveeImg.onload = () => {
+      rueveeRef.current = {
+        width: rueveeImg.width,
+        height: rueveeImg.height
+      };
+    };
+  }, []);
 
   // Load creature images based on selected creature
   useEffect(() => {
@@ -370,13 +418,23 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         ? creatureShockedImageRef.current 
         : creatureImageRef.current;
       
-      if (creatureImg && creatureImg.complete) {
+      if (creatureImg && creatureImg.complete && rueveeRef.current) {
         // Creature size is based on frequency closeness (calculated above)
         // Add pulse animation to creature image (independent of orb pulse)
         const creaturePulseAmplitude = 0.05; // Reduced from 0.08 to 0.05 (5% pulse)
         const creaturePulseSpeed = 0.008; // Slightly faster than orb breathing
         const creaturePulse = 1 + creaturePulseAmplitude * Math.sin(t * creaturePulseSpeed);
         const imageSize = creatureBaseSize * creaturePulse;
+        
+        // Normalize all creatures to Ruevee's base size
+        // Use Ruevee's dimensions as the reference for consistent sizing
+        const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
+        const creatureMaxSize = Math.max(creatureImg.width, creatureImg.height);
+        
+        // If creature is larger than Ruevee, scale it down; if smaller, scale it up
+        // This ensures all creatures appear at the same base size as Ruevee
+        const sizeRatio = rueveeMaxSize / creatureMaxSize;
+        const normalizedImageSize = imageSize * sizeRatio;
         
         // Add vertical bounce animation
         const bounceAmplitude = maxOrbRadius * 0.15; // 15% of max orb radius
@@ -385,20 +443,20 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         
         // Center image on orb with bounce offset, moved up slightly
         const verticalOffset = -maxOrbRadius * 0.1; // Move up by 10% of max orb radius
-        const imageX = shockCx - imageSize / 2;
-        const imageY = shockCy - imageSize / 2 + bounceOffset + verticalOffset;
+        const imageX = shockCx - normalizedImageSize / 2;
+        const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset;
         
         // Make creature brighter - draw with lighter composite mode
         const savedComposite = ctx.globalCompositeOperation;
         ctx.globalCompositeOperation = 'lighten'; // Makes image brighter while preserving colors
         ctx.globalAlpha = 1.0; // Full opacity for brightness
-        // Draw the creature image (not clipped, so it remains visible even when orb is smaller)
+        // Draw the creature image scaled to match Ruevee's size
         ctx.drawImage(
           creatureImg,
           imageX,
           imageY,
-          imageSize,
-          imageSize
+          normalizedImageSize,
+          normalizedImageSize
         );
         // Draw again with normal mode for full visibility
         ctx.globalCompositeOperation = 'source-over';
@@ -407,8 +465,8 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           creatureImg,
           imageX,
           imageY,
-          imageSize,
-          imageSize
+          normalizedImageSize,
+          normalizedImageSize
         );
         ctx.globalCompositeOperation = savedComposite;
         ctx.globalAlpha = 1.0; // Reset to full opacity
@@ -501,15 +559,19 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.potLabel}>Pot Size</div>
           <div className={styles.potValue}>{pot.toLocaleString()} NGT</div>
         </div>
-        <div className={styles.headerCenter}>
-          <div className={styles.titleText}>XPRMINT</div>
+        <div className={styles.rankSection}>
+          <div className={styles.rankLabel}>My Rank</div>
+          <div className={styles.rankValue}>
+            <span>#{playerRank}</span>
+            <span className={styles.rankDistance}>{playerDistanceFormatted}</span>
+          </div>
         </div>
         <div className={styles.timerSection}>
           <div className={styles.timerLabel}>XPRMINT Fails In:</div>
           <div className={`${styles.timerValue} ${danger ? styles.timerDanger : ''}`}>{label}</div>
         </div>
       </div>
-      <div className={styles.panel}>
+      <div className={styles.specimenWrapper}>
         <div className={styles.frequencyTopLeft}>
           <div className={styles.targetSection}>
             <div className={styles.targetLabel}>Target</div>
@@ -530,6 +592,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             <div className={styles.resonanceValue}>{currentDistanceFormatted}</div>
           </div>
         </div>
+        <div className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}>
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />
         <img 
           ref={cathodeBottomRef}
@@ -545,6 +608,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           className={styles.cathodeBottomRight}
           data-cathode-bottom-right="true"
         />
+        </div>
       </div>
     </div>
   );

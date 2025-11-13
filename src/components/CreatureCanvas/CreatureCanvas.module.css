@@ -14,6 +14,11 @@
   flex-shrink: 0; /* Prevent shrinking */
   flex-grow: 0; /* Prevent growing */
 }
+
+.specimenWrapper {
+  position: relative;
+  width: 100%;
+}
 .infoBar {
   display: flex;
   align-items: center;
@@ -26,6 +31,22 @@
   margin-bottom: 3.6px; /* Reduced from 7.2px to bring knob controls up */
   box-sizing: border-box;
   flex-shrink: 0; /* Prevent shrinking */
+}
+
+.rankSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 0 0 30%; /* 30% width */
+  min-width: 0;
+  max-width: 30%; /* Prevent expansion */
+  overflow: hidden; /* Clip content that might expand */
 }
 
 .potSection {
@@ -119,6 +140,32 @@
   max-width: 100%; /* Don't exceed parent */
 }
 
+.rankLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rankValue {
+  font-size: 18px;
+  color: var(--accent);
+  text-align: center;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rankDistance {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .targetSection {
   display: flex;
   flex-direction: column;
@@ -161,6 +208,22 @@
   50% {
     opacity: 0.5;
   }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translate(-2px, -1px) rotate(-0.25deg);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translate(2px, 1px) rotate(0.25deg);
+  }
+}
+
+.panel.shaking {
+  animation: shake 0.6s ease-in-out;
 }
 
 .header{ 
@@ -226,6 +289,15 @@
   letter-spacing: 0.5px;
 }
 
+.meIndicator {
+  font-size: 8.1px; /* Smaller than label */
+  color: #ff6b6b; /* Match "Me" color from ticker */
+  font-weight: 700;
+  text-transform: none; /* Don't uppercase "Me" */
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
 .resonanceValue {
   font-size: 18px;
   color: var(--accent);
@@ -289,7 +361,7 @@
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
-  height: 605px; /* Increased by 10% from 550px for desktop */
+  height: 570px; /* Reduced from 605px for better desktop fit */
   width: 100%; /* Fill container completely to match dialRow */
   max-width: 100%; /* Don't exceed container */
   min-width: 100%; /* Force to match container width exactly */
@@ -334,6 +406,12 @@
   display: flex;
   flex-direction: column;
   gap: 7.2px; /* Space between Closest and Current */
+}
+
+.closestWrapper {
+  display: flex;
+  align-items: center;
+  gap: 5.4px;
 }
 
 .frequencyTopRight .resonanceDisplay {
@@ -411,6 +489,21 @@
   .potValue {
     font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
   }
+  .rankSection {
+    padding: 7.56px 6.3px; /* Scaled down padding to match other sections */
+    flex: 0 0 30%; /* 30% width */
+    min-width: 0;
+  }
+  .rankLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) */
+  }
+  .rankValue {
+    font-size: 12.6px; /* Scaled down (18 * 0.7) */
+    gap: 4.2px; /* Scaled down (6 * 0.7) */
+  }
+  .rankDistance {
+    font-size: 8.4px; /* Scaled down (12 * 0.7) */
+  }
   .infoBar .headerCenter {
     flex: 1; /* 40% placeholder */
   }
@@ -460,6 +553,10 @@
   }
   .currentLabel {
     font-size: 7.56px; /* Scaled down (10.8 * 0.7) to match targetLabel */
+  }
+  .meIndicator {
+    font-size: 5.67px; /* Scaled down (8.1 * 0.7) */
+    margin-left: 2.52px; /* Scaled down (3.6 * 0.7) */
   }
   .resonanceValue {
     font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
@@ -535,6 +632,21 @@
   .potValue {
     font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
   }
+  .rankSection {
+    padding: 6.48px 5.4px; /* Scaled down padding to match other sections */
+    flex: 0 0 30%; /* 30% width */
+    min-width: 0;
+  }
+  .rankLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .rankValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) */
+    gap: 3.6px; /* Scaled down (6 * 0.6) */
+  }
+  .rankDistance {
+    font-size: 7.2px; /* Scaled down (12 * 0.6) */
+  }
   .infoBar .headerCenter {
     flex: 1; /* 40% placeholder */
   }
@@ -584,6 +696,10 @@
   }
   .currentLabel {
     font-size: 6.48px; /* Scaled down (10.8 * 0.6) to match targetLabel */
+  }
+  .meIndicator {
+    font-size: 4.86px; /* Scaled down (8.1 * 0.6) */
+    margin-left: 2.16px; /* Scaled down (3.6 * 0.6) */
   }
   .resonanceValue {
     font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
