@@ -234,8 +234,8 @@
   min-height: 288px;
   position: relative;
   background-image: url('/jug2.png');
-  background-size: 80%; /* Scale jug image to 0.8 (80%) */
-  background-position: center;
+  background-size: cover; /* Scale jug image back up to fill container */
+  background-position: center bottom; /* Move down and forward in container */
   background-repeat: no-repeat;
   overflow: hidden; /* Clip to container */
 }
