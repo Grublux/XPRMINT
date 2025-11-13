@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import CreatureCanvas from '../components/CreatureCanvas/CreatureCanvas';
 import FrequencyReadout from '../components/FrequencyReadout/FrequencyReadout';
 import CenterDial from '../components/CenterDial/CenterDial';
@@ -13,6 +14,7 @@ export default function ExperimentPage(){
   useRoundJudge();
   useKeyboardControls();
   const { resonanceHz, setResonance } = useGame();
+  const [selectedCreature, setSelectedCreature] = useState('Ruevee');
   
   // Orb size slider logic
   const sliderValue = 0.1 + (resonanceHz / 10000) * 1.9;
@@ -55,6 +57,19 @@ export default function ExperimentPage(){
             onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
             className={styles.sizeSlider}
           />
+        </div>
+        <div className={styles.creatureControl}>
+          <label htmlFor="creature-select" className={styles.creatureLabel}>
+            Creature
+          </label>
+          <select
+            id="creature-select"
+            value={selectedCreature}
+            onChange={(e) => setSelectedCreature(e.target.value)}
+            className={styles.creatureSelect}
+          >
+            <option value="Ruevee">Ruevee</option>
+          </select>
         </div>
       </div>
 

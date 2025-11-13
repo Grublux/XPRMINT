@@ -203,10 +203,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 18px;
   padding: 9px 16px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  flex-wrap: wrap;
 }
 
 .sizeControl {
@@ -223,6 +225,48 @@
   font-size: 11.7px;
   color: var(--muted);
   font-weight: 500;
+}
+
+
+.creatureControl {
+  display: flex;
+  flex-direction: column;
+  gap: 3.6px;
+  align-items: center;
+  min-width: 150px;
+  max-width: 250px;
+  width: 100%;
+}
+
+.creatureLabel {
+  font-size: 11.7px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.creatureSelect {
+  width: 100%;
+  padding: 6px 12px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 11.7px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.creatureSelect:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.creatureSelect:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
 }
 
 .sizeSlider {
