@@ -12,7 +12,7 @@
   min-width: 0;
   max-width: calc(280px * (550px * 932 / 1127) / 752px); /* Scale proportionally to match dialRow */
   width: auto;
-  flex: 1.27 1 0; /* Slightly larger than FrequencyReadout (280/220 ratio) */
+  flex: 1.4 1 0; /* Increased from 1.27 to 1.4 (10% more width) */
   box-sizing: border-box;
   min-height: 0; /* Allow height to scale */
   height: auto; /* Allow height to scale */
@@ -37,7 +37,7 @@
 .analogSvg {
   position: relative; /* Changed from absolute to relative for better positioning */
   width: 120%;
-  height: 50px; /* Only show top half - reduced height */
+  height: 60px; /* Increased to show full top half including top edge */
   margin: 0 auto; /* Center horizontally */
   pointer-events: none; /* Allow clicks to pass through */
   z-index: 0;
@@ -66,20 +66,23 @@
 .buyButton {
   appearance: none;
   border: 0;
-  border-radius: 5.4px;
-  padding: 3.6px 19.2px; /* Doubled horizontal padding (9.6px * 2) */
+  border-radius: 8px; /* Increased from 5.4px */
+  padding: 6px 24px; /* Increased from 3.6px 19.2px */
   color: #111;
   background: var(--gold);
-  font-weight: 600;
+  font-weight: 700; /* Increased from 600 */
   cursor: pointer;
-  font-size: 7.2px; /* Reduced by 1/3 (10.8 * 2/3) */
+  font-size: 10px; /* Increased from 7.2px */
   margin-top: auto;
   margin-bottom: 0; /* Will be overridden in mobile */
   flex-shrink: 0;
   transition: all 0.2s ease;
-  min-height: 29px; /* Reduced by 1/3 (44 * 2/3) */
+  min-height: 38px; /* Increased from 29px */
   touch-action: manipulation; /* Optimize touch interactions */
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4); /* Added shadow for prominence */
+  text-transform: uppercase; /* Make text more pronounced */
+  letter-spacing: 1px; /* Add letter spacing */
 }
 
 .buyButton:hover:not(:disabled) {
@@ -112,10 +115,11 @@
     margin-top: 2.5px;
   }
   .buyButton {
-    padding: 1.5px 8px; /* Doubled horizontal padding (4px * 2) */
-    font-size: 3.5px; /* Slightly smaller */
-    min-height: 12px; /* Slightly smaller */
+    padding: 4px 16px; /* Increased from 1.5px 8px */
+    font-size: 7px; /* Increased from 3.5px */
+    min-height: 24px; /* Increased from 12px */
     margin-bottom: 1.2px; /* Slightly reduced */
+    border-radius: 6px; /* Increased */
   }
   .numbersSection {
     min-height: 12px; /* Slightly smaller */
@@ -141,10 +145,11 @@
     margin-top: 2px;
   }
   .buyButton {
-    padding: 1px 6px; /* Doubled horizontal padding (3px * 2) */
-    font-size: 2.6px; /* Slightly smaller */
-    min-height: 10px; /* Slightly smaller */
+    padding: 3px 12px; /* Increased from 1px 6px */
+    font-size: 6px; /* Increased from 2.6px */
+    min-height: 20px; /* Increased from 10px */
     margin-bottom: 1px; /* Slightly reduced */
+    border-radius: 5px; /* Increased */
   }
   .numbersSection {
     min-height: 10.8px; /* Scaled down by 0.6 (18 * 0.6) */

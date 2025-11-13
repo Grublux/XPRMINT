@@ -26,10 +26,10 @@ export default function CenterDial(){
     <div className={styles.container}>
       <div className={styles.dialSection}>
         {/* Half-moon scale with speedometer-style needle - top half only */}
-        <svg ref={svgRef} className={styles.analogSvg} viewBox="0 0 200 100" preserveAspectRatio="xMidYTop meet">
+        <svg ref={svgRef} className={styles.analogSvg} viewBox="0 -10 200 60" preserveAspectRatio="xMidYTop meet">
           <defs>
             <clipPath id="halfCircleClip">
-              <rect x="0" y="0" width="200" height="50" />
+              <rect x="0" y="-10" width="200" height="60" />
             </clipPath>
           </defs>
           <g clipPath="url(#halfCircleClip)">

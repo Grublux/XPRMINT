@@ -7,7 +7,7 @@
   height: auto; /* Let height be determined by content */
   justify-content: flex-end; /* Align buttons at bottom */
   width: 100%; /* Take full width to allow expansion */
-  flex: 1 1 0; /* Allow flexible sizing */
+  flex: 0.9 1 0; /* Reduced from 1.0 to give more space to meter area (10% reduction) */
   min-width: 0; /* Allow shrinking */
   margin-top: 0; /* Removed negative margin */
 }
