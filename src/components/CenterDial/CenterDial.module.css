@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   gap: 7.2px; /* Increased gap to use extra space */
-  padding: 35px 7.2px 7.2px 7.2px; /* Increased top padding to give more space above half-moon scale */
+  padding: 50px 7.2px 7.2px 7.2px; /* Increased top padding for more vertical space */
   margin-top: 0; /* Removed negative margin */
   background: transparent; /* Transparent since parent container has background */
   border: none; /* Remove border - parent container handles styling */
@@ -16,7 +16,7 @@
   box-sizing: border-box;
   min-height: 0; /* Allow height to scale */
   height: auto; /* Allow height to scale */
-  max-height: 215px; /* Increased by 15px to allow more spacing */
+  max-height: 230px; /* Increased to allow more vertical space */
   overflow: visible; /* Allow scale to be visible within padding */
 }
 
@@ -35,12 +35,10 @@
 }
 
 .analogSvg {
-  position: absolute;
-  top: -10px; /* Position slightly above to show full arc */
+  position: relative; /* Changed from absolute to relative for better positioning */
   width: 120%;
-  height: 60px; /* Increased to show full scale */
-  left: 50%;
-  transform: translateX(-50%);
+  height: 80px; /* Increased height for better visibility */
+  margin: 0 auto; /* Center horizontally */
   pointer-events: none; /* Allow clicks to pass through */
   z-index: 0;
   overflow: visible; /* Ensure nothing is clipped */
@@ -56,74 +54,7 @@
   z-index: 3;
 }
 
-.dial {
-  position: relative;
-  width: 61.2px; /* Reduced by 15% from 72px (72 * 0.85) */
-  height: 61.2px;
-  margin-bottom: 0; /* Remove any default margin */
-  flex-shrink: 0;
-  z-index: 1; /* Above the SVG scale */
-}
-
-.dialFace {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #2a2a3e, #1a1a2e);
-  border: 3px solid #0f3460;
-  box-shadow: 
-    inset 0 2px 8px rgba(0, 0, 0, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.dialFace::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  height: 90%;
-  border-radius: 50%;
-  border: 1px solid rgba(74, 158, 255, 0.2);
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg 45deg,
-    rgba(74, 158, 255, 0.1) 45deg 135deg,
-    transparent 135deg 225deg,
-    rgba(255, 107, 107, 0.1) 225deg 315deg,
-    transparent 315deg 360deg
-  );
-}
-
-.dialCenter {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 10.8px;
-  height: 10.8px;
-  border-radius: 50%;
-  background: #4a9eff;
-  box-shadow: 0 0 7.2px rgba(74, 158, 255, 0.6);
-  z-index: 2;
-}
-
-.dialNeedle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -100%) rotate(0deg);
-  width: 2.7px;
-  height: 50px; /* Extended to reach the scale */
-  background: linear-gradient(to bottom, #00ff88, #4a9eff);
-  box-shadow: 0 0 5.4px rgba(0, 255, 136, 0.8);
-  transform-origin: bottom center;
-  z-index: 2; /* Above dial face, below label */
-  border-radius: 2px;
-  transition: transform 0.3s ease;
-}
+/* Dial removed - using SVG speedometer needle instead */
 
 .numbersSection {
   width: 100%;
@@ -172,21 +103,13 @@
     gap: 3px; /* Further reduced gap */
     max-height: 129.5px; /* Keep same height */
   }
-  .dial {
-    width: 30px; /* Further scaled down to fit narrower width */
-    height: 30px;
-    margin-top: 2.5px; /* Slightly reduced */
-  }
   .analogSvg {
-    height: 30px; /* Match dial size */
-    top: -3px; /* Adjusted */
+    height: 50px; /* Scaled down for mobile */
+    width: 110%;
   }
   .analogLabel {
-    font-size: 3.2px; /* Slightly smaller */
-    margin-top: 1.2px; /* Slightly reduced */
-  }
-  .dialNeedle {
-    height: 25px; /* Slightly smaller */
+    font-size: 6.3px; /* Scaled down (9 * 0.7) */
+    margin-top: 2.5px;
   }
   .buyButton {
     padding: 1.5px 8px; /* Doubled horizontal padding (4px * 2) */
@@ -209,21 +132,13 @@
     gap: 2px; /* Further reduced gap */
     max-height: 99px; /* Keep same height */
   }
-  .dial {
-    width: 22px; /* Further scaled down to fit narrower width */
-    height: 22px;
-    margin-top: 1.5px; /* Slightly reduced */
-  }
   .analogSvg {
-    height: 22px; /* Match dial size */
-    top: -1.5px; /* Adjusted */
+    height: 40px; /* Scaled down for smaller mobile */
+    width: 110%;
   }
   .analogLabel {
-    font-size: 2.4px; /* Slightly smaller */
-    margin-top: 0.8px; /* Slightly reduced */
-  }
-  .dialNeedle {
-    height: 18px; /* Slightly smaller */
+    font-size: 5.4px; /* Scaled down (9 * 0.6) */
+    margin-top: 2px;
   }
   .buyButton {
     padding: 1px 6px; /* Doubled horizontal padding (3px * 2) */

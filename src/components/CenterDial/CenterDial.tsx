@@ -25,7 +25,7 @@ export default function CenterDial(){
   return (
     <div className={styles.container}>
       <div className={styles.dialSection}>
-        {/* Half-moon scale positioned above the dial */}
+        {/* Half-moon scale with speedometer-style needle */}
         <svg ref={svgRef} className={styles.analogSvg} viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet">
           {/* Half-moon arc - positioned to align with needle rotation (-90 to +90 degrees) */}
           {/* Arc spans from -90 to +90 degrees relative to center (left to right) */}
@@ -60,18 +60,28 @@ export default function CenterDial(){
               />
             );
           })}
+          {/* Speedometer needle - rotates from center bottom of arc */}
+          {hasSelection && (
+            <g transform={`translate(100, 50) rotate(${rotation})`}>
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="-75"
+                stroke="#4a9eff"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              {/* Small circle at pivot point */}
+              <circle
+                cx="0"
+                cy="0"
+                r="3"
+                fill="#4a9eff"
+              />
+            </g>
+          )}
         </svg>
-        <div className={styles.dial}>
-          <div className={styles.dialFace}>
-            <div className={styles.dialCenter}></div>
-            {hasSelection && (
-              <div 
-                className={styles.dialNeedle}
-                style={{ transform: `translate(-50%, -100%) rotate(${rotation}deg)` }}
-              ></div>
-            )}
-          </div>
-        </div>
         {hasSelection && (
           <div className={styles.analogLabel}>{selectedNumber} Hz</div>
         )}
