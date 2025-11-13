@@ -315,6 +315,7 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
+    background-size: 106.8% 100%; /* Width: 20% wider, Height: 100% - match desktop */
   }
   .canvas {
     height: 100%;
@@ -385,6 +386,7 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
+    background-size: 106.8% 100%; /* Width: 20% wider, Height: 100% - match desktop */
   }
   .canvas {
     touch-action: none; /* Prevent default touch behaviors */
