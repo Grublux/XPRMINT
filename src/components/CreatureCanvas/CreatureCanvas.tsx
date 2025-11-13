@@ -421,8 +421,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           ) : null}
         </div>
         <div className={styles.headerCenter}>
-          <div className={styles.targetLabel}>Target Frequency</div>
-          <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
         </div>
         <div className={styles.headerRight}>
           {isAbove ? (
@@ -434,6 +432,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         </div>
       </div>
       <div className={styles.panel}>
+        <div className={styles.targetFloating}>
+          <div className={styles.targetLabel}>Target Frequency</div>
+          <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
+        </div>
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />
       </div>
     </div>
