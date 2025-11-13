@@ -178,7 +178,7 @@
 .resonanceDisplay {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: inherit; /* Inherit from parent (flex-start for left, flex-end for right) */
   justify-content: center;
   width: 100%;
   flex: 1;
@@ -190,7 +190,7 @@
 .currentLabel {
   font-size: 9.9px;
   color: var(--muted);
-  text-align: center;
+  text-align: inherit; /* Inherit from parent alignment */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -199,15 +199,17 @@
 .resonanceValue {
   font-size: 18px;
   font-weight: 700;
-  text-align: center;
+  text-align: inherit; /* Inherit from parent alignment */
 }
 
 .headerLeft .resonanceValue {
   color: #4a9eff; /* Blue when below target */
+  text-align: left;
 }
 
 .headerRight .resonanceValue {
   color: #ff6b6b; /* Red when above target */
+  text-align: right;
 }
 .sizeControl{
   display: flex;
