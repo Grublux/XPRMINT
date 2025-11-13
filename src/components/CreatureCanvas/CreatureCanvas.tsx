@@ -115,7 +115,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       if (isMobile) {
         verticalPercent = 0.55; // Higher position on mobile
       } else if (isWide) {
-        verticalPercent = 0.58; // Shift up on wider viewports
+        verticalPercent = 0.50; // Shift up more on wider viewports (reduced from 0.58)
       } else {
         verticalPercent = 0.65; // Default for medium viewports
       }
