@@ -1,10 +1,49 @@
 .shell{ min-height:100dvh; display:flex; flex-direction:column; }
 .header{
   position:sticky; top:0; z-index:10;
-  display:flex; align-items:center; justify-content:center;
   padding:8px 16px; background:#151823; box-shadow:var(--shadow);
   height: 60px;
   min-height: 60px;
+}
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+}
+.titleText {
+  font-size: 21.6px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin: 0;
+  text-align: left;
+}
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.walletButton {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.15));
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+.walletButton:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 200, 100, 0.25));
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  transform: translateY(-1px);
 }
 .title{ 
   font-weight:800; 
@@ -13,4 +52,26 @@
   text-align: center;
 }
 .main{ flex:1; max-width:1200px; margin:24px auto; padding:0 16px; width:100%; box-sizing: border-box; }
+
+@media (max-width: 768px) {
+  .titleText {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+  }
+  .walletButton {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .titleText {
+    font-size: 16px;
+    letter-spacing: 1.2px;
+  }
+  .walletButton {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+}
 

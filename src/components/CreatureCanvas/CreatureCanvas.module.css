@@ -19,6 +19,158 @@
   position: relative;
   width: 100%;
 }
+.goobBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Changed from space-between to align with infoBar */
+  flex-direction: row;
+  gap: 9px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 9px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.goobSelector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 0;
+  flex: 0 0 25%; /* Match pH readout width (25%) */
+}
+
+.goobSelectorLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.goobSelect {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.goobSelect:hover {
+  opacity: 0.8;
+}
+
+.goobSelect:focus {
+  outline: none;
+}
+
+.currentGoobSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
+  min-width: 0;
+  max-width: 50%; /* Allow expansion to 50% to match two readout sections */
+  overflow: hidden; /* Clip content that might expand */
+}
+
+.currentGoobLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.currentGoobValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+  font-weight: 700;
+}
+
+.vibesSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 0;
+  flex: 0 0 25%; /* Match Frequency readout width (25%) */
+}
+
+.vibesLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vibesValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+  font-weight: 700;
+}
+
+.myItemsSection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.myItemsButton {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.myItemsButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
 .infoBar {
   display: flex;
   align-items: center;
@@ -49,6 +201,38 @@
   overflow: hidden; /* Clip content that might expand */
 }
 
+.readoutSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 1 1 25%; /* 4 equally sized sections, 25% each */
+  min-width: 0;
+  max-width: 25%; /* Prevent expansion */
+  overflow: hidden; /* Clip content that might expand */
+}
+
+.readoutLabel {
+  font-size: 10.8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.readoutValue {
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+  font-weight: 700;
+}
+
 .potSection {
   display: flex;
   flex-direction: column;
@@ -56,10 +240,9 @@
   justify-content: center;
   gap: 3.6px;
   padding: 10.8px 9px;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
+  background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   flex: 0 0 30%; /* 30% width */
   min-width: 0;
   max-width: 30%; /* Prevent expansion */
@@ -361,7 +544,7 @@
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
-  height: 570px; /* Reduced from 605px for better desktop fit */
+  height: 655.5px; /* Increased by 15% from 570px (570 * 1.15 = 655.5) for desktop */
   width: 100%; /* Fill container completely to match dialRow */
   max-width: 100%; /* Don't exceed container */
   min-width: 100%; /* Force to match container width exactly */
@@ -370,12 +553,19 @@
   margin: 0; /* Remove auto margin to fill container */
   flex-shrink: 0; /* Prevent shrinking */
   flex-grow: 0; /* Prevent growing */
-  background-image: url('/jug2.png');
-  background-size: min(102%, 750px) 115%; /* Cap at 750px max width, height 115% (reduced by 5% from 120%) */
+  background-image: url('/jug_cartoon1.png');
+  background-size: min(120%, 800px) 120%; /* Increased width to 120% for largest viewports */
   background-position: center top; /* Keep top aligned, allow bottom and sides to overflow */
   background-repeat: no-repeat;
   overflow: hidden; /* Prevent content from causing layout shifts */
   box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Widest viewports - make jug even wider */
+@media (min-width: 1200px) {
+  .panel {
+    background-size: min(130%, 850px) 120%; /* 10% wider on widest viewports */
+  }
 }
 
 .frequencyTopLeft {
@@ -431,6 +621,16 @@
   transform-origin: bottom left; /* Scale from bottom left corner */
 }
 
+/* Larger viewports - make anodes 15% larger */
+@media (min-width: 900px) {
+  .cathodeBottom {
+    transform: scale(0.115); /* 15% larger: 0.1 * 1.15 = 0.115 */
+  }
+  .cathodeBottomRight {
+    transform: scale(0.115) translateX(-50%) scaleX(-1); /* 15% larger: 0.1 * 1.15 = 0.115 */
+  }
+}
+
 .cathodeBottomRight {
   position: absolute;
   bottom: 0;
@@ -444,6 +644,16 @@
   transform-origin: bottom center; /* Scale from bottom center */
 }
 
+.skyCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Behind everything but above panel background */
+  pointer-events: none;
+}
+
 .canvas{
   width:100%;
   height:100%;
@@ -454,12 +664,47 @@
   top: 0;
   left: 0;
   right: 0;
+  z-index: 2; /* Above sky canvas */
   bottom: 0;
-  z-index: 1;
   pointer-events: none; /* Prevent canvas from affecting layout */
   max-width: 100%; /* Prevent overflow */
   max-height: 100%; /* Prevent overflow */
   box-sizing: border-box;
+}
+
+.creatureGif {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100; /* Above canvas, below glass overlay */
+  pointer-events: none;
+  image-rendering: auto;
+  opacity: 0.92; /* Slightly reduced opacity to feel "behind glass" */
+  visibility: visible;
+  /* Remove mix-blend-mode to make it fully visible */
+  background: transparent;
+  object-fit: fill !important; /* Force image to fill exact dimensions, matching WebP size */
+  object-position: center; /* Center the image */
+  filter: blur(0.3px); /* Subtle blur to simulate glass refraction */
+  /* Dimensions are set inline in the animation loop to ensure exact matching */
+}
+
+.glassOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 101; /* Above creature, below cathodes */
+  pointer-events: none;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+  box-shadow: 
+    inset 0 0 20px rgba(200, 220, 255, 0.05),
+    inset 0 0 40px rgba(150, 180, 220, 0.03);
+  border-radius: var(--radius);
+  mix-blend-mode: overlay;
 }
 
 /* Mobile responsive - scale down but maintain structure */
@@ -473,10 +718,60 @@
     min-width: 0; /* Prevent expansion */
     flex-shrink: 0; /* Prevent shrinking */
   }
+  .goobBar {
+    gap: 4.5px; /* Scaled down gap */
+    margin-bottom: 4.5px;
+    flex-wrap: nowrap;
+  }
+  .goobSelector {
+    padding: 7.56px 6.3px; /* Scaled down to match vibesSection */
+    gap: 2.52px; /* Scaled down (3.6 * 0.7) */
+  }
+  .goobSelectorLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) */
+  }
+  .goobSelect {
+    padding: 0;
+    font-size: 12.6px; /* Scaled down (18 * 0.7) to match vibesValue */
+  }
+  .currentGoobSection {
+    padding: 7.56px 6.3px; /* Scaled down */
+    gap: 2.52px; /* Scaled down */
+    flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
+    max-width: 50%; /* Allow expansion to 50% to match two readout sections */
+  }
+  .currentGoobLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) */
+  }
+  .currentGoobValue {
+    font-size: 12.6px; /* Scaled down (18 * 0.7) */
+  }
   .infoBar {
     gap: 4.5px; /* Scaled down gap */
     margin-bottom: 3.6px; /* Scaled down margin */
     flex-wrap: nowrap; /* Prevent wrapping */
+  }
+  .readoutSection {
+    padding: 7.56px 6.3px; /* Scaled down padding to match targetSection */
+    flex: 1 1 25%; /* 4 equally sized sections, 25% each */
+    min-width: 0; /* Allow flex shrinking */
+    max-width: 25%; /* Prevent expansion */
+  }
+  .vibesSection {
+    padding: 7.56px 6.3px; /* Scaled down */
+    gap: 2.52px; /* Scaled down */
+  }
+  .vibesLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) */
+  }
+  .vibesValue {
+    font-size: 12.6px; /* Scaled down (18 * 0.7) */
+  }
+  .readoutLabel {
+    font-size: 7.56px; /* Scaled down (10.8 * 0.7) to match targetLabel */
+  }
+  .readoutValue {
+    font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
   }
   .potSection {
     padding: 7.56px 6.3px; /* Scaled down padding to match targetSection */
@@ -570,7 +865,7 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 106.8% 115%; /* Width: 20% wider, Height: 115% (reduced by 5% from 120%) */
+    background-size: 122.82% 115%; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */
@@ -616,10 +911,60 @@
     gap: 3.6px;
     margin: 0; /* No margin - fill parent */
   }
+  .goobBar {
+    gap: 3.6px; /* Scaled down gap */
+    margin-bottom: 3.6px;
+    flex-wrap: nowrap;
+  }
+  .goobSelector {
+    padding: 6.48px 5.4px; /* Scaled down to match vibesSection */
+    gap: 2.16px; /* Scaled down (3.6 * 0.6) */
+  }
+  .goobSelectorLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .goobSelect {
+    padding: 0;
+    font-size: 10.8px; /* Scaled down (18 * 0.6) to match vibesValue */
+  }
+  .currentGoobSection {
+    padding: 6.48px 5.4px; /* Scaled down */
+    gap: 2.16px; /* Scaled down */
+    flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
+    max-width: 50%; /* Allow expansion to 50% to match two readout sections */
+  }
+  .currentGoobLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .currentGoobValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) */
+  }
   .infoBar {
     gap: 3.6px; /* Scaled down gap */
     margin-bottom: 2.7px; /* Scaled down margin */
     flex-wrap: nowrap; /* Prevent wrapping */
+  }
+  .readoutSection {
+    padding: 6.48px 5.4px; /* Scaled down padding to match targetSection */
+    flex: 1 1 25%; /* 4 equally sized sections, 25% each */
+    min-width: 0; /* Allow flex shrinking */
+    max-width: 25%; /* Prevent expansion */
+  }
+  .vibesSection {
+    padding: 6.48px 5.4px; /* Scaled down */
+    gap: 2.16px; /* Scaled down */
+  }
+  .vibesLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
+  }
+  .vibesValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) */
+  }
+  .readoutLabel {
+    font-size: 6.48px; /* Scaled down (10.8 * 0.6) to match targetLabel */
+  }
+  .readoutValue {
+    font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
   }
   .potSection {
     padding: 6.48px 5.4px; /* Scaled down padding to match targetSection */
@@ -713,7 +1058,7 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 106.8% 115%; /* Width: 20% wider, Height: 115% (reduced by 5% from 120%) */
+    background-size: 122.82% 115%; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */
