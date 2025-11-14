@@ -16,12 +16,14 @@ const CREATURE_IMAGES: Record<string, string> = {
   'Ruevee': '/creature_transparent.png',
   'Rose': '/rose_trans.png',
   'Slime': '/Slime_fixed.webp',
+  'Bob': '/creature_transparent.png',
 };
 
 const CREATURE_SHOCKED_IMAGES: Record<string, string> = {
   'Ruevee': '/creature_shocked_transparent.png',
   'Rose': '/rose_trans.png', // Use same image for shocked (or add shocked version later)
   'Slime': '/slime1_shockeda.png',
+  'Bob': '/creature_shocked_transparent.png',
 };
 
 type CreatureCanvasProps = {
@@ -29,7 +31,7 @@ type CreatureCanvasProps = {
 };
 
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
-  const { resonanceHz, targetHz, pot, lastMoveAt, status, recentMoves } = useGame();
+  const { resonanceHz, targetHz, recentMoves } = useGame();
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   // Timer logic commented out - timer feature removed
@@ -53,6 +55,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   
   // Calculate player's rank (using same logic as MovesTicker)
   // Use a seeded random generator based on targetHz to keep mock players stable
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const playerRank = useMemo(() => {
     // Seed-based random function for consistent mock players per target
     const seededRandom = (seed: number) => {
@@ -81,6 +84,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   }, [resonanceHz, targetHz]);
   
   // Format player distance from target
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const playerDistanceFormatted = (() => {
     const diff = resonanceHz - targetHz;
     return diff >= 0 ? `+${Math.round(diff)} Hz` : `${Math.round(diff)} Hz`;
@@ -138,6 +142,15 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     img.src = creatureImg;
     img.onload = () => {
       creatureImageRef.current = img;
+      console.log(`Creature image loaded: ${creature}`, img.width, img.height, creatureImg);
+      if (creature === 'Bob') {
+        console.log('BOB IMAGE LOADED:', {
+          width: img.width,
+          height: img.height,
+          complete: img.complete,
+          src: img.src
+        });
+      }
       // Log dimensions for debugging scale calculation
       if (rueveeRef.current && creature === 'Slime') {
         const rueveeMax = Math.max(rueveeRef.current.width, rueveeRef.current.height);
@@ -148,6 +161,9 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         console.log(`Slime needs additional scale: ${1 / baseRatio} to match Ruevee's starting size`);
         console.log(`Current creatureScaleMultiplier will be: ${baseRatio < 1 ? baseRatio * 0.5 : 0.3}`);
       }
+    };
+    img.onerror = (e) => {
+      console.error(`Failed to load creature image: ${creature}`, creatureImg, e);
     };
     
     const shockedImage = new Image();
@@ -217,6 +233,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     let frame = 0;
     
     function animateMoonlight() {
+      if (!skyCanvas || !ctx) return;
       const w = skyCanvas.width = skyCanvas.clientWidth * devicePixelRatio;
       const h = skyCanvas.height = skyCanvas.clientHeight * devicePixelRatio;
       ctx.clearRect(0, 0, w, h);
@@ -530,7 +547,61 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Always use normal image dimensions for scaling calculations to ensure consistency
       const normalCreatureImg = creatureImageRef.current;
       
-      if (creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && rueveeRef.current) {
+      // Draw PNG creatures (Ruevee, Rose, Bob) directly to canvas
+      // This must come AFTER orb is drawn so creature appears on top
+      if (!isAnimated && creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && creatureBaseSize > 0) {
+        // Debug logging
+        if ((creature === 'Bob' || creature === 'Ruevee' || creature === 'Rose') && t % 120 === 0) {
+          console.log(`${creature} drawing:`, {
+            isAnimated,
+            hasImg: !!creatureImg,
+            imgComplete: creatureImg.complete,
+            hasNormal: !!normalCreatureImg,
+            normalComplete: normalCreatureImg.complete,
+            baseSize: creatureBaseSize
+          });
+        }
+        // Calculate size based on frequency closeness
+        const creaturePulseAmplitude = 0.05;
+        const creaturePulseSpeed = 0.008;
+        const creaturePulse = 1 + creaturePulseAmplitude * Math.sin(t * creaturePulseSpeed);
+        const imageSize = creatureBaseSize * creaturePulse;
+        
+        // Use Ruevee as reference if available, otherwise use current creature
+        let sizeRatio = 1.0;
+        if (rueveeRef.current) {
+          const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
+          const creatureMaxSize = Math.max(normalCreatureImg.width, normalCreatureImg.height);
+          sizeRatio = rueveeMaxSize / creatureMaxSize;
+        }
+        
+        const normalizedImageSize = imageSize * sizeRatio;
+        
+        // Position
+        const bounceAmplitude = maxOrbRadius * 0.15;
+        const bounceSpeed = 0.005;
+        const bounceOffset = bounceAmplitude * Math.sin(t * bounceSpeed);
+        const verticalOffset = -maxOrbRadius * 0.1;
+        const imageX = shockCx - normalizedImageSize / 2;
+        const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset;
+        
+        // Draw creature on top of orb
+        const savedComposite = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.92;
+        ctx.filter = 'blur(0.3px)';
+        ctx.drawImage(creatureImg, imageX, imageY, normalizedImageSize, normalizedImageSize);
+        // Draw again for brightness
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.8;
+        ctx.drawImage(creatureImg, imageX, imageY, normalizedImageSize, normalizedImageSize);
+        ctx.globalCompositeOperation = savedComposite;
+        ctx.globalAlpha = 1.0;
+        ctx.filter = 'none';
+      }
+      
+      // Store position for animated images (Slime) - only if not already drawn above
+      if (isAnimated && creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && rueveeRef.current) {
         // Creature size is based on frequency closeness (calculated above)
         // Add pulse animation to creature image (independent of orb pulse)
         const creaturePulseAmplitude = 0.05; // Reduced from 0.08 to 0.05 (5% pulse)
@@ -663,38 +734,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             };
           }
         }
-
-        // For animated images (GIF/WebP), use img element instead of canvas drawing (browser handles animation)
-        // For PNGs, draw to canvas
-        if (!isAnimated) {
-          // Make creature brighter - draw with lighter composite mode
-          const savedComposite = ctx.globalCompositeOperation;
-          ctx.globalCompositeOperation = 'lighten'; // Makes image brighter while preserving colors
-          ctx.globalAlpha = 0.92; // Slightly reduced opacity to feel "behind glass"
-          ctx.filter = 'blur(0.3px)'; // Subtle blur to simulate glass refraction
-          // Draw the creature image scaled to match Ruevee's size
-          ctx.drawImage(
-            creatureImg,
-            imageX,
-            imageY,
-            normalizedImageSize,
-            normalizedImageSize
-          );
-          // Draw again with normal mode for full visibility
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.globalAlpha = 0.8; // Additional pass for brightness
-          ctx.drawImage(
-            creatureImg,
-            imageX,
-            imageY,
-            normalizedImageSize,
-            normalizedImageSize
-          );
-          ctx.globalCompositeOperation = savedComposite;
-          ctx.globalAlpha = 1.0; // Reset to full opacity
-          ctx.filter = 'none'; // Reset filter
-        }
       } else {
+        // Debug: log why we're not drawing
+        if (creature === 'Ruevee' || creature === 'Rose') {
+          console.warn(`Not drawing ${creature}:`, {
+            creatureImg: creatureImg?.complete,
+            normalCreatureImg: normalCreatureImg?.complete,
+            creatureImgExists: !!creatureImg,
+            normalCreatureImgExists: !!normalCreatureImg
+          });
+        }
         // Clear position if not drawing
         creaturePositionRef.current = null;
         if (isAnimated && creatureImgElementRef.current) {

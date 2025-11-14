@@ -664,7 +664,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2; /* Above sky canvas */
+  z-index: 100; /* Above sky (1), below glass overlay (101) - creatures drawn on canvas will be visible through glass */
   bottom: 0;
   pointer-events: none; /* Prevent canvas from affecting layout */
   max-width: 100%; /* Prevent overflow */

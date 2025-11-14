@@ -65,6 +65,7 @@ export default function ExperimentPage(){
             <option value="Ruevee">Ruevee</option>
             <option value="Rose">Rose</option>
             <option value="Slime">Slime</option>
+            <option value="Bob">Bob</option>
           </select>
         </div>
       </div>
