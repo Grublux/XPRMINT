@@ -15,11 +15,13 @@ type Bubble = {
 const CREATURE_IMAGES: Record<string, string> = {
   'Ruevee': '/creature_transparent.png',
   'Rose': '/rose_trans.png',
+  'Slime': '/slime1.png',
 };
 
 const CREATURE_SHOCKED_IMAGES: Record<string, string> = {
   'Ruevee': '/creature_shocked_transparent.png',
   'Rose': '/rose_trans.png', // Use same image for shocked (or add shocked version later)
+  'Slime': '/slime1_shockeda.png',
 };
 
 type CreatureCanvasProps = {
@@ -125,6 +127,15 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     img.src = creatureImg;
     img.onload = () => {
       creatureImageRef.current = img;
+      // Log dimensions for debugging scale calculation
+      if (rueveeRef.current && creature === 'Slime') {
+        const rueveeMax = Math.max(rueveeRef.current.width, rueveeRef.current.height);
+        const slimeMax = Math.max(img.width, img.height);
+        const baseRatio = rueveeMax / slimeMax;
+        console.log(`Ruevee max dimension: ${rueveeMax}, Slime max dimension: ${slimeMax}`);
+        console.log(`Base normalization ratio: ${baseRatio}`);
+        console.log(`Slime needs additional scale: ${1 / baseRatio} to match Ruevee's starting size`);
+      }
     };
     
     const shockedImage = new Image();
@@ -418,7 +429,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         ? creatureShockedImageRef.current 
         : creatureImageRef.current;
       
-      if (creatureImg && creatureImg.complete && rueveeRef.current) {
+      // Always use normal image dimensions for scaling calculations to ensure consistency
+      const normalCreatureImg = creatureImageRef.current;
+      
+      if (creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && rueveeRef.current) {
         // Creature size is based on frequency closeness (calculated above)
         // Add pulse animation to creature image (independent of orb pulse)
         const creaturePulseAmplitude = 0.05; // Reduced from 0.08 to 0.05 (5% pulse)
@@ -428,13 +442,29 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         
         // Normalize all creatures to Ruevee's base size
         // Use Ruevee's dimensions as the reference for consistent sizing
+        // Use normal image dimensions for scaling calculation (not shocked image)
         const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
-        const creatureMaxSize = Math.max(creatureImg.width, creatureImg.height);
+        const creatureMaxSize = Math.max(normalCreatureImg.width, normalCreatureImg.height);
         
         // If creature is larger than Ruevee, scale it down; if smaller, scale it up
         // This ensures all creatures appear at the same base size as Ruevee
         const sizeRatio = rueveeMaxSize / creatureMaxSize;
-        const normalizedImageSize = imageSize * sizeRatio;
+        
+        // Creature-specific scale adjustments
+        // Calculate proper scale for Slime based on image dimensions
+        let creatureScaleMultiplier = 1.0;
+        if (creature === 'Slime' && rueveeRef.current) {
+          const rueveeMax = Math.max(rueveeRef.current.width, rueveeRef.current.height);
+          const slimeMax = Math.max(normalCreatureImg.width, normalCreatureImg.height);
+          // If Slime is larger than Ruevee, we need to scale it down more
+          // The base normalization already handles this, but Slime needs additional scaling
+          const baseRatio = rueveeMax / slimeMax;
+          // Additional scale factor - adjust this based on console output
+          // If baseRatio < 1, Slime is larger than Ruevee, so we need to scale down more
+          creatureScaleMultiplier = baseRatio < 1 ? baseRatio * 0.5 : 0.3; // Scale down significantly
+        }
+        
+        const normalizedImageSize = imageSize * sizeRatio * creatureScaleMultiplier;
         
         // Add vertical bounce animation
         const bounceAmplitude = maxOrbRadius * 0.15; // 15% of max orb radius
@@ -443,8 +473,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         
         // Center image on orb with bounce offset, moved up slightly
         const verticalOffset = -maxOrbRadius * 0.1; // Move up by 10% of max orb radius
+        // Slime needs to shift down slightly
+        const creatureVerticalAdjustment = creature === 'Slime' ? maxOrbRadius * 0.15 : 0; // Shift Slime down by 15% of max orb radius
         const imageX = shockCx - normalizedImageSize / 2;
-        const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset;
+        const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset + creatureVerticalAdjustment;
         
         // Make creature brighter - draw with lighter composite mode
         const savedComposite = ctx.globalCompositeOperation;

@@ -15,7 +15,7 @@ export default function ExperimentPage(){
   useRoundJudge();
   useKeyboardControls();
   const { resonanceHz, setResonance } = useGame();
-  const [selectedCreature, setSelectedCreature] = useState('Ruevee');
+  const [selectedCreature, setSelectedCreature] = useState('Slime');
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   
   // Orb size slider logic
@@ -86,6 +86,7 @@ export default function ExperimentPage(){
           >
             <option value="Ruevee">Ruevee</option>
             <option value="Rose">Rose</option>
+            <option value="Slime">Slime</option>
           </select>
         </div>
       </div>
