@@ -55,40 +55,40 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   
   // Calculate player's rank (using same logic as MovesTicker)
   // Use a seeded random generator based on targetHz to keep mock players stable
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const playerRank = useMemo(() => {
-    // Seed-based random function for consistent mock players per target
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed) * 10000;
-      return x - Math.floor(x);
-    };
-    
-    const seed = targetHz; // Use targetHz as seed so mock players are consistent per round
-    
-    // Generate 6 stable mock players based on targetHz seed
-    const randomPlayers: Array<{ distance: number }> = [];
-    for (let i = 0; i < 6; i++) {
-      const frequency = Math.floor(seededRandom(seed + i) * 10000);
-      const distance = Math.abs(frequency - targetHz);
-      randomPlayers.push({ distance });
-    }
-    
-    // Add player
-    const playerDistance = Math.abs(resonanceHz - targetHz);
-    const allPlayers = [...randomPlayers, { distance: playerDistance }];
-    
-    // Sort by distance (closest first) and find player's rank
-    const sorted = [...allPlayers].sort((a, b) => a.distance - b.distance);
-    const rank = sorted.findIndex(p => p.distance === playerDistance) + 1;
-    return rank;
-  }, [resonanceHz, targetHz]);
+  // Commented out - not currently used in UI
+  // const playerRank = useMemo(() => {
+  //   // Seed-based random function for consistent mock players per target
+  //   const seededRandom = (seed: number) => {
+  //     const x = Math.sin(seed) * 10000;
+  //     return x - Math.floor(x);
+  //   };
+  //   
+  //   const seed = targetHz; // Use targetHz as seed so mock players are consistent per round
+  //   
+  //   // Generate 6 stable mock players based on targetHz seed
+  //   const randomPlayers: Array<{ distance: number }> = [];
+  //   for (let i = 0; i < 6; i++) {
+  //     const frequency = Math.floor(seededRandom(seed + i) * 10000);
+  //     const distance = Math.abs(frequency - targetHz);
+  //     randomPlayers.push({ distance });
+  //   }
+  //   
+  //   // Add player
+  //   const playerDistance = Math.abs(resonanceHz - targetHz);
+  //   const allPlayers = [...randomPlayers, { distance: playerDistance }];
+  //   
+  //   // Sort by distance (closest first) and find player's rank
+  //   const sorted = [...allPlayers].sort((a, b) => a.distance - b.distance);
+  //   const rank = sorted.findIndex(p => p.distance === playerDistance) + 1;
+  //   return rank;
+  // }, [resonanceHz, targetHz]);
   
   // Format player distance from target
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const playerDistanceFormatted = (() => {
-    const diff = resonanceHz - targetHz;
-    return diff >= 0 ? `+${Math.round(diff)} Hz` : `${Math.round(diff)} Hz`;
-  })();
+  // Commented out - not currently used in UI
+  // const playerDistanceFormatted = (() => {
+  //   const diff = resonanceHz - targetHz;
+  //   return diff >= 0 ? `+${Math.round(diff)} Hz` : `${Math.round(diff)} Hz`;
+  // })();
   
   // Format closest hit distance - always show ± format
   const closestHitDistance = closestHit !== null ? Math.abs(closestHit - targetHz) : 0;
