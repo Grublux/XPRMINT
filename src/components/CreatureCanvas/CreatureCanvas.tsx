@@ -172,8 +172,8 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       creatureShockedImageRef.current = shockedImage;
     };
 
-    // For animated images (GIF/WebP), also set the img element src
-    // Force reload by adding timestamp to ensure animation works
+    // Set the img element src when creature changes - ONLY for animated images
+    // Force reload by adding timestamp to ensure image updates
     if (isAnimated && creatureImgElementRef.current) {
       const timestamp = new Date().getTime();
       creatureImgElementRef.current.src = `${creatureImg}?t=${timestamp}`;
@@ -547,61 +547,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Always use normal image dimensions for scaling calculations to ensure consistency
       const normalCreatureImg = creatureImageRef.current;
       
-      // Draw PNG creatures (Ruevee, Rose, Bob) directly to canvas
-      // This must come AFTER orb is drawn so creature appears on top
-      if (!isAnimated && creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && creatureBaseSize > 0) {
-        // Debug logging
-        if ((creature === 'Bob' || creature === 'Ruevee' || creature === 'Rose') && t % 120 === 0) {
-          console.log(`${creature} drawing:`, {
-            isAnimated,
-            hasImg: !!creatureImg,
-            imgComplete: creatureImg.complete,
-            hasNormal: !!normalCreatureImg,
-            normalComplete: normalCreatureImg.complete,
-            baseSize: creatureBaseSize
-          });
-        }
-        // Calculate size based on frequency closeness
-        const creaturePulseAmplitude = 0.05;
-        const creaturePulseSpeed = 0.008;
-        const creaturePulse = 1 + creaturePulseAmplitude * Math.sin(t * creaturePulseSpeed);
-        const imageSize = creatureBaseSize * creaturePulse;
-        
-        // Use Ruevee as reference if available, otherwise use current creature
-        let sizeRatio = 1.0;
-        if (rueveeRef.current) {
-          const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
-          const creatureMaxSize = Math.max(normalCreatureImg.width, normalCreatureImg.height);
-          sizeRatio = rueveeMaxSize / creatureMaxSize;
-        }
-        
-        const normalizedImageSize = imageSize * sizeRatio;
-        
-        // Position
-        const bounceAmplitude = maxOrbRadius * 0.15;
-        const bounceSpeed = 0.005;
-        const bounceOffset = bounceAmplitude * Math.sin(t * bounceSpeed);
-        const verticalOffset = -maxOrbRadius * 0.1;
-        const imageX = shockCx - normalizedImageSize / 2;
-        const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset;
-        
-        // Draw creature on top of orb
-        const savedComposite = ctx.globalCompositeOperation;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 0.92;
-        ctx.filter = 'blur(0.3px)';
-        ctx.drawImage(creatureImg, imageX, imageY, normalizedImageSize, normalizedImageSize);
-        // Draw again for brightness
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 0.8;
-        ctx.drawImage(creatureImg, imageX, imageY, normalizedImageSize, normalizedImageSize);
-        ctx.globalCompositeOperation = savedComposite;
-        ctx.globalAlpha = 1.0;
-        ctx.filter = 'none';
-      }
-      
-      // Store position for animated images (Slime) - only if not already drawn above
-      if (isAnimated && creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && rueveeRef.current) {
+      if (creatureImg && creatureImg.complete && normalCreatureImg && normalCreatureImg.complete && creatureBaseSize > 0) {
         // Creature size is based on frequency closeness (calculated above)
         // Add pulse animation to creature image (independent of orb pulse)
         const creaturePulseAmplitude = 0.05; // Reduced from 0.08 to 0.05 (5% pulse)
@@ -612,24 +558,17 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         // Normalize all creatures to Ruevee's base size
         // Use Ruevee's dimensions as the reference for consistent sizing
         // Use normal image dimensions for scaling calculation (not shocked image)
-        const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
-        const creatureMaxSize = Math.max(normalCreatureImg.width, normalCreatureImg.height);
-        
-        // If creature is larger than Ruevee, scale it down; if smaller, scale it up
-        // This ensures all creatures appear at the same base size as Ruevee
-        const sizeRatio = rueveeMaxSize / creatureMaxSize;
-        
-        // Creature-specific scale adjustments
-        // All creatures should match Ruevee's base size - no additional scaling needed
-        // The sizeRatio already normalizes all creatures to Ruevee's dimensions
-        // On mobile, Slime needs to be scaled down more, especially at largest magnification
-        let creatureScaleMultiplier = 1.0;
-        if (creature === 'Slime' && clientW < 768) {
-          // Scale down Slime on mobile viewports - reduced further for largest magnification
-          creatureScaleMultiplier = 0.75; // 25% smaller on mobile (reduced from 0.85)
+        let sizeRatio = 1.0;
+        if (rueveeRef.current) {
+          const rueveeMaxSize = Math.max(rueveeRef.current.width, rueveeRef.current.height);
+          const creatureMaxSize = Math.max(normalCreatureImg.width, normalCreatureImg.height);
+          sizeRatio = rueveeMaxSize / creatureMaxSize;
+        } else {
+          // If Ruevee not loaded yet, use current creature's natural size
+          sizeRatio = 1.0;
         }
         
-        const normalizedImageSize = imageSize * sizeRatio * creatureScaleMultiplier;
+        const normalizedImageSize = imageSize * sizeRatio;
         
         // Add vertical bounce animation
         const bounceAmplitude = maxOrbRadius * 0.15; // 15% of max orb radius
@@ -641,112 +580,141 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         const imageX = shockCx - normalizedImageSize / 2;
         const imageY = shockCy - normalizedImageSize / 2 + bounceOffset + verticalOffset;
         
-        // Store position for animated img element
-        creaturePositionRef.current = {
-          x: imageX,
-          y: imageY,
-          size: normalizedImageSize
-        };
+        // For PNGs (Ruevee, Rose, Bob), draw directly to canvas
+        if (!isAnimated) {
+          // Make creature brighter - draw with lighter composite mode
+          const savedComposite = ctx.globalCompositeOperation;
+          ctx.globalCompositeOperation = 'lighten'; // Makes image brighter while preserving colors
+          ctx.globalAlpha = 0.92; // Slightly reduced opacity to feel "behind glass"
+          ctx.filter = 'blur(0.3px)'; // Subtle blur to simulate glass refraction
+          
+          // Draw the creature image scaled to match Ruevee's size
+          ctx.drawImage(
+            creatureImg,
+            imageX,
+            imageY,
+            normalizedImageSize,
+            normalizedImageSize
+          );
+          // Draw again with normal mode for full visibility
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 0.8; // Additional pass for brightness
+          ctx.drawImage(
+            creatureImg,
+            imageX,
+            imageY,
+            normalizedImageSize,
+            normalizedImageSize
+          );
+          
+          ctx.globalCompositeOperation = savedComposite;
+          ctx.globalAlpha = 1.0; // Reset to full opacity
+          ctx.filter = 'none'; // Reset filter
+        } else {
+          // For WebP (Slime), store position for img element
+          creaturePositionRef.current = {
+            x: imageX,
+            y: imageY,
+            size: normalizedImageSize
+          };
 
-        // Update animated img element position directly in animation loop
-        if (isAnimated && creatureImgElementRef.current) {
-          const scaleX = w / clientW;
-          const scaleY = h / clientH;
-          const left = imageX / scaleX;
-          let top = imageY / scaleY;
-          const width = normalizedImageSize / scaleX;
-          const height = normalizedImageSize / scaleY;
-          
-          // Apply Slime-specific vertical adjustment for wide viewports directly to the img element
-          const isWideViewport = clientW > 900;
-          const isWidestViewport = clientW > 1200;
-          if (creature === 'Slime') {
-            if (isWidestViewport) {
-              top += (clientH * 0.25); // Move down 25% of viewport height on widest viewports (increased by 10% from 0.15)
-            } else if (isWideViewport) {
-              top += (clientH * 0.2); // Move down 20% of viewport height on wide viewports (increased by 10% from 0.1)
-            } else {
-              top += (clientH * 0.05); // Move down 5% on normal viewports
-            }
-          }
-          
-          // Always set the exact same dimensions for both WebP and shocked PNG
-          creatureImgElementRef.current.style.left = `${left}px`;
-          creatureImgElementRef.current.style.top = `${top}px`;
-          creatureImgElementRef.current.style.width = `${width}px`;
-          creatureImgElementRef.current.style.height = `${height}px`;
-          creatureImgElementRef.current.style.display = 'block';
-          creatureImgElementRef.current.style.visibility = 'visible';
-          // Force exact dimensions - override any natural image sizing
-          creatureImgElementRef.current.style.maxWidth = `${width}px`;
-          creatureImgElementRef.current.style.maxHeight = `${height}px`;
-          creatureImgElementRef.current.style.minWidth = `${width}px`;
-          creatureImgElementRef.current.style.minHeight = `${height}px`;
-          
-          // Switch to shocked image when shocked
-          // Important: Use the same size calculation for both normal and shocked images
-          // to ensure consistent sizing
-          const isShocked = currentShockIntensity > 0;
-          const shockedImg = CREATURE_SHOCKED_IMAGES[creature] || CREATURE_SHOCKED_IMAGES['Ruevee'];
-          const normalImg = CREATURE_IMAGES[creature] || CREATURE_IMAGES['Ruevee'];
-          const targetSrc = isShocked ? shockedImg : normalImg;
-          
-          // Force exact dimensions every frame - critical for matching sizes
-          // Use setProperty with 'important' flag to override any CSS
-          creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
-          creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
-          creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
-          creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
-          creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
-          creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
-          creatureImgElementRef.current.style.objectFit = 'fill';
-          creatureImgElementRef.current.style.objectPosition = 'center';
-          // Remove any natural width/height attributes that might override
-          creatureImgElementRef.current.removeAttribute('width');
-          creatureImgElementRef.current.removeAttribute('height');
-          
-          // Only update src if it's different to avoid unnecessary reloads
-          const currentSrc = creatureImgElementRef.current.src;
-          if (!currentSrc.includes(targetSrc)) {
-            creatureImgElementRef.current.src = targetSrc;
+          // Update img element position directly in animation loop - ONLY for animated images
+          if (creatureImgElementRef.current) {
+            const scaleX = w / clientW;
+            const scaleY = h / clientH;
+            const left = imageX / scaleX;
+            let top = imageY / scaleY;
+            const width = normalizedImageSize / scaleX;
+            const height = normalizedImageSize / scaleY;
             
-            // Force dimensions again after image loads
-            const applyDimensions = () => {
-              if (creatureImgElementRef.current) {
-                creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
-                creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
-                creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
-                creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
-                creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
-                creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
-                creatureImgElementRef.current.style.objectFit = 'fill';
-                creatureImgElementRef.current.style.objectPosition = 'center';
-                creatureImgElementRef.current.removeAttribute('width');
-                creatureImgElementRef.current.removeAttribute('height');
+            // Apply Slime-specific vertical adjustment for wide viewports directly to the img element
+            const isWideViewport = clientW > 900;
+            const isWidestViewport = clientW > 1200;
+            if (creature === 'Slime') {
+              if (isWidestViewport) {
+                top += (clientH * 0.25); // Move down 25% of viewport height on widest viewports
+              } else if (isWideViewport) {
+                top += (clientH * 0.2); // Move down 20% of viewport height on wide viewports
+              } else {
+                top += (clientH * 0.05); // Move down 5% on normal viewports
               }
-            };
+            }
             
-            // Apply after load with multiple attempts to ensure it sticks
-            creatureImgElementRef.current.onload = () => {
-              applyDimensions();
-              setTimeout(applyDimensions, 10);
-              setTimeout(applyDimensions, 50);
-            };
+            // Always set the exact same dimensions for both WebP and shocked PNG
+            creatureImgElementRef.current.style.left = `${left}px`;
+            creatureImgElementRef.current.style.top = `${top}px`;
+            creatureImgElementRef.current.style.width = `${width}px`;
+            creatureImgElementRef.current.style.height = `${height}px`;
+            creatureImgElementRef.current.style.display = 'block';
+            creatureImgElementRef.current.style.visibility = 'visible';
+            // Force exact dimensions - override any natural image sizing
+            creatureImgElementRef.current.style.maxWidth = `${width}px`;
+            creatureImgElementRef.current.style.maxHeight = `${height}px`;
+            creatureImgElementRef.current.style.minWidth = `${width}px`;
+            creatureImgElementRef.current.style.minHeight = `${height}px`;
+            
+            // Switch to shocked image when shocked
+            // Important: Use the same size calculation for both normal and shocked images
+            // to ensure consistent sizing
+            const isShocked = currentShockIntensity > 0;
+            const shockedImg = CREATURE_SHOCKED_IMAGES[creature] || CREATURE_SHOCKED_IMAGES['Ruevee'];
+            const normalImg = CREATURE_IMAGES[creature] || CREATURE_IMAGES['Ruevee'];
+            const targetSrc = isShocked ? shockedImg : normalImg;
+            
+            // Force exact dimensions every frame - critical for matching sizes
+            // Use setProperty with 'important' flag to override any CSS
+            creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
+            creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
+            creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
+            creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
+            creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
+            creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
+            creatureImgElementRef.current.style.objectFit = 'fill';
+            creatureImgElementRef.current.style.objectPosition = 'center';
+            // Remove any natural width/height attributes that might override
+            creatureImgElementRef.current.removeAttribute('width');
+            creatureImgElementRef.current.removeAttribute('height');
+            
+            // Always update src to ensure correct creature is displayed
+            // Check if we need to update (different image path or shock state changed)
+            const currentSrc = creatureImgElementRef.current.src;
+            // Extract just the filename from current src (handle full URLs)
+            const currentPath = currentSrc.split('/').pop()?.split('?')[0] || '';
+            const targetPath = targetSrc.split('/').pop() || '';
+            const needsUpdate = currentPath !== targetPath;
+            
+            if (needsUpdate) {
+              creatureImgElementRef.current.src = targetSrc;
+              
+              // Force dimensions again after image loads
+              const applyDimensions = () => {
+                if (creatureImgElementRef.current) {
+                  creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
+                  creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
+                  creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
+                  creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
+                  creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
+                  creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
+                  creatureImgElementRef.current.style.objectFit = 'fill';
+                  creatureImgElementRef.current.style.objectPosition = 'center';
+                  creatureImgElementRef.current.removeAttribute('width');
+                  creatureImgElementRef.current.removeAttribute('height');
+                }
+              };
+              
+              // Apply after load with multiple attempts to ensure it sticks
+              creatureImgElementRef.current.onload = () => {
+                applyDimensions();
+                setTimeout(applyDimensions, 10);
+                setTimeout(applyDimensions, 50);
+              };
+            }
           }
         }
       } else {
-        // Debug: log why we're not drawing
-        if (creature === 'Ruevee' || creature === 'Rose') {
-          console.warn(`Not drawing ${creature}:`, {
-            creatureImg: creatureImg?.complete,
-            normalCreatureImg: normalCreatureImg?.complete,
-            creatureImgExists: !!creatureImg,
-            normalCreatureImgExists: !!normalCreatureImg
-          });
-        }
         // Clear position if not drawing
         creaturePositionRef.current = null;
-        if (isAnimated && creatureImgElementRef.current) {
+        if (creatureImgElementRef.current) {
           creatureImgElementRef.current.style.display = 'none';
         }
       }
@@ -829,7 +797,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     }
     raf=requestAnimationFrame(loop);
     return ()=> cancelAnimationFrame(raf);
-  }, [resonanceHz, targetHz]);
+  }, [resonanceHz, targetHz, creature]);
 
   // Generate random ProtoGoob number (1-2700)
   const protoGoobNumber = useMemo(() => Math.floor(Math.random() * 2700) + 1, []);
@@ -900,15 +868,17 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
         <div className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}>
         <canvas ref={skyRef} className={styles.skyCanvas} />
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />
+        {/* Use img element ONLY for animated images (WebP/GIF like Slime) */}
+        {/* PNGs (Ruevee, Rose, Bob) are drawn directly to canvas above */}
         {isAnimated && (
           <img 
             ref={creatureImgElementRef}
             src={CREATURE_IMAGES[creature] || CREATURE_IMAGES['Ruevee']}
             alt={creature}
             className={styles.creatureGif}
-            key={`animated-${creature}`}
-            onLoad={() => console.log('Animated image loaded:', CREATURE_IMAGES[creature])}
-            onError={(e) => console.error('Animated image failed to load:', CREATURE_IMAGES[creature], e)}
+            key={`creature-${creature}`}
+            onLoad={() => console.log('Animated creature image loaded:', CREATURE_IMAGES[creature])}
+            onError={(e) => console.error('Animated creature image failed to load:', CREATURE_IMAGES[creature], e)}
           />
         )}
         <img 
