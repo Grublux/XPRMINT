@@ -33,6 +33,8 @@ type CreatureCanvasProps = {
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
   const { resonanceHz, targetHz, recentMoves } = useGame();
   const [selectedTrait, setSelectedTrait] = useState<string>('Frequency');
+  const [selectedGoob, setSelectedGoob] = useState<number>(Math.floor(Math.random() * 2700) + 1);
+  const [showGoobDropdown, setShowGoobDropdown] = useState<boolean>(false);
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   // Timer logic commented out - timer feature removed
@@ -228,54 +230,54 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     return () => window.removeEventListener('bolt-hit', handleBoltHit);
   }, []);
 
-  // Moonlight reflection animation
-  useEffect(() => {
-    const skyCanvas = skyRef.current;
-    if (!skyCanvas) return;
-    
-    const ctx = skyCanvas.getContext('2d');
-    if (!ctx) return;
-    
-    let raf = 0;
-    let frame = 0;
-    
-    function animateMoonlight() {
-      if (!skyCanvas || !ctx) return;
-      const w = skyCanvas.width = skyCanvas.clientWidth * devicePixelRatio;
-      const h = skyCanvas.height = skyCanvas.clientHeight * devicePixelRatio;
-      ctx.clearRect(0, 0, w, h);
-      
-      // Subtle moonlight gradient - soft blue-white light from top
-      const gradient = ctx.createLinearGradient(0, 0, 0, h);
-      gradient.addColorStop(0, 'rgba(200, 220, 255, 0.08)'); // Soft blue-white at top
-      gradient.addColorStop(0.3, 'rgba(180, 200, 240, 0.05)'); // Fading
-      gradient.addColorStop(0.6, 'rgba(150, 180, 220, 0.03)'); // More faded
-      gradient.addColorStop(1, 'rgba(100, 130, 180, 0.01)'); // Very subtle at bottom
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, w, h);
-      
-      // Subtle pulsing moonlight effect
-      frame++;
-      const pulse = Math.sin(frame * 0.01) * 0.02 + 0.98; // Very slow, subtle pulse
-      
-      // Moonlight beam effect - soft radial gradient from top center
-      const centerX = w * 0.5;
-      const centerY = h * 0.15;
-      const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, h * 0.8);
-      radialGradient.addColorStop(0, `rgba(220, 235, 255, ${0.06 * pulse})`);
-      radialGradient.addColorStop(0.4, `rgba(200, 220, 245, ${0.04 * pulse})`);
-      radialGradient.addColorStop(0.7, `rgba(180, 200, 230, ${0.02 * pulse})`);
-      radialGradient.addColorStop(1, 'rgba(150, 170, 200, 0)');
-      
-      ctx.fillStyle = radialGradient;
-      ctx.fillRect(0, 0, w, h);
-      
-      raf = requestAnimationFrame(animateMoonlight);
-    }
-    
-    animateMoonlight();
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  // Moonlight reflection animation - DISABLED to match backgrounds
+  // useEffect(() => {
+  //   const skyCanvas = skyRef.current;
+  //   if (!skyCanvas) return;
+  //   
+  //   const ctx = skyCanvas.getContext('2d');
+  //   if (!ctx) return;
+  //   
+  //   let raf = 0;
+  //   let frame = 0;
+  //   
+  //   function animateMoonlight() {
+  //     if (!skyCanvas || !ctx) return;
+  //     const w = skyCanvas.width = skyCanvas.clientWidth * devicePixelRatio;
+  //     const h = skyCanvas.height = skyCanvas.clientHeight * devicePixelRatio;
+  //     ctx.clearRect(0, 0, w, h);
+  //     
+  //     // Subtle moonlight gradient - soft blue-white light from top
+  //     const gradient = ctx.createLinearGradient(0, 0, 0, h);
+  //     gradient.addColorStop(0, 'rgba(200, 220, 255, 0.08)'); // Soft blue-white at top
+  //     gradient.addColorStop(0.3, 'rgba(180, 200, 240, 0.05)'); // Fading
+  //     gradient.addColorStop(0.6, 'rgba(150, 180, 220, 0.03)'); // More faded
+  //     gradient.addColorStop(1, 'rgba(100, 130, 180, 0.01)'); // Very subtle at bottom
+  //     ctx.fillStyle = gradient;
+  //     ctx.fillRect(0, 0, w, h);
+  //     
+  //     // Subtle pulsing moonlight effect
+  //     frame++;
+  //     const pulse = Math.sin(frame * 0.01) * 0.02 + 0.98; // Very slow, subtle pulse
+  //     
+  //     // Moonlight beam effect - soft radial gradient from top center
+  //     const centerX = w * 0.5;
+  //     const centerY = h * 0.15;
+  //     const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, h * 0.8);
+  //     radialGradient.addColorStop(0, `rgba(220, 235, 255, ${0.06 * pulse})`);
+  //     radialGradient.addColorStop(0.4, `rgba(200, 220, 245, ${0.04 * pulse})`);
+  //     radialGradient.addColorStop(0.7, `rgba(180, 200, 230, ${0.02 * pulse})`);
+  //     radialGradient.addColorStop(1, 'rgba(150, 170, 200, 0)');
+  //     
+  //     ctx.fillStyle = radialGradient;
+  //     ctx.fillRect(0, 0, w, h);
+  //     
+  //     raf = requestAnimationFrame(animateMoonlight);
+  //   }
+  //   
+  //   animateMoonlight();
+  //   return () => cancelAnimationFrame(raf);
+  // }, []);
 
   useEffect(()=>{
     const canvas = ref.current!;
@@ -864,26 +866,69 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   }, [resonanceHz, targetHz, creature]);
 
   // Generate random ProtoGoob number (1-2700)
-  const protoGoobNumber = useMemo(() => Math.floor(Math.random() * 2700) + 1, []);
+  // Generate 4 random Goob options (excluding the currently selected one)
+  const goobOptions = useMemo(() => {
+    const options: number[] = [];
+    while (options.length < 4) {
+      const randomGoob = Math.floor(Math.random() * 2700) + 1;
+      if (randomGoob !== selectedGoob && !options.includes(randomGoob)) {
+        options.push(randomGoob);
+      }
+    }
+    return options;
+  }, [selectedGoob]);
+
+  const handleGoobSelect = (goobNumber: number) => {
+    setSelectedGoob(goobNumber);
+    setShowGoobDropdown(false);
+  };
+
+  // Close dropdown when clicking outside
+  const goobSectionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (goobSectionRef.current && !goobSectionRef.current.contains(event.target as Node)) {
+        setShowGoobDropdown(false);
+      }
+    };
+
+    if (showGoobDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showGoobDropdown]);
 
   return (
     <div className={styles.container}>
       <div className={styles.goobBar}>
-        <div className={styles.goobSelector}>
-          <label htmlFor="goob-select" className={styles.goobSelectorLabel}>
-            Select Goob
-          </label>
-          <select
-            id="goob-select"
-            className={styles.goobSelect}
-            defaultValue=""
-          >
-            <option value="" disabled>Select Goob</option>
-          </select>
-        </div>
-        <div className={styles.currentGoobSection}>
+        <div 
+          ref={goobSectionRef}
+          className={`${styles.currentGoobSection} ${showGoobDropdown ? styles.goobDropdownOpen : ''}`}
+          onClick={() => setShowGoobDropdown(!showGoobDropdown)}
+        >
           <div className={styles.currentGoobLabel}>Current Goob</div>
-          <div className={styles.currentGoobValue}>ProtoGoob #{protoGoobNumber}</div>
+          <div className={styles.currentGoobValue}>
+            ProtoGoob #{selectedGoob}
+            <span className={styles.goobDropdownIndicator}>▼</span>
+          </div>
+          {showGoobDropdown && (
+            <div className={styles.goobDropdown}>
+              {goobOptions.map((goobNum) => (
+                <div
+                  key={goobNum}
+                  className={styles.goobOption}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGoobSelect(goobNum);
+                  }}
+                >
+                  ProtoGoob #{goobNum}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className={styles.infoBar}>
@@ -927,7 +972,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.vibesLabel}>Vibes</div>
           <div className={styles.vibesValue}>100%</div>
         </div>
-        <div className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}>
+        <div 
+          className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}
+          data-selected-trait={selectedTrait}
+        >
         <canvas ref={skyRef} className={styles.skyCanvas} />
         <canvas ref={ref} className={styles.canvas} data-specimen-canvas="true" />
         {/* Use img element ONLY for animated images (WebP/GIF like Slime) */}

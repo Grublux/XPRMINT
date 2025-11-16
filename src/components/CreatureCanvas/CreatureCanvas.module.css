@@ -24,7 +24,7 @@
 .goobBar {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Changed from space-between to align with infoBar */
+  justify-content: center; /* Center the Current Goob */
   flex-direction: row;
   gap: 9px;
   width: 100%;
@@ -94,9 +94,21 @@
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.05);
   flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
-  min-width: 0;
   max-width: 50%; /* Allow expansion to 50% to match two readout sections */
-  overflow: hidden; /* Clip content that might expand */
+  min-width: 0;
+  position: relative; /* For dropdown positioning */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.currentGoobSection:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.currentGoobSection.goobDropdownOpen {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .currentGoobLabel {
@@ -113,6 +125,63 @@
   color: var(--text);
   text-align: center;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.goobDropdownIndicator {
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.currentGoobSection:hover .goobDropdownIndicator {
+  opacity: 1;
+}
+
+.currentGoobSection.goobDropdownOpen .goobDropdownIndicator {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.goobDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  border-radius: var(--radius);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-top: -1px; /* Overlap with border */
+}
+
+.goobOption {
+  padding: 10.8px 9px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.goobOption:last-child {
+  border-bottom: none;
+}
+
+.goobOption:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .vibesSection {
@@ -210,6 +279,7 @@
   justify-content: center;
   gap: 3.6px;
   padding: 10.8px 9px;
+  padding-bottom: 0; /* Remove bottom padding to eliminate gap */
   margin: 0; /* Remove any margin */
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
@@ -235,9 +305,13 @@
 
 .readoutSection.selected {
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none; /* Keep bottom border removed when selected */
+  border-bottom: none; /* Remove bottom border to connect seamlessly with specimen area */
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* Keep top border */
+  border-left: 1px solid rgba(255, 255, 255, 0.3); /* Keep left border */
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Keep right border */
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.15), 0 0 4px rgba(255, 255, 255, 0.1);
-  background: #171922; /* Match specimen area background exactly - var(--panel) = #171922 */
+  background: var(--panel) !important; /* Match specimen area background */
+  margin-bottom: -1px; /* Pull down by 1px to overlap with panel border */
 }
 
 /* Frequency button already has bottom border removed above */
@@ -559,23 +633,26 @@
   border: none;
 }
 .panel{
-  background:var(--panel);
+  background-color: var(--panel) !important; /* Use background-color instead of background to preserve background-image */
+  background-image: url('/jug_cartoon1.png') !important; /* Ensure jug image is displayed */
+  background-size: min(120%, 800px) 120% !important; /* Increased width to 120% for largest viewports */
+  background-position: center 11px !important; /* Position 11px from top to create space above jug */
+  background-repeat: no-repeat !important;
   border-radius:var(--radius);
-  border-top-right-radius: 0; /* Remove top-right border radius to connect with Frequency button */
   border-bottom-left-radius: 0; /* Remove bottom border radius to connect seamlessly */
   border-bottom-right-radius: 0;
-  border-top: none; /* No top border */
+  border-top: none; /* No top border - will be drawn with pseudo-elements */
   border-bottom: none; /* No bottom border */
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button border opacity */
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button border opacity */
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Standard shadow */
   padding:10.8px;
-  padding-top: 0; /* Remove top padding to eliminate gap with trait buttons */
+  padding-top: 11px; /* Add top padding for jug image */
   padding-bottom: 20px; /* Add bottom padding to show more of the jug bottom */
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
-  height: 655.5px; /* Increased by 15% from 570px (570 * 1.15 = 655.5) for desktop */
+  height: 666.5px; /* Increased by 15% from 570px (570 * 1.15 = 655.5) + 11px for top padding */
   width: 100%; /* Fill container completely to match dialRow */
   max-width: 100%; /* Don't exceed container */
   min-width: 100%; /* Force to match container width exactly */
@@ -584,12 +661,154 @@
   margin: 0; /* Remove auto margin to fill container */
   flex-shrink: 0; /* Prevent shrinking */
   flex-grow: 0; /* Prevent growing */
-  background-image: url('/jug_cartoon1.png');
-  background-size: min(120%, 800px) 120%; /* Increased width to 120% for largest viewports */
-  background-position: center top; /* Keep top aligned, allow bottom and sides to overflow */
-  background-repeat: no-repeat;
   overflow: hidden; /* Prevent content from causing layout shifts */
   box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Top border segments - left side (from left edge to left edge of active button) */
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 1;
+}
+
+/* pH selected: no left border (0% to 0%) */
+.panel[data-selected-trait="pH"]::before {
+  width: 0;
+}
+
+/* Temperature selected: left border from 0% to 25% */
+.panel[data-selected-trait="Temperature"]::before {
+  width: calc(25% + 2px); /* Reduced overlap - left was too great */
+}
+
+/* Salinity selected: left border from 0% to 50% */
+.panel[data-selected-trait="Salinity"]::before {
+  width: calc(50% + 5px); /* Left is good */
+}
+
+/* Frequency selected: left border from 0% to 75% */
+.panel[data-selected-trait="Frequency"]::before {
+  width: calc(75% + 5px);
+}
+
+/* Top border segments - right side (from right edge of active button to right edge) */
+.panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 1;
+}
+
+/* pH selected: right border from 25% to 100% */
+.panel[data-selected-trait="pH"]::after {
+  width: calc(75% + 5px);
+  left: calc(25% - 5px);
+}
+
+/* Temperature selected: right border from 50% to 100% */
+.panel[data-selected-trait="Temperature"]::after {
+  width: calc(50% + 5px); /* Right is good */
+  left: calc(50% - 5px);
+}
+
+/* Salinity selected: right border from 75% to 100% */
+.panel[data-selected-trait="Salinity"]::after {
+  width: calc(25% + 2px); /* Reduced overlap - right was too great */
+  left: calc(75% - 2px); /* Reduced overlap - right was too great */
+}
+
+/* Responsive overlap scaling for smaller viewports */
+@media (max-width: 768px) {
+  /* Temperature selected: left border from 0% to 25% */
+  .panel[data-selected-trait="Temperature"]::before {
+    width: calc(25% + 1px); /* Smaller overlap on mobile */
+  }
+
+  /* Salinity selected: left border from 0% to 50% */
+  .panel[data-selected-trait="Salinity"]::before {
+    width: calc(50% + 2px); /* Smaller overlap on mobile */
+  }
+
+  /* Frequency selected: left border from 0% to 75% */
+  .panel[data-selected-trait="Frequency"]::before {
+    width: calc(75% + 2px); /* Smaller overlap on mobile */
+  }
+
+  /* pH selected: right border from 25% to 100% */
+  .panel[data-selected-trait="pH"]::after {
+    width: calc(75% + 2px); /* Smaller overlap on mobile */
+    left: calc(25% - 2px);
+  }
+
+  /* Temperature selected: right border from 50% to 100% */
+  .panel[data-selected-trait="Temperature"]::after {
+    width: calc(50% + 2px); /* Smaller overlap on mobile */
+    left: calc(50% - 2px);
+  }
+
+  /* Salinity selected: right border from 75% to 100% */
+  .panel[data-selected-trait="Salinity"]::after {
+    width: calc(25% + 1px); /* Smaller overlap on mobile */
+    left: calc(75% - 1px);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Temperature selected: left border from 0% to 25% */
+  .panel[data-selected-trait="Temperature"]::before {
+    width: calc(25% + 0.5px); /* Even smaller overlap on small mobile */
+  }
+
+  /* Salinity selected: left border from 0% to 50% */
+  .panel[data-selected-trait="Salinity"]::before {
+    width: calc(50% + 1px); /* Even smaller overlap on small mobile */
+  }
+
+  /* Frequency selected: left border from 0% to 75% */
+  .panel[data-selected-trait="Frequency"]::before {
+    width: calc(75% + 1px); /* Even smaller overlap on small mobile */
+  }
+
+  /* pH selected: right border from 25% to 100% */
+  .panel[data-selected-trait="pH"]::after {
+    width: calc(75% + 1px); /* Even smaller overlap on small mobile */
+    left: calc(25% - 1px);
+  }
+
+  /* Temperature selected: right border from 50% to 100% */
+  .panel[data-selected-trait="Temperature"]::after {
+    width: calc(50% + 1px); /* Even smaller overlap on small mobile */
+    left: calc(50% - 1px);
+  }
+
+  /* Salinity selected: right border from 75% to 100% */
+  .panel[data-selected-trait="Salinity"]::after {
+    width: calc(25% + 0.5px); /* Even smaller overlap on small mobile */
+    left: calc(75% - 0.5px);
+  }
+}
+
+/* Frequency selected: no right border (100% to 100%) */
+.panel[data-selected-trait="Frequency"]::after {
+  width: 0;
+}
+
+/* Remove top-left border radius only when pH (leftmost button) is active */
+.panel[data-selected-trait="pH"] {
+  border-top-left-radius: 0;
+}
+
+/* Remove top-right border radius only when Frequency (rightmost button) is active */
+.panel[data-selected-trait="Frequency"] {
+  border-top-right-radius: 0;
 }
 
 /* Widest viewports - make jug even wider */
@@ -816,6 +1035,7 @@
   }
   .readoutSection {
     padding: 7.56px 6.3px; /* Scaled down padding to match targetSection */
+    padding-bottom: 0; /* Remove bottom padding to eliminate gap */
     flex: 1 1 25%; /* 4 equally sized sections, 25% each */
     min-width: 0; /* Allow flex shrinking */
     max-width: 25%; /* Prevent expansion */
@@ -920,8 +1140,8 @@
     font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
   }
   .panel {
-    padding: 4.5px 4.5px 12px 4.5px; /* Add bottom padding to show more of jug stand */
-    height: 440px; /* Increased from 370px to reduce squished feeling */
+    padding: 11px 4.5px 12px 4.5px; /* Add 11px top padding for jug image, bottom padding to show more of jug stand */
+    height: 451px; /* Increased from 440px by 11px for top padding */
     width: 100%; /* Use 100% to match container width - prevent panning */
     max-width: 100%; /* Don't exceed container */
     min-width: 0; /* Prevent expansion */
@@ -929,6 +1149,7 @@
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
     background-size: 122.82% 115%; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
+    background-position: center 11px; /* Position 11px from top to create space above jug */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */
@@ -990,17 +1211,7 @@
     gap: 3.6px; /* Scaled down gap */
     margin-bottom: 3.6px;
     flex-wrap: nowrap;
-  }
-  .goobSelector {
-    padding: 6.48px 5.4px; /* Scaled down to match vibesSection */
-    gap: 2.16px; /* Scaled down (3.6 * 0.6) */
-  }
-  .goobSelectorLabel {
-    font-size: 6.48px; /* Scaled down (10.8 * 0.6) */
-  }
-  .goobSelect {
-    padding: 0;
-    font-size: 10.8px; /* Scaled down (18 * 0.6) to match vibesValue */
+    justify-content: center; /* Center the Current Goob */
   }
   .currentGoobSection {
     padding: 6.48px 5.4px; /* Scaled down */
@@ -1021,6 +1232,7 @@
   }
   .readoutSection {
     padding: 6.48px 5.4px; /* Scaled down padding to match targetSection */
+    padding-bottom: 0; /* Remove bottom padding to eliminate gap */
     flex: 1 1 25%; /* 4 equally sized sections, 25% each */
     min-width: 0; /* Allow flex shrinking */
     max-width: 25%; /* Prevent expansion */
@@ -1125,8 +1337,8 @@
     font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
   }
   .panel {
-    padding: 3.6px 3.6px 10px 3.6px; /* Add bottom padding to show more of jug stand */
-    height: 380px; /* Increased from 320px to reduce squished feeling */
+    padding: 11px 3.6px 10px 3.6px; /* Add 11px top padding for jug image, bottom padding to show more of jug stand */
+    height: 391px; /* Increased from 380px by 11px for top padding */
     width: 100%; /* Use 100% to match container width - prevent panning */
     max-width: 100%; /* Don't exceed container */
     min-width: 0; /* Prevent expansion */
@@ -1134,6 +1346,7 @@
     border-bottom-right-radius: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
     background-size: 122.82% 115%; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
+    background-position: center 11px; /* Position 11px from top to create space above jug */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */

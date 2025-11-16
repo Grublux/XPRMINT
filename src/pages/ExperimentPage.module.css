@@ -258,16 +258,16 @@
   box-sizing: border-box;
   overflow-x: hidden; /* Prevent horizontal scrolling */
   overflow-y: visible; /* Allow vertical expansion to show all content */
-  background: var(--panel); /* Shared background to match specimen area */
+  background: var(--panel) !important; /* Shared background to match specimen area */
   border-radius: 0; /* Remove all border radius to connect seamlessly */
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-bottom-left-radius: var(--radius); /* Match specimen top radius */
   border-bottom-right-radius: var(--radius);
   border-top: none; /* No top border - connects to specimen area */
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button and specimen area border opacity */
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button and specimen area border opacity */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button and specimen area border opacity */
   padding: 10.8px; /* Match specimen area padding */
   padding-top: 0; /* Remove top padding so anode/cathode are at very top */
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Match specimen area shadow exactly */
