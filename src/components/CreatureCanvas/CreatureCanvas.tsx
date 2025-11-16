@@ -31,7 +31,7 @@ type CreatureCanvasProps = {
 };
 
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
-  const { resonanceHz, targetHz, recentMoves } = useGame();
+  const { resonanceHz, targetHz } = useGame();
   const [selectedTrait, setSelectedTrait] = useState<string>('Frequency');
   const [selectedGoob, setSelectedGoob] = useState<number>(Math.floor(Math.random() * 2700) + 1);
   const [showGoobDropdown, setShowGoobDropdown] = useState<boolean>(false);
@@ -42,19 +42,19 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   // const danger = remaining <= 60_000 && status==='active';
   
   // Calculate closest hit from recent moves
-  const closestHit = useMemo(() => {
-    if (recentMoves.length === 0) return null;
-    let closestDistance = Infinity;
-    let closestFreq = null;
-    recentMoves.forEach(move => {
-      const distance = Math.abs(move.frequency - targetHz);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestFreq = move.frequency;
-      }
-    });
-    return closestFreq;
-  }, [recentMoves, targetHz]);
+  // const closestHit = useMemo(() => {
+  //   if (recentMoves.length === 0) return null;
+  //   let closestDistance = Infinity;
+  //   let closestFreq = null;
+  //   recentMoves.forEach(move => {
+  //     const distance = Math.abs(move.frequency - targetHz);
+  //     if (distance < closestDistance) {
+  //       closestDistance = distance;
+  //       closestFreq = move.frequency;
+  //     }
+  //   });
+  //   return closestFreq;
+  // }, [recentMoves, targetHz]);
   
   // Calculate player's rank (using same logic as MovesTicker)
   // Use a seeded random generator based on targetHz to keep mock players stable
@@ -94,16 +94,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   // })();
   
   // Format closest hit distance - always show ± format
-  const closestHitDistance = closestHit !== null ? Math.abs(closestHit - targetHz) : 0;
-  const closestHitFormatted = closestHit !== null
-    ? `±${Math.round(closestHitDistance)} Hz`
-    : '±-- Hz';
+  // const closestHitDistance = closestHit !== null ? Math.abs(closestHit - targetHz) : 0;
+  // const closestHitFormatted = closestHit !== null
+  //   ? `±${Math.round(closestHitDistance)} Hz`
+  //   : '±-- Hz';
   
   // Calculate current distance from target
-  const currentDistance = resonanceHz - targetHz;
-  const currentDistanceFormatted = currentDistance >= 0 
-    ? `+${Math.round(currentDistance)} Hz` 
-    : `${Math.round(currentDistance)} Hz`;
+  // const currentDistance = resonanceHz - targetHz;
+  // const currentDistanceFormatted = currentDistance >= 0 
+  //   ? `+${Math.round(currentDistance)} Hz` 
+  //   : `${Math.round(currentDistance)} Hz`;
   const ref = useRef<HTMLCanvasElement|null>(null);
   const skyRef = useRef<HTMLCanvasElement|null>(null);
   const bubblesRef = useRef<Bubble[]>([]);
@@ -762,15 +762,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
                 setTimeout(applyDimensions, 500);
                 
                 // Debug: Check actual rendered size
-                if (creature === 'Slime' && isShocked) {
-                  const rect = creatureImgElementRef.current.getBoundingClientRect();
+                if (creature === 'Slime' && isShocked && creatureImgElementRef.current) {
+                  const imgElement = creatureImgElementRef.current;
+                  const rect = imgElement.getBoundingClientRect();
                   console.log('Shocked Slime size check:', {
                     targetWidth: width,
                     targetHeight: height,
                     actualWidth: rect.width,
                     actualHeight: rect.height,
-                    styleWidth: creatureImgElementRef.current.style.width,
-                    styleHeight: creatureImgElementRef.current.style.height
+                    styleWidth: imgElement.style.width,
+                    styleHeight: imgElement.style.height
                   });
                 }
               };
