@@ -1,0 +1,81 @@
+Loaded holders from 8 CSV files.
+=== Simulation Results ===
+Days simulated: 60
+Total creatures: 2661
+Stabilized: 1982 (74.48%)
+Not stabilized: 679 (25.52%)
+Average days to stabilization (stabilized only): 20.06
+Average items used per stabilized creature: 17.44
+Average SP spent on locks per stabilized creature: 30.00
+
+Stabilization day distribution (day: count):
+  Day 0: 205
+  Day 1: 49
+  Day 2: 61
+  Day 3: 53
+  Day 4: 62
+  Day 5: 47
+  Day 6: 53
+  Day 7: 48
+  Day 8: 51
+  Day 9: 39
+  Day 10: 50
+  Day 11: 48
+  Day 12: 48
+  Day 13: 39
+  Day 14: 44
+  Day 15: 41
+  Day 16: 46
+  Day 17: 39
+  Day 18: 41
+  Day 19: 37
+  Day 20: 37
+  Day 21: 46
+  Day 22: 28
+  Day 23: 29
+  Day 24: 34
+  Day 25: 31
+  Day 26: 34
+  Day 27: 27
+  Day 28: 29
+  Day 29: 23
+  Day 30: 33
+  Day 31: 28
+  Day 32: 29
+  Day 33: 27
+  Day 34: 28
+  Day 35: 23
+  Day 36: 23
+  Day 37: 20
+  Day 38: 19
+  Day 39: 21
+  Day 40: 15
+  Day 41: 25
+  Day 42: 16
+  Day 43: 18
+  Day 44: 18
+  Day 45: 24
+  Day 46: 20
+  Day 47: 16
+  Day 48: 16
+  Day 49: 15
+  Day 50: 9
+  Day 51: 16
+  Day 52: 13
+  Day 53: 8
+  Day 54: 22
+  Day 55: 13
+  Day 56: 13
+  Day 57: 13
+  Day 58: 13
+  Day 59: 9
+
+Lock count distribution (locks: num_creatures):
+  0: 314
+  1: 296
+  2: 31
+  3: 38
+  4: 1982
+
+SP spent on locks distribution (SP: num_creatures):
+  30: 1982

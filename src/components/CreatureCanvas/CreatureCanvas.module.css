@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center; /* Center all children horizontally */
-  gap: 3.6px; /* Reduced from 7.2px to bring things closer */
+  gap: 0; /* Remove gap to eliminate space between infoBar and specimenWrapper */
   width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
   max-width: 100%; /* Don't exceed parent */
   min-width: 0; /* Allow flex shrinking */
@@ -18,6 +18,8 @@
 .specimenWrapper {
   position: relative;
   width: 100%;
+  margin-top: 0; /* Remove any top margin to eliminate gap */
+  padding-top: 0; /* Remove any top padding to eliminate gap */
 }
 .goobBar {
   display: flex;
@@ -180,7 +182,7 @@
   width: 100%;
   max-width: 100%;
   min-width: 0; /* Prevent expansion */
-  margin-bottom: 3.6px; /* Reduced from 7.2px to bring knob controls up */
+  margin-bottom: 0; /* Remove margin to eliminate gap between trait buttons and specimen area */
   box-sizing: border-box;
   flex-shrink: 0; /* Prevent shrinking */
 }
@@ -208,14 +210,37 @@
   justify-content: center;
   gap: 3.6px;
   padding: 10.8px 9px;
+  margin: 0; /* Remove any margin */
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
+  border-bottom-left-radius: 0; /* Remove bottom border radius to connect with specimen area */
+  border-bottom-right-radius: 0; /* Remove bottom border radius to connect with specimen area */
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: none; /* Remove bottom border to connect seamlessly */
   flex: 1 1 25%; /* 4 equally sized sections, 25% each */
   min-width: 0;
   max-width: 25%; /* Prevent expansion */
   overflow: hidden; /* Clip content that might expand */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: center;
 }
+
+.readoutSection:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-bottom: none; /* Keep bottom border removed on hover */
+}
+
+.readoutSection.selected {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: none; /* Keep bottom border removed when selected */
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15), 0 0 4px rgba(255, 255, 255, 0.1);
+  background: #171922; /* Match specimen area background exactly - var(--panel) = #171922 */
+}
+
+/* Frequency button already has bottom border removed above */
 
 .readoutLabel {
   font-size: 10.8px;
@@ -536,10 +561,16 @@
 .panel{
   background:var(--panel);
   border-radius:var(--radius);
+  border-top-right-radius: 0; /* Remove top-right border radius to connect with Frequency button */
   border-bottom-left-radius: 0; /* Remove bottom border radius to connect seamlessly */
   border-bottom-right-radius: 0;
+  border-top: none; /* No top border */
+  border-bottom: none; /* No bottom border */
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Standard shadow */
   padding:10.8px;
+  padding-top: 0; /* Remove top padding to eliminate gap with trait buttons */
   padding-bottom: 20px; /* Add bottom padding to show more of the jug bottom */
   display:flex;
   flex-direction:column;
@@ -585,6 +616,39 @@
 
 .frequencyTopLeft .resonanceDisplay {
   pointer-events: auto; /* Re-enable pointer events for the section */
+}
+
+.vibesTopRight {
+  position: absolute;
+  top: 10.8px;
+  right: 10.8px;
+  z-index: 10; /* Above canvas */
+  pointer-events: none; /* Allow clicks to pass through to canvas */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.6px;
+  padding: 10.8px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(0, 255, 0, 0.3); /* Green border */
+}
+
+.vibesTopRight .vibesLabel {
+  font-size: 10.8px;
+  color: rgba(0, 255, 0, 0.8); /* Green color */
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vibesTopRight .vibesValue {
+  font-size: 18px;
+  color: #00ff00; /* Bright green */
+  text-align: center;
+  font-weight: 700;
 }
 
 .frequencyTopRight {
@@ -681,12 +745,11 @@
   image-rendering: auto;
   opacity: 0.92; /* Slightly reduced opacity to feel "behind glass" */
   visibility: visible;
-  /* Remove mix-blend-mode to make it fully visible */
   background: transparent;
-  object-fit: fill !important; /* Force image to fill exact dimensions, matching WebP size */
+  object-fit: fill !important; /* Force image to fill exact dimensions */
   object-position: center; /* Center the image */
   filter: blur(0.3px); /* Subtle blur to simulate glass refraction */
-  /* Dimensions are set inline in the animation loop to ensure exact matching */
+  /* All dimensions MUST be set inline - no CSS width/height to avoid conflicts */
 }
 
 .glassOverlay {
@@ -712,7 +775,7 @@
   .container {
     width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
     max-width: 100%; /* Don't exceed parent */
-    gap: 4.5px;
+    gap: 0; /* Remove gap to eliminate space between infoBar and specimenWrapper */
     margin: 0; /* No margin - fill parent */
     position: relative; /* Ensure stable positioning */
     min-width: 0; /* Prevent expansion */
@@ -748,7 +811,7 @@
   }
   .infoBar {
     gap: 4.5px; /* Scaled down gap */
-    margin-bottom: 3.6px; /* Scaled down margin */
+    margin-bottom: 0; /* Remove margin to eliminate gap between trait buttons and specimen area */
     flex-wrap: nowrap; /* Prevent wrapping */
   }
   .readoutSection {
@@ -879,6 +942,18 @@
     top: 4.5px;
     right: 4.5px;
   }
+  .vibesTopRight {
+    top: 4.5px;
+    right: 4.5px;
+    padding: 7.56px 6.3px;
+    gap: 2.52px;
+  }
+  .vibesTopRight .vibesLabel {
+    font-size: 7.56px;
+  }
+  .vibesTopRight .vibesValue {
+    font-size: 12.6px;
+  }
   .canvas {
     height: 100%;
     touch-action: none; /* Prevent default touch behaviors */
@@ -908,7 +983,7 @@
     flex-shrink: 0; /* Prevent shrinking */
     width: 100%; /* Fill parent (specimenRow) completely to match dialRow */
     max-width: 100%; /* Don't exceed parent */
-    gap: 3.6px;
+    gap: 0; /* Remove gap to eliminate space between infoBar and specimenWrapper */
     margin: 0; /* No margin - fill parent */
   }
   .goobBar {
@@ -941,7 +1016,7 @@
   }
   .infoBar {
     gap: 3.6px; /* Scaled down gap */
-    margin-bottom: 2.7px; /* Scaled down margin */
+    margin-bottom: 0; /* Remove margin to eliminate gap between trait buttons and specimen area */
     flex-wrap: nowrap; /* Prevent wrapping */
   }
   .readoutSection {
@@ -1071,6 +1146,18 @@
   .frequencyTopRight {
     top: 3.6px;
     right: 3.6px;
+  }
+  .vibesTopRight {
+    top: 3.6px;
+    right: 3.6px;
+    padding: 6.48px 5.4px;
+    gap: 2.16px;
+  }
+  .vibesTopRight .vibesLabel {
+    font-size: 6.48px;
+  }
+  .vibesTopRight .vibesValue {
+    font-size: 10.8px;
   }
   .canvas {
     touch-action: none; /* Prevent default touch behaviors */

@@ -32,6 +32,7 @@ type CreatureCanvasProps = {
 
 export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasProps){
   const { resonanceHz, targetHz, recentMoves } = useGame();
+  const [selectedTrait, setSelectedTrait] = useState<string>('Frequency');
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   // Timer logic commented out - timer feature removed
@@ -170,6 +171,12 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
     shockedImage.src = shockedImg;
     shockedImage.onload = () => {
       creatureShockedImageRef.current = shockedImage;
+      if (creature === 'Slime') {
+        console.log(`Shocked Slime image loaded:`, shockedImage.width, shockedImage.height, shockedImg);
+      }
+    };
+    shockedImage.onerror = (e) => {
+      console.error(`Failed to load shocked image: ${creature}`, shockedImg, e);
     };
 
     // Set the img element src when creature changes - ONLY for animated images
@@ -661,19 +668,70 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             const normalImg = CREATURE_IMAGES[creature] || CREATURE_IMAGES['Ruevee'];
             const targetSrc = isShocked ? shockedImg : normalImg;
             
-            // Force exact dimensions every frame - critical for matching sizes
-            // Use setProperty with 'important' flag to override any CSS
-            creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
-            creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
-            creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
-            creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
-            creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
-            creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
-            creatureImgElementRef.current.style.objectFit = 'fill';
-            creatureImgElementRef.current.style.objectPosition = 'center';
-            // Remove any natural width/height attributes that might override
-            creatureImgElementRef.current.removeAttribute('width');
-            creatureImgElementRef.current.removeAttribute('height');
+            // Calculate scale factor if shocked image is larger than normal image
+            // This ensures the shocked image appears the same size as the normal image
+            let sizeMultiplier = 1.0;
+            if (isShocked && creatureShockedImageRef.current?.complete && normalCreatureImg?.complete) {
+              const normalMax = Math.max(normalCreatureImg.width, normalCreatureImg.height);
+              const shockedMax = Math.max(creatureShockedImageRef.current.width, creatureShockedImageRef.current.height);
+              
+              // Always log for Slime when shocked (first frame only)
+              if (creature === 'Slime' && t === 0) {
+                console.log('Slime size comparison (shocked):', {
+                  normalSize: `${normalCreatureImg.width}x${normalCreatureImg.height}`,
+                  shockedSize: `${creatureShockedImageRef.current.width}x${creatureShockedImageRef.current.height}`,
+                  normalMax,
+                  shockedMax,
+                  calculatedMultiplier: shockedMax > normalMax ? normalMax / shockedMax : 1.0,
+                  willApply: shockedMax > normalMax
+                });
+              }
+              
+              if (shockedMax > normalMax) {
+                // If shocked image is larger, scale it down to match normal image size
+                sizeMultiplier = normalMax / shockedMax;
+              }
+            } else if (isShocked && creature === 'Slime' && t === 0) {
+              // Debug why multiplier isn't being calculated
+              console.log('Slime shocked but multiplier not calculated:', {
+                shockedImageComplete: creatureShockedImageRef.current?.complete,
+                normalImageComplete: normalCreatureImg?.complete,
+                hasShockedRef: !!creatureShockedImageRef.current,
+                hasNormalRef: !!normalCreatureImg
+              });
+            }
+            
+            // Function to apply dimensions - use this consistently
+            // CRITICAL: These dimensions must match exactly between normal and shocked images
+            const applyDimensions = () => {
+              if (creatureImgElementRef.current) {
+                // Apply size multiplier for shocked images that are naturally larger
+                const exactWidth = `${width * sizeMultiplier}px`;
+                const exactHeight = `${height * sizeMultiplier}px`;
+                
+                // Apply dimensions using every method possible to ensure they stick
+                creatureImgElementRef.current.style.width = exactWidth;
+                creatureImgElementRef.current.style.height = exactHeight;
+                creatureImgElementRef.current.style.setProperty('width', exactWidth, 'important');
+                creatureImgElementRef.current.style.setProperty('height', exactHeight, 'important');
+                creatureImgElementRef.current.style.setProperty('max-width', exactWidth, 'important');
+                creatureImgElementRef.current.style.setProperty('max-height', exactHeight, 'important');
+                creatureImgElementRef.current.style.setProperty('min-width', exactWidth, 'important');
+                creatureImgElementRef.current.style.setProperty('min-height', exactHeight, 'important');
+                creatureImgElementRef.current.style.objectFit = 'fill';
+                creatureImgElementRef.current.style.objectPosition = 'center';
+                
+                // Remove any natural width/height attributes that might override
+                creatureImgElementRef.current.removeAttribute('width');
+                creatureImgElementRef.current.removeAttribute('height');
+                
+                // Force reflow to ensure dimensions are applied
+                void creatureImgElementRef.current.offsetWidth;
+              }
+            };
+            
+            // ALWAYS apply dimensions every frame - critical for matching sizes
+            applyDimensions();
             
             // Always update src to ensure correct creature is displayed
             // Check if we need to update (different image path or shock state changed)
@@ -684,29 +742,35 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             const needsUpdate = currentPath !== targetPath;
             
             if (needsUpdate) {
+              // Lock dimensions BEFORE switching src
+              applyDimensions();
+              
               creatureImgElementRef.current.src = targetSrc;
               
-              // Force dimensions again after image loads
-              const applyDimensions = () => {
-                if (creatureImgElementRef.current) {
-                  creatureImgElementRef.current.style.setProperty('width', `${width}px`, 'important');
-                  creatureImgElementRef.current.style.setProperty('height', `${height}px`, 'important');
-                  creatureImgElementRef.current.style.setProperty('max-width', `${width}px`, 'important');
-                  creatureImgElementRef.current.style.setProperty('max-height', `${height}px`, 'important');
-                  creatureImgElementRef.current.style.setProperty('min-width', `${width}px`, 'important');
-                  creatureImgElementRef.current.style.setProperty('min-height', `${height}px`, 'important');
-                  creatureImgElementRef.current.style.objectFit = 'fill';
-                  creatureImgElementRef.current.style.objectPosition = 'center';
-                  creatureImgElementRef.current.removeAttribute('width');
-                  creatureImgElementRef.current.removeAttribute('height');
-                }
-              };
+              // Apply immediately after src change
+              applyDimensions();
               
               // Apply after load with multiple attempts to ensure it sticks
               creatureImgElementRef.current.onload = () => {
                 applyDimensions();
                 setTimeout(applyDimensions, 10);
                 setTimeout(applyDimensions, 50);
+                setTimeout(applyDimensions, 100);
+                setTimeout(applyDimensions, 200);
+                setTimeout(applyDimensions, 500);
+                
+                // Debug: Check actual rendered size
+                if (creature === 'Slime' && isShocked) {
+                  const rect = creatureImgElementRef.current.getBoundingClientRect();
+                  console.log('Shocked Slime size check:', {
+                    targetWidth: width,
+                    targetHeight: height,
+                    actualWidth: rect.width,
+                    actualHeight: rect.height,
+                    styleWidth: creatureImgElementRef.current.style.width,
+                    styleHeight: creatureImgElementRef.current.style.height
+                  });
+                }
               };
             }
           }
@@ -821,49 +885,47 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           <div className={styles.currentGoobLabel}>Current Goob</div>
           <div className={styles.currentGoobValue}>ProtoGoob #{protoGoobNumber}</div>
         </div>
-        <div className={styles.vibesSection}>
-          <div className={styles.vibesLabel}>Vibes</div>
-          <div className={styles.vibesValue}>--</div>
-        </div>
       </div>
       <div className={styles.infoBar}>
-        <div className={styles.readoutSection}>
+        <button 
+          className={`${styles.readoutSection} ${selectedTrait === 'pH' ? styles.selected : ''}`}
+          onClick={() => setSelectedTrait('pH')}
+        >
           <div className={styles.readoutLabel}>pH</div>
           <div className={styles.readoutValue}>--</div>
-        </div>
-        <div className={styles.readoutSection}>
+        </button>
+        <button 
+          className={`${styles.readoutSection} ${selectedTrait === 'Temperature' ? styles.selected : ''}`}
+          onClick={() => setSelectedTrait('Temperature')}
+        >
           <div className={styles.readoutLabel}>Temperature</div>
           <div className={styles.readoutValue}>--</div>
-        </div>
-        <div className={styles.readoutSection}>
+        </button>
+        <button 
+          className={`${styles.readoutSection} ${selectedTrait === 'Salinity' ? styles.selected : ''}`}
+          onClick={() => setSelectedTrait('Salinity')}
+        >
           <div className={styles.readoutLabel}>Salinity</div>
           <div className={styles.readoutValue}>--</div>
-        </div>
-        <div className={styles.readoutSection}>
+        </button>
+        <button 
+          className={`${styles.readoutSection} ${selectedTrait === 'Frequency' ? styles.selected : ''}`}
+          onClick={() => setSelectedTrait('Frequency')}
+        >
           <div className={styles.readoutLabel}>Frequency</div>
           <div className={styles.readoutValue}>--</div>
-        </div>
+        </button>
       </div>
       <div className={styles.specimenWrapper}>
-        <div className={styles.frequencyTopLeft}>
-          <div className={styles.targetSection}>
-            <div className={styles.targetLabel}>Target</div>
-            <div className={styles.targetValue}>{Math.round(targetHz)} Hz</div>
-          </div>
-          <div key={`resonance-${resonanceHz}`} className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
-            <div className={styles.currentLabel}>Specimen</div>
-            <div className={styles.resonanceValue}>{Math.round(resonanceHz)} Hz</div>
-          </div>
-        </div>
-        <div className={styles.frequencyTopRight}>
-          <div className={`${styles.resonanceDisplay} ${closestHit !== null && closestHit > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
-            <div className={styles.currentLabel}>Closest</div>
-            <div className={styles.resonanceValue}>{closestHitFormatted}</div>
-          </div>
-          <div className={`${styles.resonanceDisplay} ${resonanceHz > targetHz ? styles.resonanceAbove : styles.resonanceBelow}`}>
-            <div className={styles.currentLabel}>Current</div>
-            <div className={styles.resonanceValue}>{currentDistanceFormatted}</div>
-          </div>
+        {/* Removed readouts - keeping values for later use:
+          - targetHz: {Math.round(targetHz)} Hz
+          - resonanceHz: {Math.round(resonanceHz)} Hz
+          - closestHit: {closestHitFormatted}
+          - currentDistance: {currentDistanceFormatted}
+        */}
+        <div className={styles.vibesTopRight}>
+          <div className={styles.vibesLabel}>Vibes</div>
+          <div className={styles.vibesValue}>100%</div>
         </div>
         <div className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}>
         <canvas ref={skyRef} className={styles.skyCanvas} />
