@@ -35,6 +35,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   const [selectedTrait, setSelectedTrait] = useState<string>('Frequency');
   const [selectedGoob, setSelectedGoob] = useState<number>(Math.floor(Math.random() * 2700) + 1);
   const [showGoobDropdown, setShowGoobDropdown] = useState<boolean>(false);
+  const [vibes] = useState<number>(100); // TODO: Connect to actual vibes value
   const cathodeBottomRef = useRef<HTMLImageElement>(null);
   const cathodeBottomRightRef = useRef<HTMLImageElement>(null);
   // Timer logic commented out - timer feature removed
@@ -904,6 +905,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   return (
     <div className={styles.container}>
       <div className={styles.goobBar}>
+        <div className={styles.goobTypeSection}>
+          <div className={styles.goobTypeLabel}>Type</div>
+          <div className={styles.goobTypeValue}>{creature}</div>
+        </div>
         <div 
           ref={goobSectionRef}
           className={`${styles.currentGoobSection} ${showGoobDropdown ? styles.goobDropdownOpen : ''}`}
@@ -930,6 +935,10 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
               ))}
             </div>
           )}
+        </div>
+        <div className={`${styles.vibesSection} ${vibes <= 10 ? styles.vibesLow : vibes <= 50 ? styles.vibesMedium : styles.vibesHigh}`}>
+          <div className={styles.vibesLabel}>Vibes</div>
+          <div className={styles.vibesValue}>{vibes}%</div>
         </div>
       </div>
       <div className={styles.infoBar}>
@@ -969,10 +978,6 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
           - closestHit: {closestHitFormatted}
           - currentDistance: {currentDistanceFormatted}
         */}
-        <div className={styles.vibesTopRight}>
-          <div className={styles.vibesLabel}>Vibes</div>
-          <div className={styles.vibesValue}>100%</div>
-        </div>
         <div 
           className={`${styles.panel} ${shockIntensity > 0 ? styles.shaking : ''}`}
           data-selected-trait={selectedTrait}

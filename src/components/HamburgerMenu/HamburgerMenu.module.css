@@ -72,27 +72,6 @@
 
 @media (max-width: 768px) {
   .hamburger {
-    width: 20px;
-    height: 20px;
-  }
-
-  .hamburger span {
-    width: 20px;
-    height: 2px;
-  }
-
-  .menu {
-    min-width: 140px;
-  }
-
-  .menuItem {
-    padding: 10px 14px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hamburger {
     width: 18px;
     height: 18px;
   }
@@ -109,6 +88,35 @@
   .menuItem {
     padding: 8px 12px;
     font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hamburger span {
+    width: 16px;
+    height: 1.5px;
+  }
+
+  .hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .menu {
+    min-width: 100px;
+  }
+
+  .menuItem {
+    padding: 6px 10px;
+    font-size: 10px;
   }
 }
 

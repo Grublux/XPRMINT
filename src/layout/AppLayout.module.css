@@ -59,8 +59,11 @@
     letter-spacing: 1.5px;
   }
   .walletButton {
-    padding: 6px 12px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+  .headerRight {
+    gap: 8px;
   }
 }
 
@@ -70,8 +73,11 @@
     letter-spacing: 1.2px;
   }
   .walletButton {
-    padding: 5px 10px;
-    font-size: 10px;
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+  .headerRight {
+    gap: 6px;
   }
 }
 
