@@ -134,6 +134,53 @@ s ∈ uniform(0.15, 0.30)
 
 Burning an item changes no traits.
 
+### 3.5 Epic Items (Reserved for Future Phases)
+
+> **Important:** Epic items are **not** part of the v1 stabilization balance.  
+> They are reserved for future content and are intentionally excluded from all v1 simulations.
+
+In v1, the live economy only uses three rarities:
+
+- Common
+- Uncommon
+- Rare
+
+Epic items are reserved for later expansions and will be designed to:
+
+- **Modify constraints**, not just push bigger numbers  
+- Introduce **tactical tradeoffs** (e.g., helping one trait while hurting others)  
+- Avoid trivializing stabilization or bypassing SP costs  
+- Live **outside** the baseline daily drip (e.g., events, crafting, special drops)
+
+Conceptual examples (non-final):
+
+- **Harmonic Pulse Vial**  
+  - Bring one chosen trait into a "near band" (e.g., within ±10% of the lock band)  
+  - Push all other *unlocked* traits a fixed % further away from their targets  
+  - Does not grant a free lock, but reshapes the puzzle with a cost.
+
+- **Interphase Dampener**  
+  - Temporarily disables secondary (interdependent) effects for a small number of moves  
+  - Allows precise adjustments without long-term changes to math or SP.
+
+Implementation constraints for future Epics:
+
+- They must **not**:
+  - Auto-lock traits for free  
+  - Fully align multiple traits at once  
+  - Mass-generate SP beyond the tuned economy  
+- They should:
+  - Operate as **special-case effects** layered on top of the existing item engine  
+  - Be gated by separate minting logic (events, crafting, etc.), not by the standard drip
+
+For v1:
+
+- No Epics are emitted via:
+  - Awakening packs  
+  - Daily drip  
+  - Streak rewards  
+- All simulation results and tuning assume **Epic = disabled**.
+
 ---
 
 ## 4. Stability Points (SP) & Locks
