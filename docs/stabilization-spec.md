@@ -26,7 +26,7 @@ Each creature passes through four phases:
 - No drift. No trait changes.
 
 ### 4. Evolution
-- After Resonance, evolve/incubate becomes available.
+- After Resonance (7 days elapsed) AND Vibes == 10, evolve/incubate becomes available.
 - Evolution logic is out of scope for this document.
 
 ---
