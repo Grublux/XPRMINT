@@ -21,7 +21,7 @@ const IMAGES_TO_PRELOAD = [
  */
 export function preloadAllImages(): Promise<void> {
   const loadPromises = IMAGES_TO_PRELOAD.map((src) => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       const img = new Image();
       img.onload = () => resolve();
       img.onerror = () => {
