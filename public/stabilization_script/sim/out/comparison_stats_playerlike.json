@@ -1,0 +1,68 @@
+{
+  "comparison": {
+    "description": "Comparison between v_min_offset (old) and v_playerlike (new player-optimized behavior)",
+    "date": "2024-11-17"
+  },
+  "single_sim": {
+    "v_playerlike": {
+      "runs": 1000,
+      "stabilized": 1000,
+      "stabilization_rate": 1.0,
+      "avg_days": 15.099,
+      "median_days": 14.0,
+      "avg_items_used": 9.4
+    },
+    "notes": "v_playerlike allows up to 30 actions per day, multiple locks per day, and batch item burning for SP"
+  },
+  "multi_sim": {
+    "v_playerlike": {
+      "total_creatures": 2661,
+      "stabilized": 2661,
+      "stabilization_rate": 100.0,
+      "days_to_stabilization": {
+        "mean": 12.92,
+        "median": 12.0,
+        "min": 0,
+        "max": 56
+      },
+      "items": {
+        "total_used": 20575,
+        "total_burned": 49696,
+        "avg_per_stabilized": 7.73
+      },
+      "sp_economy": {
+        "total_from_burns": 67093,
+        "total_from_streaks": 12948,
+        "total_consumed": 66882
+      },
+      "creatures_stabilized_with_bonded_only": 0,
+      "creatures_requiring_30plus_items": 0,
+      "whale_wallets": 62,
+      "whale_failures": 0
+    },
+    "notes": "v_playerlike shows faster stabilization (mean 12.92 vs ~13.3 days) with more efficient item usage"
+  },
+  "key_changes": {
+    "starter_pack": "5 real items (not SP) on Day 0",
+    "starting_sp": "0 (no free SP)",
+    "actions_per_day": "Up to 30 actions per creature per day (was 10)",
+    "multiple_locks": "Can lock multiple traits per day if SP available",
+    "batch_burning": "Can burn multiple items in sequence to afford locks",
+    "epic_simulation": "Epic items properly simulated in item evaluation"
+  },
+  "summary": {
+    "single_sim": {
+      "stabilization_rate": "100% (unchanged)",
+      "avg_days": "15.10 days (slightly faster than previous ~15.94)",
+      "avg_items_used": "9.4 items (similar to previous ~9.64)"
+    },
+    "multi_sim": {
+      "stabilization_rate": "100% (unchanged)",
+      "mean_days": "12.92 days (faster than previous ~13.3)",
+      "median_days": "12 days (faster than previous 11)",
+      "avg_items_per_creature": "7.73 items (similar to previous ~7.7)",
+      "whale_performance": "All 62 whale wallets stabilized (0 failures)"
+    }
+  }
+}
+

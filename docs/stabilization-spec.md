@@ -1,309 +1,452 @@
 # Creature Stabilization & Resonance System — v1 Spec
 
-**Version:** v1 (Hybrid Drip + Epics + Min Offset)
-**Scope:** Mechanics + tuning for on-chain stabilization, resonance, and incubation.
-**Audience:** Smart contract devs, gameplay devs, and design partners.
+_Last tuned with the **player-like** simulations (multi-wallet + single-wallet) using real holder distribution and Epic items unlocked after Day 7._
 
 ---
 
-## 0. High-Level Loop
+## 0. Purpose & Scope
 
-Each creature goes through:
+This document defines the **on-chain game loop** for stabilizing lab creatures so they can evolve.
 
-1. **Unstable Phase**  
-   - Four lab traits are off-target.  
-   - Player uses items to adjust traits & locks them one by one.  
-   - Daily item drip + streak bonuses fuel progress.
+Core loop:
 
-2. **Stabilized Phase**  
-   - All four traits are **locked** within a 5% band of their targets.  
-   - Creature is now "Stable" (ready to begin Resonance).
+1. **Unstable → Stable** via items that adjust four traits.
+2. **Resonance Phase**: remain fully locked for 7 days.
+3. **Vibes check** (must be max) → **Incubate** → **Evolve**.
 
-3. **Resonance Phase**  
-   - 7-day timer where the creature remains fully locked.  
-   - Player must continue to send Vibes (0–10 scale).  
-   - At the **end of 7 days**, Vibes must be **10** to incubate.
+Everything here is designed to be:
 
-4. **Incubation → Evolution**  
-   - Once Resonance conditions are met, player can call `incubate()` / `evolve()` on-chain.  
-   - Stabilization + resonance state is consumed → new evolved form minted / existing metadata updated (implementation-dependent).
+- **Fully on-chain** (no server-side drift).
+- **Deterministic & replayable** from contract state.
+- **Tunable** via a small set of config constants.
 
-All core state is **on-chain**: no server-driven drift, no off-chain timers.
+This spec matches the behavior used in the latest player-like simulations:
+
+- Single-creature Monte Carlo (1,000 runs).
+- Multi-wallet Monte Carlo using real holder distribution (2,661 creatures).
+- Hybrid drip (1 item/day → 2 items/day with a Vibes streak).
+- Epic items unlocked from **Day 7** onward.
 
 ---
 
-## 1. Traits & Targets
+## 1. Traits & Lock Rules
 
-### 1.1 Trait List
+Each creature has 4 independent traits:
 
-Each creature has 4 continuous traits:
+- **Salinity**
+- **pH**
+- **Temperature**
+- **Frequency**
 
-1. **Salinity**
-2. **pH**
-3. **Temperature**
-4. **Frequency**
+### 1.1 Value Ranges
 
-Each trait has:
-- `target[t]` — target value (visible to player)
-- `current[t]` — current value (visible)
-- `locked[t]` — boolean lock flag
+On chain, we treat all traits as integer values on the same numeric scale, even if the UI presents them differently:
 
-Targets are **per-creature**, fixed once initialized.
+- `TRAIT_MIN = 0`
+- `TRAIT_MAX = 100`
 
-### 1.2 Trait Ranges (Conceptual)
-Traits are numeric scalars with a fixed ±5% stabilization window.
+Each trait `t` has:
 
-Contracts only care about:
-- Absolute values
-- % distance from target
-- Lock-state
+- `target[t]` — the **visible** target value for the player (stored on-chain).
+- `current[t]` — the current measured value (stored on-chain).
+- `locked[t]` — boolean.
 
-### 1.3 Lock Band
-A trait is lock-eligible when:
+**Targets are always visible.** There is no hidden target: players are optimizing against known numbers.
 
-```
-abs(current[t] - target[t]) / abs(target[t]) <= 0.05
-```
+### 1.2 Lock Band (±5%)
 
-### 1.4 Initial Trait Offsets
+We define a **lock band** in **percentage distance** from the target:
 
-We enforce **no trait starts inside the lock window**.
-
-- `OFFSET_MAX_PCT = 0.30` (30%)
 - `LOCK_PCT = 0.05` (5%)
 
-Initialization:
-1. Pick target `target[t]` (reasonable mid-range).
-2. Draw `f` ∈ [-0.30, +0.30].
-3. If `|f| < 0.05`, clamp to ±0.05.
-4. Set `current[t] = target[t] * (1 + f)`.
+A trait is **lockable** when:
 
----
-
-## 2. Items, Rarity, & Interdependence
-
-Each item:
-- Has a rarity (Common/Uncommon/Rare/Epic)
-- Moves traits when **applied**
-- Generates SP when **burned**
-
-### 2.1 Rarity Base Distribution
-
-Before Epics unlock (Day < 7):
-- Common 60%
-- Uncommon 25%
-- Rare 15%
-
-After Epic unlock (Day ≥ 7):
-- Epic ~2%
-- Remaining 98% distributed as C/U/R
-
-### 2.2 Primary Deltas (Non-Epic)
-```
-common:   +2 to +3
-uncommon: +3 to +5
-rare:     +4 to +6
+```text
+distance_pct(t) = abs(current[t] - target[t]) / target[t] <= LOCK_PCT
 ```
 
-Movement **always toward the target**.
+Constraints:
 
-### 2.3 Secondary Interdependence
-For non-Epic items:
-```
-secondary = primary_delta * s
-s ∈ [0.15, 0.30]
-```
-Applies to another trait and moves it **away** from target (unless locked).
+- Lockable **only if** `locked[t] == false`.
+- Once `locked[t] == true`, it **never unlocks**.
+- Secondary (interdependent) effects **ignore locked traits**.
 
-### 2.4 Epics (Puzzle-Shapers)
-Epic item behavior:
-1. Find worst trait (largest % error).
-2. Pull it significantly closer:
-   - If >10% away (2×LOCK_PCT): snap to exactly 10% error.
-   - Else: halve its error.
-3. For all other **unlocked** traits:
-   - Increase error by 10% (push further away).
-4. Locked traits ignore secondary chaos.
-
-### 2.5 SP From Burning Items
-- Common → 1 SP
-- Uncommon → 2 SP
-- Rare → 3 SP
-- Epic → 3 SP
-
-SP only comes from **burning**, not applying.
-
-SP is:
-- Stored per wallet
-- Non-transferable
-- Only spent to lock traits
+A creature is **stabilized** when **all 4 traits are locked**, each within the 5% band at the moment of lock.
 
 ---
 
-## 3. Daily Drip & Starter Pack
+## 2. Trait Initialization
 
-### 3.1 Starter Pack
-Each creature receives **5 items** at first interaction.
-No Epics in starter pack.
+### 2.1 Target Generation
 
-### 3.2 Hybrid Drip System
-Baseline:
-- **1 item/day** per **unstabilized** creature
+Per trait `t`:
 
-If the creature hits a 7-day Vibes-at-max streak:
-- Drip becomes **2 items/day**
-- Reverts to 1/day if streak breaks
-
-### 3.3 Epic Unlock Timing
-- Days 0–6: C/U/R only
-- Day 7+: Epic ~2% chance
-
----
-
-## 4. Vibes System
-
-### 4.1 Scale
-- Integer 0–10
-
-### 4.2 Sending Vibes
-`sendVibes(creature)`:
-- Raises Vibes up to max 10
-- Used to maintain drip streaks
-
-### 4.3 Vibes Streaks
-Track:
-- `consecutiveDaysAtMax`
-
-Seven consecutive days at Vibes=10:
-- Enables 2-item daily drip
-- Lose streak → revert to 1/day
-
-### 4.4 Vibes Requirement for Incubation
-During Resonance:
-- No streak needed
-- On day of incubation: **Vibes must be 10**
-
----
-
-## 5. Lifecycle States
-
-```
-UNSTABLE → STABLE → RESONANCE → EVOLVED
+```text
+target[t] ∈ [TARGET_MIN, TARGET_MAX]
+TARGET_MIN = 20
+TARGET_MAX = 80
 ```
 
-### 5.1 Stabilization (Unstable → Stable)
-Conditions:
-- Move traits with items
-- Burn items to get SP
-- Lock traits once within ±5%
+Exact range is tunable but mid-band values (20–80) were used in simulations.
 
-Lock costs:
-- 1st lock: 0 SP
-- 2nd lock: 8 SP
-- 3rd lock: 10 SP
-- 4th lock: 12 SP
+### 2.2 Initial Offsets (Never Start Inside the Lock Band)
 
-All traits locked → creature becomes **Stable**.
+We **never** allow a trait to start already within the lock band.
 
-### 5.2 Resonance (Stable → Resonance)
-Resonance begins as soon as all 4 traits locked.
+Constants:
 
-Duration:
-- 7 days
+- `LOCK_PCT = 0.05` (5%).
+- `OFFSET_MAX_PCT = 0.30` (30%).
 
-### 5.3 Incubation (Resonance → Evolved)
-At incubation call:
-- Has been in resonance ≥ 7 days
-- **Vibes == 10**
-- Not already evolved
+For each trait:
 
----
+1. Draw `target[t]`.
+2. Draw offset factor `f ∈ uniform(-OFFSET_MAX_PCT, OFFSET_MAX_PCT)`.
+3. If `abs(f) < LOCK_PCT`, clamp it to exactly `LOCK_PCT` with the same sign.
+4. Compute:
 
-## 6. SP Economy
+   ```text
+   raw = target[t] * (1 + f)
+   current[t] = clamp(round(raw), TRAIT_MIN, TRAIT_MAX)
+   ```
 
-### 6.1 SP Generation
-SP from burning items only.
+Result:
 
-### 6.2 SP Spending
-Used to lock traits (0/8/10/12 values).
-
-### 6.3 Strategy
-Players choose:
-- When to burn vs apply
-- Which traits to prioritize
-- How to manage Epics
+- Initial distance is **between 5% and 30%** away from target for each trait.
+- No free locks at time 0.
 
 ---
 
-## 7. Simulation Summary (v1 Final)
+## 3. Items & Interdependence
 
-Sim conditions:
-- Hybrid drip
-- Epics 2% from Day 7
-- Min offset 5% (no free locks)
-- Interdependence 15–30%
-- 2,661 real creatures from holder distribution
+Items are the **only way** to move traits during the Stabilization Phase. Each item has:
 
-### 7.1 Single Simulation (1,000 trials)
-- Stabilization: **100%**
-- Avg days: **~15.94**
-- Median: **15**
-- Avg items used: **~9.64**
+- A **rarity**.
+- A **primary trait** it targets.
+- A **primary delta** (how much it moves that trait).
+- A **secondary effect** on another trait (interdependence).
+- An **SP yield** if burned instead of applied.
 
-### 7.2 Multi Simulation (2,661 creatures)
-- Stabilization rate: **99.92%–100%** (depending on run seed)
-- Mean days: **~13.3**
-- Median: **11**
-- Items per creature: **~7.7**
-- No whales got stuck
-- No creature needed >30 items
+### 3.1 Rarity & Timing
+
+Base rarities:
+
+- **Common** — 60%
+- **Uncommon** — 25%
+- **Rare** — 15%
+- **Epic** — 0% before Day 7, then 2% after Day 7
+
+More precisely in the sim:
+
+- **Starter Pack (Day 0)** and **Days 1–6 drip**: only Common/Uncommon/Rare with 60/25/15 split.
+- **From Day 7 onward**:
+  - 2% of drops are **Epic**.
+  - Remaining 98% follow the 60/25/15 C/U/R distribution.
+
+This keeps early play simple, then introduces Epics as a late-game puzzle spice.
+
+### 3.2 Primary Deltas (v1 Final)
+
+All primary deltas are **integer steps** directly toward the target.
+
+- **Common**: `+2` to `+3` (toward target)
+- **Uncommon**: `+3` to `+5`
+- **Rare**: `+4` to `+6`
+
+Rules:
+
+- The sign is chosen so the primary trait **always moves toward its target**.
+- Clamped to `[TRAIT_MIN, TRAIT_MAX]`.
+
+### 3.3 Secondary Interdependence (C/U/R)
+
+Every non-Epic item also has a smaller **secondary effect** on a different trait.
+
+For an item with primary delta `primary_delta` on trait `A`:
+
+1. Secondary trait `B = INTERDEPENDENCE[A]` (fixed mapping, e.g. a 4-cycle).
+2. Sample `scale ∈ uniform(0.15, 0.30)`.
+3. Compute:
+
+   ```text
+   secondary_magnitude = max(1, round(abs(primary_delta) * scale))
+   secondary_delta = sign(primary_delta) * secondary_magnitude
+   ```
+
+4. Apply to `B` **only if** `locked[B] == false`.
+
+This creates **soft coupling** between traits without making the system chaotic.
+
+### 3.4 Epic Items — Puzzle Shapers
+
+Epics are **not** just bigger numbers. They are **puzzle shapers**.
+
+Epic behavior in v1 sim:
+
+- Determine the trait `W` with the **largest percentage error**.
+- Move `W` **aggressively toward** its target, e.g. by halving the percent error or snapping it close to the inner band.
+- At the same time, **push other unlocked traits** slightly **away** from their targets (e.g. ~10% worse) to keep tension.
+
+Principles:
+
+- Epics should feel like **big swings** and **interesting decisions**, not automatic wins.
+- They can be burned for a **larger SP yield** than Rare (e.g. 5 SP).
+
+Exact Epic parameters are configurable in the contracts, but the behavior and timing (unlock from Day 7) should match this spec.
+
+### 3.5 SP From Burning Items
+
+Any item can be **burned for SP** instead of being applied.
+
+Baseline SP yields:
+
+- Common → **1 SP**
+- Uncommon → **2 SP**
+- Rare → **3 SP**
+- Epic → **5 SP** (tunable; must be strictly > Rare)
+
+**Burning an item never changes traits.** It only increases wallet SP (or creature-bound SP in some cases).
+
 
 ---
 
-## 8. Contract Implementation Notes
+## 4. Stability Points (SP) & Locks
 
-### 8.1 Creature State
-```
-struct CreatureState {
-  uint256[4] target;
-  uint256[4] current;
-  bool[4] locked;
-  uint8 vibes;
-  uint64 stabilizedAt;
-  uint64 resonanceStart;
-  bool evolved;
-  uint8 consecutiveVibesAtMax;
-  bool dripUpgraded;
-}
-```
+SP is the currency used to **pay for locks**.
 
-### 8.2 Wallet SP
-- `mapping(address => uint256) walletSP`;
+### 4.1 Sources of SP
 
-### 8.3 Core Methods
-- `applyItem()`
-- `burnItemForSP()`
-- `lockTrait()`
-- `sendVibes()`
-- `incubate()` / `evolve()`
+Two sources:
+
+1. **Wallet SP** — from burning items:
+   - Burn any item → gain SP according to rarity.
+   - Wallet SP is **shared across all creatures** in that wallet.
+
+2. **Bonded SP** — from Vibes streaks (see §5):
+   - Bonded SP is **bound to a single creature** and can only pay for that creature's locks.
+
+### 4.2 Lock Costs
+
+Lock costs by lock index (0-based) per creature:
+
+- 1st lock: **0 SP** (free lock)
+- 2nd lock: **8 SP**
+- 3rd lock: **10 SP**
+- 4th lock: **12 SP**
+
+SP can be paid from:
+
+- Bonded SP for that creature.
+- Wallet SP.
+- Or a combination thereof.
+
+Locking rule:
+
+- Trait must be **lockable** (≤ 5% distance) at the time of lock.
+- Once locked, that trait never changes again.
+
+### 4.3 Player-Like Lock Strategy (as used in sims)
+
+The player-like agent used in simulations behaves roughly as an optimizer would:
+
+- **Never burns items for SP** unless:
+  - There is at least one trait for some creature in the wallet that is **currently lockable**, and
+  - The wallet plus bonded SP is **insufficient** to pay the next lock cost.
+- Burns the **lowest-yield** items first to reach the needed SP.
+- Always uses available SP to lock traits as soon as a lockable trait exists.
+
+This is the behavior we assume real players will approximate.
 
 ---
 
-## 9. Future Extensions
-- Additional Epic types
-- Temporary global modifiers
-- Social/linked stabilization mechanics
-- Additional drip or SP sinks/sources
+## 5. Vibes & Resonance
+
+Vibes are a simple **engagement meter** with hard bounds:
+
+- `VIBES_MIN = 0`
+- `VIBES_MAX = 10`
+
+### 5.1 Sending Vibes
+
+We expose a `sendVibes(creatureId)` function:
+
+- Can be called **once per day per creature**.
+- On call:
+  - Increment Vibes by +1 up to `VIBES_MAX`.
+  - Update streak tracking.
+- If the player **does not** call `sendVibes` on a given day, Vibes **decays** by 1 (down to 0).
+
+Interpretation:
+
+- Daily "pet your creature" or "say hello" action.
+- Frontend can display this however we like — the contract only needs to store the integer.
+
+### 5.2 Vibes Streak → Bonded SP + Drip Upgrade
+
+We track a **max Vibes streak** per creature:
+
+- Each day the creature is at `VIBES_MAX` **and** `sendVibes` is called, we increment `consecutive_vibes_at_max`.
+- Hitting a streak of **7 consecutive days** at max Vibes:
+  - Grants **+3 bonded SP** to that creature.
+  - Unlocks **enhanced drip**: 2 items/day instead of 1.
+
+If Vibes ever drop below max:
+
+- Streak counter resets.
+- Enhanced drip deactivates until another 7-day max-Vibes streak is achieved.
+
+This means engaged players effectively accelerate their item flow.
+
+### 5.3 Resonance Phase (Post-Stabilization)
+
+Once a creature is fully stabilized:
+
+1. We record `stabilizedAt` (block timestamp or day index).
+2. The creature enters the **Resonance Phase**.
+
+Resonance rules:
+
+- Duration: **7 days** (configurable as `RESONANCE_DAYS = 7`).
+- During Resonance the player **can** keep sending Vibes, but a streak is **not required**.
+- To incubate, two conditions must be true:
+
+  1. `now - stabilizedAt >= RESONANCE_DAYS`.
+  2. `vibes == VIBES_MAX` (10) **at the time of incubation call**.
+
+So post-stabilization the player must:
+
+- Wait 7 days.
+- Ensure the creature is at Vibes 10 on the day they trigger incubation.
+
+No additional streak is required; only the hard **Vibes == 10** check.
 
 ---
 
-## 10. Summary
-v1 delivers:
-- Fully on-chain stabilization
-- Hybrid drip economy
-- Vibes-driven engagement
-- Burn-based locking via SP
-- Epics as meaningful puzzle shapers
-- Proven tuning via Monte Carlo simulation
+## 6. Lifecycle Phases
 
-This spec is ready for contract + frontend implementation.
+### 6.1 Phase 0 — Awakening
+
+When the system goes live or when a creature is first "woken up" into this system:
+
+- Each creature receives a **Starter Pack** of **5 items** immediately.
+- Starter Pack contains only **Common/Uncommon/Rare** items (no Epics).
+- Vibes start at **9** (so the first `sendVibes` can hit 10 quickly).
+- `stabilized = false`, `locked[t] = false` for all traits.
+- `walletSP = 0`, `bondedSP = 0` for all creatures.
+
+There is **no drip on Day 0** — drip starts on Day 1.
+
+Players can begin applying or burning items on Day 0.
+
+### 6.2 Phase 1 — Daily Drip
+
+Each day, for each **unstabilized** creature:
+
+- The creature receives:
+  - **1 item/day** by default.
+  - **2 items/day** if the creature has an active max-Vibes streak (see §5.2).
+
+Drip stops permanently for that creature once it is fully stabilized (all 4 traits locked).
+
+### 6.3 Phase 2 — Stabilization
+
+While `stabilized == false` the player can:
+
+- Apply items (moving traits via primary + secondary effects).
+- Burn items for SP.
+- Spend SP to lock traits once they are in the 5% band.
+- Send Vibes to:
+  - Maintain or grow streaks.
+  - Unlock bonded SP.
+  - Upgrade drip to 2 items/day.
+
+Once **all 4 traits** are locked, the creature is considered **stabilized** and moves to Resonance.
+
+### 6.4 Phase 3 — Resonance
+
+- Start: `stabilizedAt` = current timestamp/day index.
+- Duration: `RESONANCE_DAYS = 7`.
+- Player should:
+  - Keep the creature's Vibes healthy.
+  - Ensure it is at Vibes 10 when ready to incubate.
+
+No additional trait movement is possible (all traits are locked).
+
+### 6.5 Phase 4 — Incubation & Evolution
+
+When:
+
+1. `now - stabilizedAt >= RESONANCE_DAYS`, and
+2. `vibes == VIBES_MAX` (10), and
+3. `stabilized == true`,
+
+…then the player can call `incubate(creatureId)`.
+
+Expected on chain behavior:
+
+- Mark the creature as **evolved**.
+- Burn or morph the stabilizing token into an evolved form.
+- Optionally emit events to allow frontend to show a reveal.
+
+---
+
+## 7. Calibration Snapshot (Player-Like Sims)
+
+These numbers are **from the latest player-like simulations**, not from a naive or over-strict bot. The agent:
+
+- Uses up to ~30 actions/day.
+- Uses items and burns for SP **only when helpful**.
+- Locks traits as soon as they are in range and SP is available.
+
+All simulations use:
+
+- 4 traits per creature.
+- Initial offsets between 5% and 30% from target.
+- Primary deltas: Common 2–3, Uncommon 3–5, Rare 4–6.
+- Secondary interdependence: 15–30% of primary delta, same direction.
+- Hybrid drip: 1 item/day → 2 items/day with a 7-day max-Vibes streak.
+- Epics: 2% of drops from Day 7 onwards, puzzle-shaping behavior.
+
+### 7.1 Single-Creature Monte Carlo (1,000 runs)
+
+- Stabilization rate: **100%**
+- Average days to stabilization: **~15.1 days**
+- Median days: **14**
+- Average items used per creature: **~9.4 items**
+
+Interpretation:
+
+- A solo holder who actually plays reasonably will **always** stabilize within the 60-day window.
+- The time and item count feel like a **medium-difficulty puzzle**, not a trivial tap.
+
+### 7.2 Multi-Wallet Simulation (Real Holders, 2,661 Creatures)
+
+Using the real distribution of holders (whales, mid-holders, and many 1-unit wallets):
+
+- Total creatures: **2,661**
+- Stabilized: **2,661**
+- Unstabilized after 60 days: **0**
+- Stabilization rate: **100%**
+- Mean days to stabilization: **~12.9 days**
+- Median days: **12 days**
+- Min/Max days: **0 / 56 days**
+- Average items per stabilized creature: **~7.73 items**
+- Whale wallets (> 10 creatures): **62**
+- Whale failures: **0**
+
+Notes:
+
+- Multi-creature wallets stabilize **faster on average** than solos because they can pool SP and items intelligently.
+- Average items per stabilized creature stays in the **7–10 item** band we were targeting.
+
+### 7.3 Tuning Levers (Post-Launch)
+
+If real gameplay data suggests difficulty is too high/low, the primary levers are:
+
+1. **Primary deltas** — shrink or enlarge deltas to make traits converge slower/faster.
+2. **Secondary interdependence** — increase/decrease to make the puzzle more/less coupled.
+3. **Drip rate** — adjust baseline or streak multipliers.
+4. **Streak rewards** — adjust bonded SP per streak.
+5. **Epic rate and behavior** — adjust unlock day, drop chance, or how aggressively Epics reshape the puzzle.
+
+These can be implemented as config values or upgradable via a governance/admin contract, without changing core game loop semantics.
