@@ -22,7 +22,7 @@ Each creature passes through four phases:
 - Creature becomes eligible for Resonance.
 
 ### 3. Resonance Phase
-- Player must maintain a 7-day streak of max Vibes.
+- Resonance period is 7 days in duration.
 - No drift. No trait changes.
 
 ### 4. Evolution
@@ -272,10 +272,13 @@ Once stabilized:
 
 - No more drip  
 - No trait drift  
-- Creature must achieve a **fresh** 7-day Vibes streak  
-- After streak → `canEvolve(creatureId) = true`
+- Resonance period begins (7 days duration)
+- To enable incubation after 7 days:
+  - Has been in resonance for ≥ 7 days? **Y**
+  - Has a Vibes reading of 10? **Y**
+  - → `canEvolve(creatureId) = true`
 
-Evolution contract checks this flag.
+Evolution contract checks this flag. No streak required—just 7 days elapsed and Vibes = 10.
 
 ---
 
