@@ -390,7 +390,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Size increases as frequency approaches target from either direction (above or below)
       const minImageSize = baseImageSize * 0.33; // Start at 33% when far from target
       // Reduce Slime's maximum size by 10%
-      const maxImageSizeMultiplier = creature === 'Slime' ? 1.197 : 1.33; // Slime: 119.7% (10% reduction from 133%), Others: 133%
+      const maxImageSizeMultiplier = creature === 'Slime' ? 1.15 : 1.25; // Slime: 115%, Others: 125% (reduced from 133% to make slightly smaller when matching)
       const maxImageSize = baseImageSize * maxImageSizeMultiplier; // Grow to max size when matching target
       
       // Calculate closeness based on frequency difference (works from both directions)
@@ -936,9 +936,16 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
             </div>
           )}
         </div>
-        <div className={`${styles.vibesSection} ${vibes <= 10 ? styles.vibesLow : vibes <= 50 ? styles.vibesMedium : styles.vibesHigh}`}>
+        <div 
+          className={`${styles.vibesSection} ${vibes <= 10 ? styles.vibesLow : vibes <= 50 ? styles.vibesMedium : styles.vibesHigh}`}
+          onClick={() => {
+            // TODO: Implement vibes sending functionality
+          }}
+          style={{ cursor: 'pointer' }}
+        >
           <div className={styles.vibesLabel}>Vibes</div>
           <div className={styles.vibesValue}>{vibes}%</div>
+          <div className={styles.vibesInstruction}>Click to send Vibes</div>
         </div>
       </div>
       <div className={styles.infoBar}>

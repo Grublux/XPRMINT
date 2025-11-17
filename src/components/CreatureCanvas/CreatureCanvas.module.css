@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   gap: 3.6px;
-  padding: 10.8px 9px;
+  padding: 18px 9px; /* Increased vertical padding to match Vibes section height (was 10.8px) */
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -120,7 +120,7 @@
   align-items: center;
   justify-content: center;
   gap: 3.6px;
-  padding: 10.8px 9px;
+  padding: 18px 9px; /* Increased vertical padding to match Vibes section height (was 10.8px) */
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -229,6 +229,12 @@
   min-width: 0;
   max-width: 25%;
   transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.vibesSection:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .vibesSection.vibesHigh {
@@ -270,6 +276,16 @@
   text-align: center;
   font-weight: 700;
   transition: color 0.2s ease;
+}
+
+.vibesInstruction {
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: 2px;
+  line-height: 1.2;
 }
 
 .myItemsSection {
@@ -1062,7 +1078,7 @@
     justify-content: space-between; /* Space between Type, Current Goob, and Vibes */
   }
   .goobTypeSection {
-    padding: 7.56px 6.3px; /* Scaled down */
+    padding: 12.6px 6.3px; /* Increased vertical padding to match Vibes section height (was 7.56px) */
     gap: 2.52px; /* Scaled down */
     flex: 1 1 25%; /* Same size as trait buttons */
     max-width: 25%;
@@ -1074,7 +1090,7 @@
     font-size: 12.6px; /* Scaled down (18 * 0.7) */
   }
   .currentGoobSection {
-    padding: 7.56px 6.3px; /* Scaled down */
+    padding: 12.6px 6.3px; /* Increased vertical padding to match Vibes section height (was 7.56px) */
     gap: 2.52px; /* Scaled down */
     flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
     max-width: 50%; /* Allow expansion to 50% to match two readout sections */
@@ -1106,6 +1122,9 @@
   }
   .vibesValue {
     font-size: 12.6px; /* Scaled down (18 * 0.7) */
+  }
+  .vibesInstruction {
+    font-size: 5.6px; /* Scaled down (8 * 0.7) */
   }
   .readoutLabel {
     font-size: 7.56px; /* Scaled down (10.8 * 0.7) to match targetLabel */
@@ -1205,7 +1224,7 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 147.384% 115% !important; /* Width: increased by 20% from 122.82% (122.82 * 1.2 = 147.384%), Height: 115%, allow stretch/distort on mobile */
+    background-size: 122.82% 115% !important; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
     background-position: center 11px !important; /* Position 11px from top to create space above jug */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
@@ -1271,7 +1290,7 @@
     justify-content: space-between; /* Space between Type, Current Goob, and Vibes */
   }
   .goobTypeSection {
-    padding: 6.48px 5.4px; /* Scaled down */
+    padding: 10.8px 5.4px; /* Increased vertical padding to match Vibes section height (was 6.48px) */
     gap: 2.16px; /* Scaled down */
     flex: 1 1 25%; /* Same size as trait buttons */
     max-width: 25%;
@@ -1283,7 +1302,7 @@
     font-size: 10.8px; /* Scaled down (18 * 0.6) */
   }
   .currentGoobSection {
-    padding: 6.48px 5.4px; /* Scaled down */
+    padding: 10.8px 5.4px; /* Increased vertical padding to match Vibes section height (was 6.48px) */
     gap: 2.16px; /* Scaled down */
     flex: 1 1 50%; /* Span 50% to center over Temperature and Salinity (middle 2 readouts) */
     max-width: 50%; /* Allow expansion to 50% to match two readout sections */
@@ -1315,6 +1334,9 @@
   }
   .vibesValue {
     font-size: 10.8px; /* Scaled down (18 * 0.6) */
+  }
+  .vibesInstruction {
+    font-size: 4.8px; /* Scaled down (8 * 0.6) */
   }
   .readoutLabel {
     font-size: 6.48px; /* Scaled down (10.8 * 0.6) to match targetLabel */
