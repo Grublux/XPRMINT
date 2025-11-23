@@ -1,0 +1,31 @@
+# Stabilization System - ApeChain Mainnet Deployment
+# Deployed: $(date)
+# Chain ID: 33139
+# Deployer: 0x634989990acb7F95d07Ac09a6c35491Ac8dFa3Cf
+
+## PROXY ADDRESSES (Use these in frontend/apps)
+ProxyAdmin: 0x0bdB9d6Cb50aD1DC1f1c664F9e8995Cd68e6C448
+ItemCatalog Proxy: 0x0B4CaF09813382995e33101a241DE0091321039D
+ItemToken1155 Proxy: 0x6F6605036F172111FE017a3548D72C084760635d
+CreatureStabilizer Proxy: 0x21f4471Ac34D7c39c0353c92E998A025956a4D04
+ItemImageDeployer: 0xE72e4F0316767A9655A2e4b1Dc2A26a7AAf6FB03
+
+## IMPLEMENTATION ADDRESSES (For verification/upgrades)
+ItemCatalog Implementation: 0x2ebceB5ede40137EBfF4b41415b8E2d22111814C
+ItemToken1155 Implementation: 0x0cB8e24e15eB039888e29c98560f92B4dFfe7b43
+CreatureStabilizer Implementation: 0xcfAd6C9A826ABe43125eA57b86c9392F515B130B
+
+## DEPLOYMENT TRANSACTIONS
+1. ProxyAdmin: 0xc1e3b7c2dbf0420e6370427ffb1aafa9abe9d26a65f27327b6ed31bbc7f86cc3
+2. ItemImageDeployer: 0x1771eb0618d14e018e044981afc568bb3f3d192e7b25cfb17a7d5580e54ac5f3
+3. ItemCatalog Impl: 0x185eadaaa2c400f99ef677d2edc24ca8dc37c5b627c406540c2ec6fac0f973b4
+4. ItemCatalog Proxy: 0x88b0f6719ec3f379d53ed558905532000d4a110a48583d1dc06be9afdeaa8b41
+5. ItemToken1155 Impl: 0xe135aa5b5d16c636c1b9d5d0dbeb3cc215fa4eca17e1f7dd3a09e2e834b31850
+6. ItemToken1155 Proxy: 0x17985d5b4bb48b272718a6de10795d41855a8689bd54d46a9db4887aaf47bf58
+7. CreatureStabilizer Impl: 0x5de239c5cd3948dd3cc3feef5e60872c57687e2d00823e5352dc1ef43636a8f1
+8. CreatureStabilizer Proxy: 0x141365ae3376bd022287d8ff726ae33d6b9766e29dc3b0f2b4cdb2d7448607c7
+9. Wire Stabilizer: 0x90ef4e56346b0962fe4ba10e378e4234e1dd92b06cb49392b78c97f61b95490e
+
+## TOTAL COST
+Gas Used: 10,134,932
+Total Paid: 0.25763696454308 ETH

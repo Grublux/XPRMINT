@@ -1,0 +1,22 @@
+.itemGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 2px;
+  width: 100%;
+  justify-content: start;
+}
+
+.itemCard {
+  width: 132px;
+  height: auto;
+}
+
+@media (max-width: 480px) {
+  .itemGrid {
+    grid-template-columns: repeat(3, 99px);
+  }
+  
+  .itemCard {
+    width: 99px;
+  }
+}

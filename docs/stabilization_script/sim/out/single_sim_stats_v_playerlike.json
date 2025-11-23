@@ -1,0 +1,8 @@
+{
+  "runs": 1000,
+  "stabilized": 1000,
+  "stabilization_rate": 1.0,
+  "avg_days": 15.099,
+  "median_days": 14.0,
+  "avg_items_used": 9.4
+}

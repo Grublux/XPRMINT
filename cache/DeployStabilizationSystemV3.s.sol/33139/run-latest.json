@@ -1,0 +1,22 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    },
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    },
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    },
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    },
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    },
+    {
+      "rpc": "https://apechain.calderachain.xyz/http"
+    }
+  ]
+}

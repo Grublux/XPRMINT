@@ -1,0 +1,85 @@
+Loaded 373 unique wallet addresses
+Total creatures: 2661
+=== Multi Sim Summary ===
+Total creatures: 2661
+Stabilized: 1661 (62.42%)
+Unstabilized: 1000 (37.58%)
+
+Days to Stabilization:
+  Mean: 32.81
+  Median: 30.00
+  Min/Max: 10 / 59
+
+Histogram (days -> count):
+  Day 10:    3 creatures 
+  Day 11:    3 creatures 
+  Day 12:    7 creatures █
+  Day 13:   15 creatures ███
+  Day 14:   18 creatures ███
+  Day 15:   32 creatures ██████
+  Day 16:   40 creatures ████████
+  Day 17:   48 creatures █████████
+  Day 18:   60 creatures ████████████
+  Day 19:   66 creatures █████████████
+  Day 20:   92 creatures ██████████████████
+  Day 21:   70 creatures ██████████████
+  Day 22:   59 creatures ███████████
+  Day 23:   50 creatures ██████████
+  Day 24:   53 creatures ██████████
+  Day 25:   40 creatures ████████
+  Day 26:   35 creatures ███████
+  Day 27:   46 creatures █████████
+  Day 28:   38 creatures ███████
+  Day 29:   38 creatures ███████
+  Day 30:   35 creatures ███████
+  Day 31:   36 creatures ███████
+  Day 32:   27 creatures █████
+  Day 33:   26 creatures █████
+  Day 34:   34 creatures ██████
+  Day 35:   32 creatures ██████
+  Day 36:   31 creatures ██████
+  Day 37:   33 creatures ██████
+  Day 38:   31 creatures ██████
+  Day 39:   27 creatures █████
+  Day 40:   22 creatures ████
+  Day 41:   27 creatures █████
+  Day 42:   24 creatures ████
+  Day 43:   31 creatures ██████
+  Day 44:   27 creatures █████
+  Day 45:   23 creatures ████
+  Day 46:   31 creatures ██████
+  Day 47:   30 creatures ██████
+  Day 48:   31 creatures ██████
+  Day 49:   28 creatures █████
+  Day 50:   26 creatures █████
+  Day 51:   25 creatures █████
+  Day 52:   20 creatures ████
+  Day 53:   27 creatures █████
+  Day 54:   26 creatures █████
+  Day 55:   30 creatures ██████
+  Day 56:   29 creatures █████
+  Day 57:   25 creatures █████
+  Day 58:   26 creatures █████
+  Day 59:   28 creatures █████
+
+Items:
+  Total used: 20241
+  Total burned: 26914
+  Avg per stabilized creature: 12.19
+
+SP Economy:
+  Total SP from item burns: 30158
+  Total SP from streaks: 46035
+  Total SP consumed by locks: 29949
+
+Average SP per Creature:
+  From burns: 11.33 SP
+  From streaks: 17.30 SP
+
+Special Stats:
+  Creatures stabilized with bonded SP only: 40
+  Creatures requiring 30+ items: 0
+  Whale wallets (>10 creatures): 62
+  Whale wallets with 0 stabilized: 0
+
+✓ Detailed stats saved to sim/out/multi_sim_stats_resonance_tuned_v2.json

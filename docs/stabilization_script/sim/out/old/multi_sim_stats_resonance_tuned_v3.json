@@ -1,0 +1,72 @@
+{
+  "total_creatures": 2661,
+  "stabilized": 379,
+  "unstabilized": 2282,
+  "stabilization_rate": 14.242765877489665,
+  "days_to_stabilization": {
+    "mean": 10.79419525065963,
+    "median": 9,
+    "min": 0,
+    "max": 58
+  },
+  "histogram": {
+    "25": 6,
+    "24": 6,
+    "23": 8,
+    "20": 4,
+    "22": 6,
+    "16": 17,
+    "15": 29,
+    "14": 19,
+    "13": 13,
+    "12": 17,
+    "11": 17,
+    "9": 16,
+    "10": 16,
+    "35": 1,
+    "33": 1,
+    "8": 19,
+    "17": 1,
+    "7": 24,
+    "6": 38,
+    "5": 21,
+    "31": 3,
+    "2": 24,
+    "4": 20,
+    "3": 32,
+    "1": 6,
+    "47": 3,
+    "19": 1,
+    "21": 2,
+    "41": 1,
+    "28": 2,
+    "0": 2,
+    "53": 1,
+    "57": 1,
+    "58": 1,
+    "36": 1
+  },
+  "items": {
+    "total_used": 4886,
+    "total_burned": 27264,
+    "avg_per_stabilized": 12.891820580474935,
+    "items_used_distribution": {
+      "3": 161,
+      "2": 86,
+      "4": 92,
+      "1": 27,
+      "0": 2,
+      "6": 4,
+      "5": 7
+    }
+  },
+  "sp_economy": {
+    "total_from_burns": 31206,
+    "total_from_streaks": 56220,
+    "total_consumed": 31080
+  },
+  "creatures_stabilized_with_bonded_only": 7,
+  "creatures_requiring_30plus_items": 0,
+  "whale_wallets": 62,
+  "whale_failures": 3
+}

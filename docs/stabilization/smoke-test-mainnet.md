@@ -2,17 +2,175 @@
 
 This guide explains how to perform on-chain smoke tests of the deployed Stabilization System on ApeChain mainnet.
 
+## Deployments
+
+The Stabilization System has two deployments on ApeChain mainnet:
+
+### v0 (Legacy Test Deployment)
+- **Status:** Fully functional for gameplay
+- **Issue:** Broken ProxyAdmin topology - individual ProxyAdmins are owned by a main ProxyAdmin (contract), preventing upgrades and imagePtr updates
+- **Use case:** Testing and validation of game mechanics
+- **Addresses:** Use `STAB_CREATURE_STABILIZER`, `STAB_ITEM_TOKEN`, `STAB_ITEM_CATALOG` env vars
+
+### v1 (Production Deployment)
+- **Status:** Clean deployment with proper upgradeability
+- **Features:** Single central ProxyAdminV1 owned by deployer EOA, upgradable, with proper imagePtr wiring and images on-chain
+- **Use case:** Production deployment with full upgradeability and image support
+- **Addresses:** Use `CREATURE_STABILIZER_PROXY_V1`, `ITEM_TOKEN_PROXY_V1`, `ITEM_CATALOG_PROXY_V1` env vars
+
+**Note:** Game mechanics, rules, and catalog content are identical between v0 and v1. Only the admin/upgradeability topology and image support differ.
+
 ## Prerequisites
 
 The contracts are already deployed on ApeChain mainnet. Before running smoke tests, you need to set the following environment variables:
 
-- `CREATURE_STABILIZER_PROXY` - Address of the CreatureStabilizer proxy contract
-- `ITEM_TOKEN_PROXY` - Address of the ItemToken1155 proxy contract
-- `ITEM_CATALOG_PROXY` - Address of the ItemCatalog proxy contract
+**For v0 (legacy):**
+
+- `CREATURE_STABILIZER_PROXY` or `STAB_CREATURE_STABILIZER` - Address of the CreatureStabilizer proxy contract
+- `ITEM_TOKEN_PROXY` or `STAB_ITEM_TOKEN` - Address of the ItemToken1155 proxy contract
+- `ITEM_CATALOG_PROXY` or `STAB_ITEM_CATALOG` - Address of the ItemCatalog proxy contract
 - `APECHAIN_MAINNET_RPC_URL` - Your ApeChain mainnet RPC endpoint
 - `DEPLOYER_PRIVATE_KEY` - Your private key for testing (⚠️ **DO NOT commit this to version control**)
 
-**Note:** If your environment uses different variable names (e.g., `STAB_CREATURE_STABILIZER`, `STAB_ITEM_TOKEN`, `STAB_ITEM_CATALOG`), the script will attempt to read those as fallbacks.
+**For v1 (production):**
+- `STAB_V1` or `CREATURE_STABILIZER_PROXY_V1` - Address of the v1 CreatureStabilizer proxy contract
+- `ITEM_V1` or `ITEM_TOKEN_PROXY_V1` - Address of the v1 ItemToken1155 proxy contract
+- `CATALOG_V1` or `ITEM_CATALOG_PROXY_V1` - Address of the v1 ItemCatalog proxy contract
+- `PROXY_ADMIN_V1` - Address of the v1 ProxyAdmin (owned by deployer EOA)
+- `ITEM_IMAGE_DEPLOYER_V1` - Address of the v1 ItemImageDeployer
+- `APECHAIN_MAINNET_RPC_URL` - Your ApeChain mainnet RPC endpoint
+- `DEPLOYER_PRIVATE_KEY` - Your private key for testing (⚠️ **DO NOT commit this to version control**)
+
+**Note:** The smoke test script will read v1 addresses if set, otherwise falls back to v0 addresses.
+
+## V1 Deployment Flow
+
+To deploy the v1 system from scratch:
+
+1. **Deploy the v1 system:**
+   ```bash
+   forge script scripts/DeployStabilizationSystemV1.s.sol \
+     --rpc-url $APECHAIN_MAINNET_RPC_URL \
+     --broadcast
+   ```
+   
+   This will output export commands like:
+   ```bash
+   export STAB_V1=0x...
+   export ITEM_V1=0x...
+   export CATALOG_V1=0x...
+   export PROXY_ADMIN_V1=0x...
+   export ITEM_IMAGE_DEPLOYER_V1=0x...
+   ```
+
+2. **Seed the v1 catalog:**
+   ```bash
+   export ITEM_CATALOG_PROXY_V1=$CATALOG_V1
+   export ITEM_TOKEN_PROXY_V1=$ITEM_V1
+   export ITEM_ADMIN_RECIPIENT_V1=<your-wallet-address>
+   
+   forge script scripts/DeployItemCatalogV1.s.sol \
+     --rpc-url $APECHAIN_MAINNET_RPC_URL \
+     --broadcast
+   ```
+
+3. **Upload item images:**
+   ```bash
+   export ITEM_CATALOG_PROXY_V1=$CATALOG_V1
+   export ITEM_IMAGE_DEPLOYER_V1=<from-step-1>
+   export ITEM_IMAGE_DIR=assets/items  # default, can be overridden
+   
+   forge script scripts/UploadItemImages.s.sol \
+     --rpc-url $APECHAIN_MAINNET_RPC_URL \
+     --broadcast
+   ```
+
+4. **Run smoke tests:**
+   ```bash
+   export CREATURE_STABILIZER_PROXY_V1=$STAB_V1
+   export ITEM_TOKEN_PROXY_V1=$ITEM_V1
+   export ITEM_CATALOG_PROXY_V1=$CATALOG_V1
+   
+   forge script scripts/SmokeTest.s.sol --rpc-url $APECHAIN_MAINNET_RPC_URL
+   ```
+
+## Collection and Item Metadata
+
+The v1 deployment includes proper collection-level and item-level metadata for marketplace display.
+
+### Collection-Level Metadata
+
+The `ItemToken1155` contract exposes collection information:
+
+- **`name()`** - Returns the collection name (V1 default: "Stabilization Items V1")
+- **`symbol()`** - Returns the collection symbol (V1 default: "ITEMS")
+- **`contractURI()`** - Returns collection-level metadata JSON with name, description, and external URL
+
+**V1 Production Defaults:**
+- Collection name: "Stabilization Items V1"
+- Collection symbol: "ITEMS"
+- Collection description: "On-chain tools, artifacts, and anomalies used in stabilizing creatures within the NMGI ecosystem."
+
+These values can be updated by the contract owner using:
+- `setName(string calldata newName)`
+- `setSymbol(string calldata newSymbol)`
+- `setContractURI(string calldata newContractURI)`
+
+**Note:** The above defaults are the intended production values for V1, but they can be changed post-deployment if needed.
+
+**Example verification:**
+```bash
+cast call $ITEM_V1 "name()(string)" --rpc-url $RPC
+cast call $ITEM_V1 "symbol()(string)" --rpc-url $RPC
+cast call $ITEM_V1 "contractURI()(string)" --rpc-url $RPC
+```
+
+### Item-Level Metadata
+
+Each item's metadata comes from the `ItemCatalog` template and is exposed via `ItemToken1155.uri(uint256 id)`. The URI returns a base64-encoded JSON object that **always includes**:
+
+- `"name"` - Item name from template
+- `"description"` - Item description from template
+- `"image"` - Data URI for the item image (if `imagePtr` is set)
+- `"attributes"` - Array of trait attributes (rarity, traits, deltas, SP yield)
+- `"collection"` - Collection identifier
+
+**Example verification:**
+```bash
+cast call $ITEM_V1 "uri(uint256)(string)" 0 --rpc-url $RPC
+# Decode the base64 part to see the JSON
+```
+
+### Updating Item Metadata
+
+Item names and descriptions can be updated by the catalog owner without affecting gameplay mechanics. The following functions are available:
+
+- `updateTemplateMetadata(uint256 id, string calldata newName, string calldata newDescription)` - Update both name and description
+- `updateTemplateName(uint256 id, string calldata newName)` - Update name only
+- `updateTemplateDescription(uint256 id, string calldata newDescription)` - Update description only
+
+**Important:** These functions **only** modify the `name` and `description` fields. They do **not** affect:
+- Rarity
+- Primary/secondary traits
+- Delta values
+- Any gameplay mechanics
+
+**Example usage:**
+```bash
+# Using the example script
+export ITEM_CATALOG_PROXY_V1=$CATALOG_V1
+forge script scripts/UpdateItemMetadataExample.s.sol \
+  --rpc-url $APECHAIN_MAINNET_RPC_URL \
+  --broadcast
+
+# Or using cast directly
+cast send $CATALOG_V1 \
+  "updateTemplateMetadata(uint256,string,string)" \
+  0 "Fixed Item Name" "Corrected description" \
+  --rpc-url $RPC --private-key $PK
+```
+
+**Note:** Metadata updates are purely cosmetic and only affect how items are displayed in marketplaces. All stabilization mechanics, item effects, and game rules remain unchanged.
 
 ## Running the Smoke Test Script
 
@@ -70,7 +228,7 @@ All commands use placeholders that you must replace:
 
 ## Recommended Smoke Test Flow
 
-Follow this sequence to verify the system is working:
+Follow this sequence to verify the system is working. This flow works for both v0 and v1 deployments - just set the appropriate environment variables:
 
 1. **Disable Goobs ownership enforcement** (for testing):
    ```bash

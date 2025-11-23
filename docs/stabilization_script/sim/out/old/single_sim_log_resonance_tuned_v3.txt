@@ -1,0 +1,302 @@
+
+============================================================
+Day 0
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 24 / 21 (error: 3.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=False, lockable=True)
+
+  Vibes: 9 -> 10 (decay: 0, streak: 0 -> 1 days)
+  SP: bonded=0 (earned today: 0), wallet=9
+
+  Items received today (2):
+    - common: temperature+2, frequency+1 (SP yield: 1)
+    - epic: frequency+-3, temperature+-1 (SP yield: 4)
+  Items in inventory: 0
+
+  Actions (8):
+    - Applied rare item: salinity+6, temperature+1 (error reduction: 5.00)
+    - Locked salinity (cost: 0 SP, bonded: 0, wallet: 0)
+    - Applied uncommon item: frequency+-4, temperature+-1 (error reduction: 5.00)
+    - Burned common item for 1 SP (need 8 more for lock)
+    - Burned common item for 1 SP (need 7 more for lock)
+    - Burned common item for 1 SP (need 6 more for lock)
+    - Burned uncommon item for 2 SP (need 5 more for lock)
+    - Burned epic item for 4 SP (need 3 more for lock)
+
+  Cumulative stats:
+    Items received: 7
+    Items applied: 2
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 0
+    Locks completed: 1
+------------------------------------------------------------
+
+============================================================
+Day 1
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 1 -> 2 days)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - uncommon: temperature+-5, frequency+-1 (SP yield: 2)
+    - uncommon: temperature+3, frequency+1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (3):
+    - Locked frequency (cost: 8 SP, bonded: 0, wallet: 8)
+    - Applied uncommon item: temperature+-5, frequency+-1 (error reduction: 1.00)
+    - Applied uncommon item: temperature+3, frequency+1 (error reduction: 1.00)
+
+  Cumulative stats:
+    Items received: 9
+    Items applied: 4
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+------------------------------------------------------------
+
+============================================================
+Day 2
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 2 -> 3 days)
+  SP: bonded=0 (earned today: 0), wallet=4
+
+  Items received today (2):
+    - common: frequency+-3, temperature+-1 (SP yield: 1)
+    - uncommon: salinity+5, temperature+1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (2):
+    - Burned common item for 1 SP (need 9 more for lock)
+    - Burned uncommon item for 2 SP (need 8 more for lock)
+
+  Cumulative stats:
+    Items received: 11
+    Items applied: 4
+    Items burned: 7
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+------------------------------------------------------------
+
+============================================================
+Day 3
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 3 -> 4 days)
+  SP: bonded=0 (earned today: 0), wallet=7
+
+  Items received today (2):
+    - common: frequency+-3, temperature+-1 (SP yield: 1)
+    - uncommon: ph+5, frequency+1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (2):
+    - Burned common item for 1 SP (need 6 more for lock)
+    - Burned uncommon item for 2 SP (need 5 more for lock)
+
+  Cumulative stats:
+    Items received: 13
+    Items applied: 4
+    Items burned: 9
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+------------------------------------------------------------
+
+============================================================
+Day 4
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 4 -> 5 days)
+  SP: bonded=0 (earned today: 0), wallet=11
+
+  Items received today (2):
+    - common: salinity+3, temperature+1 (SP yield: 1)
+    - rare: temperature+-4, frequency+-1 (SP yield: 3)
+  Items in inventory: 0
+
+  Actions (2):
+    - Burned common item for 1 SP (need 3 more for lock)
+    - Burned rare item for 3 SP (need 2 more for lock)
+
+  Cumulative stats:
+    Items received: 15
+    Items applied: 4
+    Items burned: 11
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+------------------------------------------------------------
+
+============================================================
+Day 5
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 5 -> 6 days)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - rare: frequency+-4, temperature+-1 (SP yield: 3)
+    - common: temperature+3, frequency+1 (SP yield: 1)
+  Items in inventory: 2
+
+  Actions (1):
+    - Locked temperature (cost: 10 SP, bonded: 0, wallet: 10)
+
+  Cumulative stats:
+    Items received: 17
+    Items applied: 4
+    Items burned: 11
+    Bonded SP earned: 0
+    Wallet SP used for locks: 18
+    Locks completed: 3
+------------------------------------------------------------
+
+============================================================
+Day 6
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 26 / 27 (error: 1.0, locked=False, lockable=True)
+    temperature: 22 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 6 -> 0 days)
+  SP: bonded=3 (earned today: 3), wallet=6
+
+  Items received today (2):
+    - common: ph+3, frequency+1 (SP yield: 1)
+    - common: ph+3, frequency+1 (SP yield: 1)
+  Items in inventory: 0
+
+  Actions (4):
+    - Applied common item: ph+3, frequency+1 (error reduction: 3.00)
+    - Burned common item for 1 SP (need 8 more for lock)
+    - Burned common item for 1 SP (need 7 more for lock)
+    - Burned rare item for 3 SP (need 6 more for lock)
+
+  Cumulative stats:
+    Items received: 19
+    Items applied: 5
+    Items burned: 14
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+------------------------------------------------------------
+
+============================================================
+Day 7
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 26 / 27 (error: 1.0, locked=False, lockable=True)
+    temperature: 22 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 0 -> 1 days)
+  SP: bonded=3 (earned today: 0), wallet=8
+
+  Items received today (2):
+    - common: frequency+3, temperature+1 (SP yield: 1)
+    - common: salinity+-3, temperature+-1 (SP yield: 1)
+  Items in inventory: 0
+
+  Actions (2):
+    - Burned common item for 1 SP (need 3 more for lock)
+    - Burned common item for 1 SP (need 2 more for lock)
+
+  Cumulative stats:
+    Items received: 21
+    Items applied: 5
+    Items burned: 16
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+------------------------------------------------------------
+
+============================================================
+Day 8
+============================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 26 / 27 (error: 1.0, locked=True, lockable=False)
+    temperature: 22 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 1 -> 2 days)
+  SP: bonded=0 (earned today: 0), wallet=0
+
+  Items received today (2):
+    - common: ph+3, frequency+1 (SP yield: 1)
+    - uncommon: ph+-5, frequency+-1 (SP yield: 2)
+  Items in inventory: 1
+
+  Actions (2):
+    - Burned common item for 1 SP (need 1 more for lock)
+    - Locked ph (cost: 12 SP, bonded: 0, wallet: 12)
+
+  Cumulative stats:
+    Items received: 23
+    Items applied: 5
+    Items burned: 17
+    Bonded SP earned: 3
+    Wallet SP used for locks: 30
+    Locks completed: 4
+------------------------------------------------------------
+
+============================================================
+=== Single Sim Summary ===
+============================================================
+✓ Stabilized on day: 8
+
+Items:
+  Total received: 23
+  Total applied: 5
+  Total burned: 17
+  Applied/Burned ratio: 0.28
+
+SP Economy:
+  Bonded SP earned: 3
+  Wallet SP used for locks: 30
+  Final wallet SP: 0
+  Final bonded SP: 0
+
+Lock Events (4):
+  1. Day 0: salinity (cost: 0, bonded: 0, wallet: 0)
+  2. Day 1: frequency (cost: 8, bonded: 0, wallet: 8)
+  3. Day 5: temperature (cost: 10, bonded: 0, wallet: 10)
+  4. Day 8: ph (cost: 12, bonded: 0, wallet: 12)
+============================================================

@@ -1,0 +1,439 @@
+======================================================================
+SINGLE CREATURE SIMULATION - DETAILED LOG
+======================================================================
+
+
+======================================================================
+Day 0
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 24 / 21 (error: 3.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=False, lockable=True)
+
+  Vibes: 9 -> 10 (decay: 0, streak: 0 -> 1 days)
+  Max Vibes Streak: 1 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=5
+
+  Items received today (1):
+    - common: temperature+2, frequency+1 (SP yield: 1)
+  Items in inventory: 0
+
+  Actions (7):
+    - Applied rare item: salinity+6, temperature+1 (error reduction: 5.00)
+    - Locked salinity (cost: 0 SP, bonded: 0, wallet: 0)
+    - Applied uncommon item: frequency+-4, temperature+-1 (error reduction: 5.00)
+    - Burned common item for 1 SP (need 8 more for lock)
+    - Burned common item for 1 SP (need 7 more for lock)
+    - Burned common item for 1 SP (need 6 more for lock)
+    - Burned uncommon item for 2 SP (need 5 more for lock)
+
+  Cumulative stats:
+    Items received: 6
+    Items applied: 2
+    Items burned: 4
+    Bonded SP earned: 0
+    Wallet SP used for locks: 0
+    Locks completed: 1
+----------------------------------------------------------------------
+
+======================================================================
+Day 1
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 24 / 21 (error: 3.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=False, lockable=True)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 1 -> 2 days)
+  Max Vibes Streak: 2 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=8
+
+  Items received today (1):
+    - rare: frequency+-4, temperature+-1 (SP yield: 3)
+  Items in inventory: 0
+
+  Actions (1):
+    - Burned rare item for 3 SP (need 3 more for lock)
+
+  Cumulative stats:
+    Items received: 7
+    Items applied: 2
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 0
+    Locks completed: 1
+----------------------------------------------------------------------
+
+======================================================================
+Day 2
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 19 / 21 (error: 2.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 2 -> 3 days)
+  Max Vibes Streak: 3 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=0
+
+  Items received today (1):
+    - uncommon: temperature+-5, frequency+-1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (2):
+    - Locked frequency (cost: 8 SP, bonded: 0, wallet: 8)
+    - Applied uncommon item: temperature+-5, frequency+-1 (error reduction: 1.00)
+
+  Cumulative stats:
+    Items received: 8
+    Items applied: 3
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 3
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 19 / 21 (error: 2.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 3 -> 4 days)
+  Max Vibes Streak: 4 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=0
+
+  Items received today (1):
+    - uncommon: temperature+-3, frequency+-1 (SP yield: 2)
+  Items in inventory: 1
+
+  Actions (0):
+
+  Cumulative stats:
+    Items received: 9
+    Items applied: 3
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 4
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 19 / 21 (error: 2.0, locked=False, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 4 -> 5 days)
+  Max Vibes Streak: 5 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=0
+
+  Items received today (1):
+    - common: frequency+-3, temperature+-1 (SP yield: 1)
+  Items in inventory: 2
+
+  Actions (0):
+
+  Cumulative stats:
+    Items received: 10
+    Items applied: 3
+    Items burned: 5
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 5
+======================================================================
+  Drip: 1 item/day
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 5 -> 6 days)
+  Max Vibes Streak: 6 days (completed: False, active: False)
+  SP: bonded=0 (earned today: 0), wallet=3
+
+  Items received today (1):
+    - uncommon: salinity+5, temperature+1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (3):
+    - Applied uncommon item: salinity+5, temperature+1 (error reduction: 1.00)
+    - Burned common item for 1 SP (need 10 more for lock)
+    - Burned uncommon item for 2 SP (need 9 more for lock)
+
+  Cumulative stats:
+    Items received: 11
+    Items applied: 4
+    Items burned: 7
+    Bonded SP earned: 0
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 6
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 6 -> 0 days)
+  Max Vibes Streak: 7 days (completed: True, active: True)
+  SP: bonded=3 (earned today: 3), wallet=4
+
+  Items received today (1):
+    - common: frequency+-3, temperature+-1 (SP yield: 1)
+  Items in inventory: 0
+
+  Actions (1):
+    - Burned common item for 1 SP (need 4 more for lock)
+
+  Cumulative stats:
+    Items received: 12
+    Items applied: 4
+    Items burned: 8
+    Bonded SP earned: 3
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 7
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=False, lockable=True)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 0 -> 1 days)
+  Max Vibes Streak: 8 days (completed: True, active: True)
+  SP: bonded=3 (earned today: 0), wallet=6
+
+  Items received today (2):
+    - common: temperature+2, frequency+1 (SP yield: 1)
+    - common: ph+3, frequency+1 (SP yield: 1)
+  Items in inventory: 0
+
+  Actions (2):
+    - Burned common item for 1 SP (need 3 more for lock)
+    - Burned common item for 1 SP (need 2 more for lock)
+
+  Cumulative stats:
+    Items received: 14
+    Items applied: 4
+    Items burned: 10
+    Bonded SP earned: 3
+    Wallet SP used for locks: 8
+    Locks completed: 2
+----------------------------------------------------------------------
+
+======================================================================
+Day 8
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 1 -> 2 days)
+  Max Vibes Streak: 9 days (completed: True, active: True)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - uncommon: ph+4, frequency+1 (SP yield: 2)
+    - uncommon: frequency+-5, temperature+-1 (SP yield: 2)
+  Items in inventory: 1
+
+  Actions (2):
+    - Burned uncommon item for 2 SP (need 1 more for lock)
+    - Locked temperature (cost: 10 SP, bonded: 0, wallet: 10)
+
+  Cumulative stats:
+    Items received: 16
+    Items applied: 4
+    Items burned: 11
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+----------------------------------------------------------------------
+
+======================================================================
+Day 9
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 2 -> 3 days)
+  Max Vibes Streak: 10 days (completed: True, active: True)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - common: salinity+-2, temperature+-1 (SP yield: 1)
+    - uncommon: salinity+4, temperature+1 (SP yield: 2)
+  Items in inventory: 3
+
+  Actions (0):
+
+  Cumulative stats:
+    Items received: 18
+    Items applied: 4
+    Items burned: 11
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+----------------------------------------------------------------------
+
+======================================================================
+Day 10
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 23 / 27 (error: 4.0, locked=False, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 3 -> 4 days)
+  Max Vibes Streak: 11 days (completed: True, active: True)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - rare: salinity+-6, temperature+-2 (SP yield: 3)
+    - common: temperature+2, frequency+1 (SP yield: 1)
+  Items in inventory: 5
+
+  Actions (0):
+
+  Cumulative stats:
+    Items received: 20
+    Items applied: 4
+    Items burned: 11
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+----------------------------------------------------------------------
+
+======================================================================
+Day 11
+======================================================================
+  Drip: 2 items/day (streak active)
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 26 / 27 (error: 1.0, locked=False, lockable=True)
+    temperature: 20 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 4 -> 5 days)
+  Max Vibes Streak: 12 days (completed: True, active: True)
+  SP: bonded=0 (earned today: 0), wallet=13
+
+  Items received today (2):
+    - epic: temperature+-6, frequency+-1 (SP yield: 3)
+    - uncommon: ph+3, frequency+1 (SP yield: 2)
+  Items in inventory: 0
+
+  Actions (7):
+    - Applied uncommon item: ph+3, frequency+1 (error reduction: 3.00)
+    - Burned common item for 1 SP (need 11 more for lock)
+    - Burned common item for 1 SP (need 10 more for lock)
+    - Burned uncommon item for 2 SP (need 9 more for lock)
+    - Burned uncommon item for 2 SP (need 7 more for lock)
+    - Burned rare item for 3 SP (need 5 more for lock)
+    - Burned epic item for 3 SP (need 2 more for lock)
+
+  Cumulative stats:
+    Items received: 22
+    Items applied: 5
+    Items burned: 17
+    Bonded SP earned: 3
+    Wallet SP used for locks: 18
+    Locks completed: 3
+----------------------------------------------------------------------
+
+======================================================================
+Day 12
+======================================================================
+  Traits:
+    salinity: 58 / 60 (error: 2.0, locked=True, lockable=False)
+    ph: 26 / 27 (error: 1.0, locked=True, lockable=False)
+    temperature: 20 / 21 (error: 1.0, locked=True, lockable=False)
+    frequency: 70 / 67 (error: 3.0, locked=True, lockable=False)
+
+  Vibes: 10 -> 10 (decay: 0, streak: 5 -> 6 days)
+  Max Vibes Streak: 13 days (completed: True, active: True)
+  SP: bonded=0 (earned today: 0), wallet=1
+
+  Items received today (2):
+    - rare: salinity+6, temperature+1 (SP yield: 3)
+    - rare: temperature+4, frequency+1 (SP yield: 3)
+  Items in inventory: 2
+
+  Actions (1):
+    - Locked ph (cost: 12 SP, bonded: 0, wallet: 12)
+
+  Cumulative stats:
+    Items received: 24
+    Items applied: 5
+    Items burned: 17
+    Bonded SP earned: 3
+    Wallet SP used for locks: 30
+    Locks completed: 4
+----------------------------------------------------------------------
+
+======================================================================
+✓ STABILIZED on Day 12
+======================================================================
+
+======================================================================
+FINAL SUMMARY
+======================================================================
+✓ Stabilized on day: 12
+
+Items:
+  Total received: 24
+  Total applied: 5
+  Total burned: 17
+  Applied/Burned ratio: 0.28
+
+SP Economy:
+  Bonded SP earned: 3
+  Wallet SP used for locks: 30
+  Final wallet SP: 1
+  Final bonded SP: 0
+
+Lock Events (4):
+  1. Day 0: salinity (cost: 0, bonded: 0, wallet: 0)
+  2. Day 2: frequency (cost: 8, bonded: 0, wallet: 8)
+  3. Day 8: temperature (cost: 10, bonded: 0, wallet: 10)
+  4. Day 12: ph (cost: 12, bonded: 0, wallet: 12)

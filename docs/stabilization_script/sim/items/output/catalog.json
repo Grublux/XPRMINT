@@ -1,0 +1,1086 @@
+[
+  {
+    "id": 0,
+    "name": "Rust-Flake Calibrator",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_0",
+    "description": "A thumb-sized brass dial packed with iron sediment scraped from old mine-cart axles.",
+    "domain": [
+      "Mining"
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Brass Drip Coupling",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 2,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_1",
+    "description": "A repurposed valve fitting from the Goblinn cellar pipes, releasing consistent mineral drips.",
+    "domain": [
+      "Tavern: Cellar Hardware"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Pickle-Line Tubing Section",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 2,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_2",
+    "description": "A stained coil of tubing once used in Taffy’s pickle-transfer setup; still smells sharp.",
+    "domain": [
+      "Tavern: Pickle Cellar"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Salinity Gauge Cartridge",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_3",
+    "description": "A small brass sensor cartridge pieced from broken boiler gauges, needle twitching erratically.",
+    "domain": [
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Tap-Valve Concentrator",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_4",
+    "description": "A modified tavern tap valve that condenses trace salts as liquid passes through.",
+    "domain": [
+      "Tavern: Maintenance"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Dust of Minto Horn",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_5",
+    "description": "Finely ground powder from the mineral-loaded horn of a deep-tunnel Minto beast.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Pickle-Brine Filter Disk",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_6",
+    "description": "A mesh disk used to strain seeds, spice, and solids from Taffy’s pickle vats.",
+    "domain": [
+      "Tavern: Pickle Cellar"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Minewater Compression Brick",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_7",
+    "description": "A dense sediment brick formed by years of mineral pressure in abandoned tunnels.",
+    "domain": [
+      "Mining"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Electro-Salt Capacitor",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_8",
+    "description": "A charged brass canister built from tavern lighting fixtures and cellar wiring, humming with mineral tension.",
+    "domain": [
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Outhouse Sludge Tablet",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_9",
+    "description": "A composting tablet from the Goblinn outhouse repurposed to modulate ionic balance when ground and distilled.",
+    "domain": [
+      "Inn: Outhouse"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Cellar Salt-Press Plate",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 6,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_10",
+    "description": "A heavy plate once used to compact salt and cheese in the Goblinn’s cellar press, still crusted with brine.",
+    "domain": [
+      "Inn: Cellar"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Iono-Regulation Core",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_11",
+    "description": "A sealed orb built from brass lamp housings and deep-vein mineral fragments, regulating salinity with uncanny precision.",
+    "domain": [
+      "Mining",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "House-Linen Mineral Strip",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 0,
+    "primary_trait_name": "salinity",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_12",
+    "description": "A strip of laundry-room towel fabric stiffened by decades of hard-water mineral crust.",
+    "domain": [
+      "Inn: Laundry"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "pH Drip Regulator",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 3,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_13",
+    "description": "A salvage from the brewery filtration rigs, now repurposed to deliver controlled neutralizing drips.",
+    "domain": [
+      "Tavern: Brewery"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Neutralizing Valve Pellet",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 2,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_14",
+    "description": "A corrosion-moderating bead originally used in mine pump housings.",
+    "domain": [
+      "Mining"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Vinegar-Stone Bite",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 2,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_15",
+    "description": "A small stone chunk gnawed by Vinegar-Bats, soaked in naturally acidic saliva.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Balancing Basin Cartridge",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 4,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_16",
+    "description": "A ceramic filter cartridge taken from an old dwarven water-tuning basin.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Metered Dose Basin Syringe",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_17",
+    "description": "A stainless dosing syringe rebuilt from dishwashing-line tools, meant for tiny, exact fluid adjustments.",
+    "domain": [
+      "Inn: Dishwashing",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Unicorn Brew Settling Disc",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 3,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_18",
+    "description": "A disc used to separate foam layers in Unicorn Brew kettles; coated with reactive sweet-acid residue.",
+    "domain": [
+      "Tavern: Brewery"
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Dairy-Ladle pH Paddle",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_19",
+    "description": "A wooden ladle used in goat-milk prep, its surface etched with residue perfect for fine pH adjustments.",
+    "domain": [
+      "Inn: Goat Stall",
+      "Inn: Kitchen"
+    ]
+  },
+  {
+    "id": 20,
+    "name": "Guestroom Basin Scale Chip",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_20",
+    "description": "A mineral flake chipped from the underside of old guestroom washbasins, packed with layered deposits.",
+    "domain": [
+      "Inn: Guestrooms"
+    ]
+  },
+  {
+    "id": 21,
+    "name": "Basin-Reactor Flask",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 4,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_21",
+    "description": "A squat flask reinforced with laundry-starch films and copper banding to stabilize volatile mixtures.",
+    "domain": [
+      "Inn: Laundry",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Mineral pH Regulator Shard",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 4,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_22",
+    "description": "A calcite shard infused with glowing cavern growths, vibrating with subtle chemical weight.",
+    "domain": [
+      "Mining",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 23,
+    "name": "Volatility Modulation Tube",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_23",
+    "description": "A copper-lined modulator tube scavenged from the brewing line, balancing unstable reactions via controlled swirl.",
+    "domain": [
+      "Mechanical",
+      "Tavern: Brewery"
+    ]
+  },
+  {
+    "id": 24,
+    "name": "Deep-Clean Scraper Head",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 6,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_24",
+    "description": "A heavy scraper attachment from the inn’s cleaning closet, once used to descale brewing and septic pipes.",
+    "domain": [
+      "Inn: Maintenance"
+    ]
+  },
+  {
+    "id": 25,
+    "name": "pH Equilibrium Lance",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 1,
+    "primary_trait_name": "ph",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_25",
+    "description": "A long brass fluid-lance built from stove piping and pump housings, achieving near-perfect chemical alignment.",
+    "domain": [
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 26,
+    "name": "Flux-Wick Assembly",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 2,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_26",
+    "description": "A wick woven from stove-lamp fibers and cellar threads, responsive to ambient flux.",
+    "domain": [
+      "Mechanical",
+      "Tavern: Kitchen"
+    ]
+  },
+  {
+    "id": 27,
+    "name": "Conduction Scrap Chip",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 3,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_27",
+    "description": "A shard taken from an old conduction plate on the mine elevators.",
+    "domain": [
+      "Mining"
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Stove Coil Topper",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 2,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_28",
+    "description": "A warped topper salvaged from the Goblinn’s kitchen stovetops.",
+    "domain": [
+      "Tavern: Kitchen"
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Pantry Thermo-Crank",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 2,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_29",
+    "description": "A hand-crank from a broken food dehydrator in pantry storage, still turning slightly warm.",
+    "domain": [
+      "Inn: Pantry"
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Boiler-Runoff Coil Segment",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_30",
+    "description": "A coil fragment taken from the inn’s basement boiler system, still resonant with residual warmth cycling.",
+    "domain": [
+      "Inn: Maintenance",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 31,
+    "name": "Cellar-Core Capsule",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 3,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_31",
+    "description": "A capsule lined with cold cellar moss, used to stabilize low-temp food stores.",
+    "domain": [
+      "Inn: Cellar"
+    ]
+  },
+  {
+    "id": 32,
+    "name": "Generator-Chain Flux Loop",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 3,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_32",
+    "description": "A smooth metal loop once part of the Goblinn generator’s chain assembly, repurposed to even out fluctuating energy patterns.",
+    "domain": [
+      "Inn: Maintenance",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 33,
+    "name": "Goat-Stall Comfort Rod",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_33",
+    "description": "A rod used to maintain stable environmental comfort around goat feed troughs during unpredictable temperature swings.",
+    "domain": [
+      "Inn: Goat Stall"
+    ]
+  },
+  {
+    "id": 34,
+    "name": "Bedframe Coil Support",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_34",
+    "description": "A spring coil salvaged from a creaky guestroom bedframe, its tension now tuned for equilibrium functions.",
+    "domain": [
+      "Inn: Guestrooms"
+    ]
+  },
+  {
+    "id": 35,
+    "name": "Kinetic-Whip Rod",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 6,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_35",
+    "description": "A wrapped alloy rod reacting dynamically to flickering environmental energy.",
+    "domain": [
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "Charge-Burst Pebble",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 5,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_36",
+    "description": "A pebble from cavern fauna that stores tiny bursts of reactive spark-energy.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 37,
+    "name": "Stabilizer Core Block",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 6,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_37",
+    "description": "A cold-core block holding structured energy patterns.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 38,
+    "name": "Smokehouse Ember Disk",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 6,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_38",
+    "description": "A metal plate from the Goblinn smokehouse floor, simmering with old heat and cured oils.",
+    "domain": [
+      "Inn: Kitchen/Smokehouse"
+    ]
+  },
+  {
+    "id": 39,
+    "name": "Flux Convergence Node",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 2,
+    "primary_trait_name": "temperature",
+    "primary_delta": 4,
+    "secondary_trait": 3,
+    "secondary_trait_name": "frequency",
+    "secondary_delta": 1,
+    "image_key": "item_39",
+    "description": "A multi-layered disk driving temperature into equilibrium.",
+    "domain": [
+      "Mechanical",
+      "Inn: Maintenance"
+    ]
+  },
+  {
+    "id": 40,
+    "name": "Chime-Plate Resonator",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_40",
+    "description": "A thin bell plate salvaged from the tavern’s old stage chime.",
+    "domain": [
+      "Tavern: Music Corner"
+    ]
+  },
+  {
+    "id": 41,
+    "name": "Buzz-Coil Relay",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_41",
+    "description": "A compact relay coil scavenged from mine alarm systems.",
+    "domain": [
+      "Mining"
+    ]
+  },
+  {
+    "id": 42,
+    "name": "Vibe-Spring Coupling",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 2,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_42",
+    "description": "A jittering spring connector built from dishwashing rack hardware.",
+    "domain": [
+      "Inn: Dishwashing",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 43,
+    "name": "Broom-Handle Resonance Rod",
+    "rarity": 0,
+    "rarity_name": "common",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 2,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_43",
+    "description": "A broken broom handle wrapped in copper wire by bored Goblinn staff.",
+    "domain": [
+      "Inn: Cleaning Closet"
+    ]
+  },
+  {
+    "id": 44,
+    "name": "Stove-Plate Resonance Cage",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_44",
+    "description": "A resonance housing built from warped kitchen stove plates and iron bands.",
+    "domain": [
+      "Tavern: Kitchen",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 45,
+    "name": "Tuning Fork Assembly",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_45",
+    "description": "Twin prongs mounted on a brass bracket once used by tavern musicians to test harmonics.",
+    "domain": [
+      "Mechanical",
+      "Tavern: Stage"
+    ]
+  },
+  {
+    "id": 46,
+    "name": "Bar-Top Acoustic Rod",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 3,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_46",
+    "description": "A tuning rod used behind the bar for testing glassware resonance.",
+    "domain": [
+      "Tavern: Stage/Bar"
+    ]
+  },
+  {
+    "id": 47,
+    "name": "Maintenance Rattle Clamp",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_47",
+    "description": "A clamp used to identify rattling ductwork.",
+    "domain": [
+      "Inn: Maintenance"
+    ]
+  },
+  {
+    "id": 48,
+    "name": "Door-Hinge Resonance Pin",
+    "rarity": 1,
+    "rarity_name": "uncommon",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_48",
+    "description": "A hinge-pin from the noisy hallway doors, polished by decades of use into a perfect vibration guide.",
+    "domain": [
+      "Inn: Hallway"
+    ]
+  },
+  {
+    "id": 49,
+    "name": "Bottling Conveyor Harmonic Wheel",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_49",
+    "description": "A rotating wheel salvaged from the Unicorn Brew bottling line, etched with harmonic grooves.",
+    "domain": [
+      "Tavern: Brewery",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 50,
+    "name": "Lantern-Soot Oscillation Baffle",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_50",
+    "description": "A brass baffle scraped from tavern lanterns, coated in soot that vibrates in perfect patterns.",
+    "domain": [
+      "Inn: Hallway",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 51,
+    "name": "Chroma Conduction Core",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 4,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_51",
+    "description": "A prismatic core fused with chromatic beast-scale fragments.",
+    "domain": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": 52,
+    "name": "Stage-Bell Resonance Drum",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 5,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_52",
+    "description": "A mini-drum from the Goblinn stage, perfect for overtones.",
+    "domain": [
+      "Tavern: Stage"
+    ]
+  },
+  {
+    "id": 53,
+    "name": "Boiler-Gauge Flux Coupler",
+    "rarity": 2,
+    "rarity_name": "rare",
+    "primary_trait": 3,
+    "primary_trait_name": "frequency",
+    "primary_delta": 6,
+    "secondary_trait": 2,
+    "secondary_trait_name": "temperature",
+    "secondary_delta": 1,
+    "image_key": "item_53",
+    "description": "A multi-chambered resonant coupler assembled from broken boiler gauges and barrel hoops, collapsing vibrations into perfect alignment.",
+    "domain": [
+      "Inn: Maintenance",
+      "Mechanical"
+    ]
+  },
+  {
+    "id": 54,
+    "name": "The Ancient Titration Stone",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_54",
+    "description": "A palm stone carved with channels worn smooth by centuries of experimental pouring. Warm to the touch at random, as if remembering old mixtures.",
+    "domain": []
+  },
+  {
+    "id": 55,
+    "name": "The Brine-Eater’s Coil",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_55",
+    "description": "A twisted copper helix found beneath the tavern’s foundation, humming faintly like it’s digesting something unseen.",
+    "domain": []
+  },
+  {
+    "id": 56,
+    "name": "The Unsplit Hourglass",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_56",
+    "description": "A sealed glass vessel where the sand refuses to fall unless held sideways. No Gob has ever figured out why.",
+    "domain": []
+  },
+  {
+    "id": 57,
+    "name": "The Whisper-Jar Fragment",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_57",
+    "description": "A shard of thick glass from an unknown container — when tapped, it echoes with distant clinks, as if something is inside on the other side.",
+    "domain": []
+  },
+  {
+    "id": 58,
+    "name": "The Half-Melted Calibration Crown",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_58",
+    "description": "A crown-shaped ring of metal partially melted but still impossibly symmetrical. Engineers hate it; wizards fear it.",
+    "domain": []
+  },
+  {
+    "id": 59,
+    "name": "The Bound-Spiral Lens",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_59",
+    "description": "A lens wrapped in metal wiring that shifts color depending on which Gob is looking through it.",
+    "domain": []
+  },
+  {
+    "id": 60,
+    "name": "The Forgotten Resonance Nail",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_60",
+    "description": "A long rusted nail that vibrates at night. Staff keep trying to throw it out, but it always reappears somewhere useful.",
+    "domain": []
+  },
+  {
+    "id": 61,
+    "name": "The Forge-Dormant Ember Core",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_61",
+    "description": "A small cold ember that still leaves scorch marks when placed near parchment.",
+    "domain": []
+  },
+  {
+    "id": 62,
+    "name": "The Goat-Stall Miracle Rag",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_62",
+    "description": "A filthy cleaning rag that somehow removes exactly the stain you weren’t aiming at. A stable miracle.",
+    "domain": []
+  },
+  {
+    "id": 63,
+    "name": "Quiet-Gift Counterpulse Rod",
+    "rarity": 3,
+    "rarity_name": "epic",
+    "primary_trait": 255,
+    "primary_trait_name": "none",
+    "primary_delta": 0,
+    "secondary_trait": 255,
+    "secondary_trait_name": "none",
+    "secondary_delta": 0,
+    "image_key": "item_63",
+    "description": "A simple brass rod left on a tavern table one night by an unknown guest—never explained, never claimed—and most guests can’t handle it bare-handed without gloves.",
+    "domain": []
+  }
+]

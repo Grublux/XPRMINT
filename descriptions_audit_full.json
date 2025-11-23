@@ -1,0 +1,2146 @@
+[
+  {
+    "name": "Rust-Flake Calibrator",
+    "description": "A thumb-sized brass dial packed with iron sediment scraped from old mine-cart axles.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Rust-Flake Calibrator"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,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"
+  },
+  {
+    "name": "Brass Drip Coupling",
+    "description": "A repurposed valve fitting from the Goblinn cellar pipes, releasing consistent mineral drips.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Brass Drip Coupling"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,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"
+  },
+  {
+    "name": "Pickle-Line Tubing Section",
+    "description": "A stained coil of tubing once used in Taffy\u2019s pickle-transfer setup; still smells sharp.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Pickle-Line Tubing Section"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Salinity Gauge Cartridge",
+    "description": "A small brass sensor cartridge pieced from broken boiler gauges, needle twitching erratically.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Salinity Gauge Cartridge"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Tap-Valve Concentrator",
+    "description": "A modified tavern tap valve that condenses trace salts as liquid passes through.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Tap-Valve Concentrator"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Dust of Minto Horn",
+    "description": "Finely ground powder from the mineral-loaded horn of a deep-tunnel Minto beast.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Dust of Minto Horn"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Pickle-Brine Filter Disk",
+    "description": "A mesh disk used to strain seeds, spice, and solids from Taffy\u2019s pickle vats.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Pickle-Brine Filter Disk"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Minewater Compression Brick",
+    "description": "A dense sediment brick formed by years of mineral pressure in abandoned tunnels.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Minewater Compression Brick"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Electro-Salt Capacitor",
+    "description": "A charged brass canister built from tavern lighting fixtures and cellar wiring, humming with mineral tension.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Electro-Salt Capacitor"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Outhouse Sludge Tablet",
+    "description": "A composting tablet from the Goblinn outhouse repurposed to modulate ionic balance when ground and distilled.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Outhouse Sludge Tablet"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Cellar Salt-Press Plate",
+    "description": "A heavy plate once used to compact salt and cheese in the Goblinn\u2019s cellar press, still crusted with brine.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Cellar Salt-Press Plate"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Iono-Regulation Core",
+    "description": "A sealed orb built from brass lamp housings and deep-vein mineral fragments, regulating salinity with uncanny precision.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Iono-Regulation Core"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "House-Linen Mineral Strip",
+    "description": "A strip of laundry-room towel fabric stiffened by decades of hard-water mineral crust.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "House-Linen Mineral Strip"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Salinity"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "pH Drip Regulator",
+    "description": "A salvage from the brewery filtration rigs, now repurposed to deliver controlled neutralizing drips.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "pH Drip Regulator"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Neutralizing Valve Pellet",
+    "description": "A corrosion-moderating bead originally used in mine pump housings.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Neutralizing Valve Pellet"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Vinegar-Stone Bite",
+    "description": "A small stone chunk gnawed by Vinegar-Bats, soaked in naturally acidic saliva.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Vinegar-Stone Bite"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Balancing Basin Cartridge",
+    "description": "A ceramic filter cartridge taken from an old dwarven water-tuning basin.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Balancing Basin Cartridge"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Metered Dose Basin Syringe",
+    "description": "A stainless dosing syringe rebuilt from dishwashing-line tools, meant for tiny, exact fluid adjustments.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Metered Dose Basin Syringe"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Unicorn Brew Settling Disc",
+    "description": "A disc used to separate foam layers in Unicorn Brew kettles; coated with reactive sweet-acid residue.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Unicorn Brew Settling Disc"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Dairy-Ladle pH Paddle",
+    "description": "A wooden ladle used in goat-milk prep, its surface etched with residue perfect for fine pH adjustments.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Dairy-Ladle pH Paddle"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Guestroom Basin Scale Chip",
+    "description": "A mineral flake chipped from the underside of old guestroom washbasins, packed with layered deposits.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Guestroom Basin Scale Chip"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Basin-Reactor Flask",
+    "description": "A squat flask reinforced with laundry-starch films and copper banding to stabilize volatile mixtures.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Basin-Reactor Flask"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Mineral pH Regulator Shard",
+    "description": "A calcite shard infused with glowing cavern growths, vibrating with subtle chemical weight.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Mineral pH Regulator Shard"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Volatility Modulation Tube",
+    "description": "A copper-lined modulator tube scavenged from the brewing line, balancing unstable reactions via controlled swirl.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Volatility Modulation Tube"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Deep-Clean Scraper Head",
+    "description": "A heavy scraper attachment from the inn\u2019s cleaning closet, once used to descale brewing and septic pipes.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Deep-Clean Scraper Head"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "pH Equilibrium Lance",
+    "description": "A long brass fluid-lance built from stove piping and pump housings, achieving near-perfect chemical alignment.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "pH Equilibrium Lance"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "pH"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Flux-Wick Assembly",
+    "description": "A wick woven from stove-lamp fibers and cellar threads, responsive to ambient flux.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Flux-Wick Assembly"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Conduction Scrap Chip",
+    "description": "A shard taken from an old conduction plate on the mine elevators.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Conduction Scrap Chip"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Stove Coil Topper",
+    "description": "A warped topper salvaged from the Goblinn\u2019s kitchen stovetops.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Stove Coil Topper"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Pantry Thermo-Crank",
+    "description": "A hand-crank from a broken food dehydrator in pantry storage, still turning slightly warm.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Pantry Thermo-Crank"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Boiler-Runoff Coil Segment",
+    "description": "A coil fragment taken from the inn\u2019s basement boiler system, still resonant with residual warmth cycling.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Boiler-Runoff Coil Segment"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Cellar-Core Capsule",
+    "description": "A capsule lined with cold cellar moss, used to stabilize low-temp food stores.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Cellar-Core Capsule"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Generator-Chain Flux Loop",
+    "description": "A smooth metal loop once part of the Goblinn generator\u2019s chain assembly, repurposed to even out fluctuating energy patterns.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Generator-Chain Flux Loop"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Goat-Stall Comfort Rod",
+    "description": "A rod used to maintain stable environmental comfort around goat feed troughs during unpredictable temperature swings.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Goat-Stall Comfort Rod"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Bedframe Coil Support",
+    "description": "A spring coil salvaged from a creaky guestroom bedframe, its tension now tuned for equilibrium functions.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Bedframe Coil Support"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Kinetic-Whip Rod",
+    "description": "A wrapped alloy rod reacting dynamically to flickering environmental energy.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Kinetic-Whip Rod"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Charge-Burst Pebble",
+    "description": "A pebble from cavern fauna that stores tiny bursts of reactive spark-energy.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Charge-Burst Pebble"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Stabilizer Core Block",
+    "description": "A cold-core block holding structured energy patterns.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Stabilizer Core Block"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Smokehouse Ember Disk",
+    "description": "A metal plate from the Goblinn smokehouse floor, simmering with old heat and cured oils.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Smokehouse Ember Disk"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Flux Convergence Node",
+    "description": "A multi-layered disk driving temperature into equilibrium.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Flux Convergence Node"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Chime-Plate Resonator",
+    "description": "A thin bell plate salvaged from the tavern\u2019s old stage chime.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Chime-Plate Resonator"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Buzz-Coil Relay",
+    "description": "A compact relay coil scavenged from mine alarm systems.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Buzz-Coil Relay"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Vibe-Spring Coupling",
+    "description": "A jittering spring connector built from dishwashing rack hardware.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Vibe-Spring Coupling"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Broom-Handle Resonance Rod",
+    "description": "A broken broom handle wrapped in copper wire by bored Goblinn staff.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Broom-Handle Resonance Rod"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Common"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 2
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 1
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Stove-Plate Resonance Cage",
+    "description": "A resonance housing built from warped kitchen stove plates and iron bands.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Stove-Plate Resonance Cage"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Tuning Fork Assembly",
+    "description": "Twin prongs mounted on a brass bracket once used by tavern musicians to test harmonics.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Tuning Fork Assembly"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Bar-Top Acoustic Rod",
+    "description": "A tuning rod used behind the bar for testing glassware resonance.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Bar-Top Acoustic Rod"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 3
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Maintenance Rattle Clamp",
+    "description": "A clamp used to identify rattling ductwork.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Maintenance Rattle Clamp"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Door-Hinge Resonance Pin",
+    "description": "A hinge-pin from the noisy hallway doors, polished by decades of use into a perfect vibration guide.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Door-Hinge Resonance Pin"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Uncommon"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 2
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Bottling Conveyor Harmonic Wheel",
+    "description": "A rotating wheel salvaged from the Unicorn Brew bottling line, etched with harmonic grooves.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Bottling Conveyor Harmonic Wheel"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Lantern-Soot Oscillation Baffle",
+    "description": "A brass baffle scraped from tavern lanterns, coated in soot that vibrates in perfect patterns.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Lantern-Soot Oscillation Baffle"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Chroma Conduction Core",
+    "description": "A prismatic core fused with chromatic beast-scale fragments.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Chroma Conduction Core"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 4
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Stage-Bell Resonance Drum",
+    "description": "A mini-drum from the Goblinn stage, perfect for overtones.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Stage-Bell Resonance Drum"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 5
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Boiler-Gauge Flux Coupler",
+    "description": "A multi-chambered resonant coupler assembled from broken boiler gauges and barrel hoops, collapsing vibrations into perfect alignment.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Boiler-Gauge Flux Coupler"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Rare"
+      },
+      {
+        "trait_type": "Primary Trait",
+        "value": "Frequency"
+      },
+      {
+        "trait_type": "Primary Delta Magnitude",
+        "value": 6
+      },
+      {
+        "trait_type": "Secondary Trait",
+        "value": "Temperature"
+      },
+      {
+        "trait_type": "Secondary Delta Magnitude",
+        "value": 1
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 3
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Ancient Titration Stone",
+    "description": "A palm stone carved with channels worn smooth by centuries of experimental pouring. Warm to the touch at random, as if remembering old mixtures.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Ancient Titration Stone"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Brine-Eater\u2019s Coil",
+    "description": "A twisted copper helix found beneath the tavern\u2019s foundation, humming faintly like it\u2019s digesting something unseen.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Brine-Eater\u2019s Coil"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Unsplit Hourglass",
+    "description": "A sealed glass vessel where the sand refuses to fall unless held sideways. No Gob has ever figured out why.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Unsplit Hourglass"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Whisper-Jar Fragment",
+    "description": "A shard of thick glass from an unknown container \u2014 when tapped, it echoes with distant clinks, as if something is inside on the other side.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Whisper-Jar Fragment"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Half-Melted Calibration Crown",
+    "description": "A crown-shaped ring of metal partially melted but still impossibly symmetrical. Engineers hate it; wizards fear it.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Half-Melted Calibration Crown"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Bound-Spiral Lens",
+    "description": "A lens wrapped in metal wiring that shifts color depending on which Gob is looking through it.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Bound-Spiral Lens"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Forgotten Resonance Nail",
+    "description": "A long rusted nail that vibrates at night. Staff keep trying to throw it out, but it always reappears somewhere useful.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Forgotten Resonance Nail"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Forge-Dormant Ember Core",
+    "description": "A small cold ember that still leaves scorch marks when placed near parchment.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Forge-Dormant Ember Core"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "The Goat-Stall Miracle Rag",
+    "description": "A filthy cleaning rag that somehow removes exactly the stain you weren\u2019t aiming at. A stable miracle.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "The Goat-Stall Miracle Rag"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  },
+  {
+    "name": "Quiet-Gift Counterpulse Rod",
+    "description": "A simple brass rod left on a tavern table one night by an unknown guest\u2014never explained, never claimed\u2014and most guests can\u2019t handle it bare-handed without gloves.",
+    "collection": "Stabilization Items",
+    "attributes": [
+      {
+        "trait_type": "Item Name",
+        "value": "Quiet-Gift Counterpulse Rod"
+      },
+      {
+        "trait_type": "Rarity",
+        "value": "Epic"
+      },
+      {
+        "trait_type": "SP Yield",
+        "value": 5
+      }
+    ],
+    "image": "data:image/png;base64,"
+  }
+]
