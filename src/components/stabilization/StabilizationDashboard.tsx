@@ -40,9 +40,6 @@ export const StabilizationDashboard: React.FC = () => {
     return (
       <div className={styles.dashboardWrapper}>
         <div className={styles.dashboardContainer}>
-          <div className={styles.headerSection}>
-            <h2 className={styles.title}>My Goobs</h2>
-          </div>
           <div className={styles.connectOrSimulateContainer}>
             <div className={styles.connectOrSimulateDescription}>
               Connect wallet to import your Goobs and Items into the stabilization lab
