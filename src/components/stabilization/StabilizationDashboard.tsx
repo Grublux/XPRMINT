@@ -21,6 +21,9 @@ export const StabilizationDashboard: React.FC = () => {
   const simulateGoobsQuery = useSimulatedGoobs();
   const simulateItemsQuery = useSimulatedItems();
   
+  // Always call useWalletSP unconditionally (React rules)
+  const { sp, isLoading: spLoading } = useWalletSP();
+  
   const simulatedGoobs = isSimulating ? simulateGoobsQuery.goobs : [];
   const loadingSimulatedGoobs = isSimulating ? simulateGoobsQuery.isLoading : false;
   const simulatedItems = isSimulating ? simulateItemsQuery.items : [];
@@ -63,8 +66,6 @@ export const StabilizationDashboard: React.FC = () => {
     );
   }
 
-  const { sp, isLoading: spLoading } = useWalletSP();
-
   return (
     <div className={styles.dashboardWrapper}>
       <div className={styles.dashboardContainer}>
@@ -103,7 +104,7 @@ export const StabilizationDashboard: React.FC = () => {
         <div className={styles.spSection}>
           <div className={styles.spLabel}>Stabilization Points (SP)</div>
           <div className={styles.spValue}>
-            {spLoading ? '…' : sp.toString()}
+            {spLoading ? '…' : (address ? sp.toString() : '0')}
           </div>
           <p className={styles.spDescription}>
             Earned by burning items. SP is required to lock traits.
