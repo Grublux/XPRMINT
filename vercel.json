@@ -6,6 +6,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/items_full/(.*)",
+      "destination": "/items_full/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
