@@ -11,7 +11,7 @@ const IMAGES_TO_PRELOAD = [
   // Anode images
   '/anode_cart.png',
   // Background images
-  '/jug_cartoon1.png',
+  '/active_lab_3.png',
 ];
 
 /**

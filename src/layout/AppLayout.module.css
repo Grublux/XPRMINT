@@ -14,6 +14,11 @@
   margin: 0 auto;
   height: 100%;
 }
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .titleText {
   font-size: 21.6px;
   font-weight: 900;

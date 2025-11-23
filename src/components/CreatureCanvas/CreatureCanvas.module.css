@@ -705,9 +705,9 @@
 }
 .panel{
   background-color: var(--panel) !important; /* Use background-color instead of background to preserve background-image */
-  background-image: url('/jug_cartoon1.png') !important; /* Ensure jug image is displayed */
-  background-size: min(120%, 800px) 120% !important; /* Increased width to 120% for largest viewports */
-  background-position: center 11px !important; /* Position 11px from top to create space above jug */
+  background-image: url('/active_lab_3.png') !important; /* Lab background image */
+  background-size: auto 115% !important; /* 115% height, width adjusts automatically */
+  background-position: center center !important; /* Center the background */
   background-repeat: no-repeat !important;
   border-radius:var(--radius);
   border-bottom-left-radius: 0; /* Remove bottom border radius to connect seamlessly */
@@ -718,8 +718,6 @@
   border-right: 1px solid rgba(255, 255, 255, 0.3); /* Match selected button border opacity */
   box-shadow: 0 10px 30px rgba(0,0,0,.35); /* Standard shadow */
   padding:10.8px;
-  padding-top: 11px; /* Add top padding for jug image */
-  padding-bottom: 20px; /* Add bottom padding to show more of the jug bottom */
   display:flex;
   flex-direction:column;
   gap:3.6px; /* Reduced from 7.2px to bring things closer */
@@ -732,7 +730,7 @@
   margin: 0; /* Remove auto margin to fill container */
   flex-shrink: 0; /* Prevent shrinking */
   flex-grow: 0; /* Prevent growing */
-  overflow: hidden; /* Prevent content from causing layout shifts */
+  overflow: visible; /* Allow full background image to be visible */
   box-sizing: border-box; /* Include padding in width calculation */
 }
 
@@ -882,10 +880,10 @@
   border-top-right-radius: 0;
 }
 
-/* Widest viewports - make jug even wider */
+/* Widest viewports - ensure background shows full height */
 @media (min-width: 1200px) {
   .panel {
-    background-size: min(130%, 850px) 120%; /* 10% wider on widest viewports */
+    background-size: auto 115% !important; /* 115% height, width adjusts automatically */
   }
 }
 
@@ -964,8 +962,8 @@
 
 .cathodeBottom {
   position: absolute;
-  bottom: 0;
-  left: max(10.8px, calc(50% - 375px)); /* Position at jug2 left edge: center (50%) minus half max jug width (375px), but never less than padding */
+  bottom: 5%; /* Shifted up 5% to target new creature position (45% from top) */
+  left: max(10.8px, calc(50% - 375px)); /* Position anode at center minus offset, but never less than padding */
   z-index: 1000; /* Highest z-index to be on top of everything */
   pointer-events: none; /* Allow clicks to pass through */
   display: block;
@@ -987,7 +985,7 @@
 
 .cathodeBottomRight {
   position: absolute;
-  bottom: 0;
+  bottom: 5%; /* Shifted up 5% to target new creature position (45% from top) */
   left: 50%; /* Center horizontally */
   z-index: 1000; /* Highest z-index to be on top of everything */
   pointer-events: none; /* Allow clicks to pass through */
@@ -1216,7 +1214,7 @@
     font-size: 12.6px; /* Scaled down (18 * 0.7) to match targetValue */
   }
   .panel {
-    padding: 11px 4.5px 12px 4.5px; /* Add 11px top padding for jug image, bottom padding to show more of jug stand */
+    padding: 10.8px 4.5px 12px 4.5px; /* Standard padding */
     height: 451px; /* Increased from 440px by 11px for top padding */
     width: 100%; /* Use 100% to match container width - prevent panning */
     max-width: 100%; /* Don't exceed container */
@@ -1224,8 +1222,8 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 7px 21px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 122.82% 115% !important; /* Width: increased by 15% from 106.8% (106.8 * 1.15 = 122.82%), Height: 115%, allow stretch/distort on mobile */
-    background-position: center 11px !important; /* Position 11px from top to create space above jug */
+    background-size: auto 115% !important; /* 115% height, width adjusts automatically */
+    background-position: center center !important; /* Center the background */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */
@@ -1428,7 +1426,7 @@
     font-size: 10.8px; /* Scaled down (18 * 0.6) to match targetValue */
   }
   .panel {
-    padding: 11px 3.6px 10px 3.6px; /* Add 11px top padding for jug image, bottom padding to show more of jug stand */
+    padding: 10.8px 3.6px 10px 3.6px; /* Standard padding */
     height: 391px; /* Increased from 380px by 11px for top padding */
     width: 100%; /* Use 100% to match container width - prevent panning */
     max-width: 100%; /* Don't exceed container */
@@ -1436,8 +1434,8 @@
     border-bottom-left-radius: 0; /* Ensure seamless connection on mobile */
     border-bottom-right-radius: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,.35); /* Scaled shadow, no bottom shadow */
-    background-size: 147.384% 115% !important; /* Width: increased by 20% from 122.82% (122.82 * 1.2 = 147.384%), Height: 115%, allow stretch/distort on mobile */
-    background-position: center 11px !important; /* Position 11px from top to create space above jug */
+    background-size: auto 115% !important; /* 115% height, width adjusts automatically */
+    background-position: center center !important; /* Center the background */
     flex-shrink: 0; /* Prevent shrinking */
     flex-grow: 0; /* Prevent growing */
     overflow: hidden; /* Prevent content from causing layout shifts */

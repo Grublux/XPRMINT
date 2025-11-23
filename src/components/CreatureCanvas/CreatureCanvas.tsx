@@ -3,14 +3,6 @@ import { useGame } from '../../state/gameStore';
 // import { useTimer } from '../../hooks/useTimer'; // Commented out - timer feature removed
 import styles from './CreatureCanvas.module.css';
 
-type Bubble = {
-  x: number;
-  y: number;
-  radius: number;
-  speed: number;
-  opacity: number;
-};
-
 // Creature mapping: name -> image file
 const CREATURE_IMAGES: Record<string, string> = {
   'Ruevee': '/creature_transparent.png',
@@ -107,8 +99,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
   //   : `${Math.round(currentDistance)} Hz`;
   const ref = useRef<HTMLCanvasElement|null>(null);
   const skyRef = useRef<HTMLCanvasElement|null>(null);
-  const bubblesRef = useRef<Bubble[]>([]);
-  const lastBubbleSpawnRef = useRef<number>(0);
+  // Bubble refs removed - bubbles effect disabled
   const [shockIntensity, setShockIntensity] = useState(0);
   const shockRef = useRef<number>(0);
   const shockIntensityRef = useRef<number>(0);
@@ -317,19 +308,17 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       // Center horizontally (adjust offset if background tank appears off-center)
       const refCx = refWidth / 2 + (refWidth * 0.01); // +1% offset to right
       const cx = refCx * scaleX;
-      // Position orb lower to sit in the liquid area of the jug
-      // On mobile (smaller canvas), position higher (smaller percentage) to keep creature in jug
-      // On wider viewports, position higher to shift creature up
-      // Shifted lower to accommodate taller jug2 image (115% height)
+      // Position orb in the lab area
+      // Shift creature up by 10% from center (40% from top)
       const isMobile = clientH < 450; // Detect mobile viewport
       const isWide = clientW > 900; // Detect wide viewport
       let verticalPercent;
       if (isMobile) {
-        verticalPercent = 0.65; // Mobile positioning
+        verticalPercent = 0.40; // 10% up from center on mobile
       } else if (isWide) {
-        verticalPercent = 0.65; // Wide viewport positioning
+        verticalPercent = 0.40; // 10% up from center on wide viewport
       } else {
-        verticalPercent = 0.65; // Desktop positioning
+        verticalPercent = 0.40; // 10% up from center on desktop
       }
       const refCy = refHeight * verticalPercent;
       const cy = refCy * scaleY;
@@ -442,58 +431,7 @@ export default function CreatureCanvas({ creature = 'Ruevee' }: CreatureCanvasPr
       const intenseBreathing = 1 + breathingAmplitude * Math.sin(t*breathingSpeed);
       const finalR = baseRadius * intenseBreathing;
 
-      // Bubble system - spawn rate based on frequency closeness
-      // Most rapid when frequencies match, very little when furthest apart
-      // Calculate frequency closeness (already calculated above)
-      const bubbleCloseness = frequencyCloseness; // 1.0 when matching, 0.0 when furthest
-      const minSpawnInterval = 5000; // 5 seconds when furthest from match (very little bubbling)
-      const maxSpawnInterval = 50; // 0.05 seconds when matching (most rapid bubbling)
-      const spawnInterval = minSpawnInterval - (minSpawnInterval - maxSpawnInterval) * bubbleCloseness;
-      
-      // Liquid area bounds - bubbles should stay within liquid
-      // Orb is at 65% down, keep bubbles in lower liquid area
-      const liquidTop = h * 0.45; // Top of liquid area - keep bubbles lower
-      const liquidBottom = h * 0.80; // Bottom of liquid area
-
-      // Spawn new bubbles
-      if (t - lastBubbleSpawnRef.current > spawnInterval) {
-        const bubble: Bubble = {
-          x: cx + (Math.random() - 0.5) * (w * 0.3), // Spawn near center, some variation
-          y: liquidBottom, // Bottom of liquid area
-          radius: 2 + Math.random() * 4 * devicePixelRatio,
-          speed: 0.3 + Math.random() * 0.5, // Pixels per frame
-          opacity: 0.3 + Math.random() * 0.4
-        };
-        bubblesRef.current.push(bubble);
-        lastBubbleSpawnRef.current = t;
-      }
-
-      // Update and draw bubbles (draw before orb so they appear behind)
-      bubblesRef.current = bubblesRef.current.filter(bubble => {
-        bubble.y -= bubble.speed * devicePixelRatio;
-        bubble.opacity *= 0.998; // Fade slightly as they rise
-        
-        // Remove if above liquid surface
-        if (bubble.y < liquidTop) {
-          return false;
-        }
-        
-        // Draw bubble only if within liquid area
-        if (bubble.y >= liquidTop && bubble.y <= liquidBottom) {
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI*2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${bubble.opacity})`;
-          ctx.fill();
-          // Bubble highlight
-          ctx.beginPath();
-          ctx.arc(bubble.x - bubble.radius * 0.3, bubble.y - bubble.radius * 0.3, bubble.radius * 0.4, 0, Math.PI*2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${bubble.opacity * 0.6})`;
-          ctx.fill();
-        }
-        
-        // Keep bubble if still in liquid and not faded out
-        return bubble.y >= liquidTop && bubble.opacity > 0.05;
-      });
+      // Bubble system removed - no longer drawing bubbles
 
       // Pulse rings - number increases with resonance, intensity increases when close
       // Scale line width based on canvas size for proper mobile scaling
