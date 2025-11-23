@@ -43,22 +43,23 @@ export const StabilizationDashboard: React.FC = () => {
           <div className={styles.headerSection}>
             <h2 className={styles.title}>My Goobs</h2>
           </div>
-          <div className={styles.goobInventoryContainer}>
-            <div className={styles.connectOrSimulateContainer}>
-              <div className={styles.connectOrSimulateTitle}>Connect Wallet or Simulate</div>
-              <button
-                onClick={handleConnect}
-                className={styles.connectButton}
-              >
-                Connect Wallet
-              </button>
-              <button
-                onClick={handleSimulate}
-                className={styles.simulateButton}
-              >
-                Simulate
-              </button>
+          <div className={styles.connectOrSimulateContainer}>
+            <div className={styles.connectOrSimulateDescription}>
+              Connect wallet to import your Goobs and Items into the stabilization lab
             </div>
+            <button
+              onClick={handleConnect}
+              className={styles.connectButton}
+            >
+              Connect Wallet
+            </button>
+            <div className={styles.orText}>or</div>
+            <button
+              onClick={handleSimulate}
+              className={styles.simulateButton}
+            >
+              Simulate
+            </button>
           </div>
         </div>
       </div>

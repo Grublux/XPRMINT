@@ -137,16 +137,22 @@
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  padding: 3rem 2rem;
+  padding: 2rem 1rem;
   text-align: center;
   width: 100%;
 }
 
-.connectOrSimulateTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: rgb(16, 185, 129);
+.connectOrSimulateDescription {
+  font-size: 0.95rem;
+  color: var(--muted);
   margin-bottom: 0.5rem;
+  max-width: 500px;
+}
+
+.orText {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-style: italic;
 }
 
 .connectButton,
