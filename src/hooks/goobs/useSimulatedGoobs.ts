@@ -10,7 +10,7 @@ export function useSimulatedGoobs() {
 
   const query = useQuery({
     queryKey: ['simulated-goobs'],
-    enabled: Boolean(publicClient),
+    enabled: Boolean(publicClient), // Only run when publicClient is available
     queryFn: async (): Promise<Array<{ tokenId: bigint }>> => {
       if (!publicClient) return [];
 

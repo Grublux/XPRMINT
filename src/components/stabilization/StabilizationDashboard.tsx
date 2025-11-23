@@ -17,8 +17,13 @@ export const StabilizationDashboard: React.FC = () => {
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
   
-  const { goobs: simulatedGoobs, isLoading: loadingSimulatedGoobs } = useSimulatedGoobs();
-  const { items: simulatedItems } = useSimulatedItems();
+  // Always call hooks unconditionally (React rules), but only use results when simulating
+  const simulateGoobsQuery = useSimulatedGoobs();
+  const simulateItemsQuery = useSimulatedItems();
+  
+  const simulatedGoobs = isSimulating ? simulateGoobsQuery.goobs : [];
+  const loadingSimulatedGoobs = isSimulating ? simulateGoobsQuery.isLoading : false;
+  const simulatedItems = isSimulating ? simulateItemsQuery.items : [];
 
   const handleSimulate = () => {
     setIsSimulating(true);
@@ -39,22 +44,20 @@ export const StabilizationDashboard: React.FC = () => {
             <h2 className={styles.title}>My Goobs</h2>
           </div>
           <div className={styles.goobInventoryContainer}>
-            <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
-              <div className="text-lg font-semibold">Connect Wallet or Simulate</div>
-              <div className="flex gap-4">
-                <button
-                  onClick={handleConnect}
-                  className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded transition-colors"
-                >
-                  Connect Wallet
-                </button>
-                <button
-                  onClick={handleSimulate}
-                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
-                >
-                  Simulate
-                </button>
-              </div>
+            <div className={styles.connectOrSimulateContainer}>
+              <div className={styles.connectOrSimulateTitle}>Connect Wallet or Simulate</div>
+              <button
+                onClick={handleConnect}
+                className={styles.connectButton}
+              >
+                Connect Wallet
+              </button>
+              <button
+                onClick={handleSimulate}
+                className={styles.simulateButton}
+              >
+                Simulate
+              </button>
             </div>
           </div>
         </div>
