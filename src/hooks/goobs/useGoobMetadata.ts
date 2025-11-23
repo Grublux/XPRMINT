@@ -4,7 +4,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { usePublicClient } from 'wagmi';
 import { GOOBS_ADDRESS, goobsAbi } from '../../config/contracts/goobs';
-import type { Address } from 'viem';
 
 export type GoobMetadata = {
   name?: string;

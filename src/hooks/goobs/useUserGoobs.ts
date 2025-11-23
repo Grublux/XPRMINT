@@ -236,9 +236,9 @@ export function useUserGoobs() {
                 },
                 fromBlock: 0n,
                 toBlock: currentBlock,
-                limit: 1, // Just need the first one
               });
               
+              // Just use the first one
               if (firstLogs.length > 0 && firstLogs[0].blockNumber) {
                 // Use the block before the first Transfer as deployment block (contract deployed, then first mint)
                 fromBlock = firstLogs[0].blockNumber > 0n ? firstLogs[0].blockNumber - 1n : 0n;
