@@ -5,8 +5,16 @@ import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItem
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import styles from './ItemSelector.module.css';
 
-export const ItemSelector: React.FC = () => {
-  const { items, isLoading, isError } = useWalletItemsSummary();
+type ItemSelectorProps = {
+  items?: Array<{ id: number; balance: bigint }>;
+};
+
+export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems }) => {
+  const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
+  
+  // Use provided items if in simulate mode, otherwise use wallet items
+  const items = providedItems ?? walletItems;
+  const isLoading = providedItems ? false : walletIsLoading;
 
   if (isLoading) {
     return (

@@ -8,11 +8,22 @@ import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 interface GoobSelectorProps {
   selectedId: bigint | null;
   onChange: (id: bigint | null) => void;
+  goobs?: Array<{ tokenId: bigint }>;
+  isLoading?: boolean;
 }
 
-export const GoobSelector: React.FC<GoobSelectorProps> = ({ selectedId, onChange }) => {
+export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
+  selectedId, 
+  onChange,
+  goobs: providedGoobs,
+  isLoading: providedIsLoading,
+}) => {
   const { chain } = useAccount();
-  const { goobs, isLoading, isError, error, progress } = useUserGoobs();
+  const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
+  
+  // Use provided goobs if in simulate mode, otherwise use wallet goobs
+  const goobs = providedGoobs ?? walletGoobs;
+  const isLoading = providedIsLoading ?? walletIsLoading;
   const [manualId, setManualId] = useState<string>('');
   const [showManual, setShowManual] = useState(false);
 
@@ -108,7 +119,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({ selectedId, onChange
         width: '100%',
         justifyContent: 'start',
       }}>
-        {goobs.map((g) => {
+        {goobs.map((g: { tokenId: bigint }) => {
           const isSelected = selectedId === g.tokenId;
           return (
             <GoobCard
