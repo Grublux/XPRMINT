@@ -6,6 +6,7 @@ import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { GoobModal } from './GoobModal';
 import styles from './GoobSelector.module.css';
+import cardStyles from './GoobCard.module.css';
 
 interface GoobSelectorProps {
   selectedId: bigint | null;
@@ -161,23 +162,9 @@ const GoobCard: React.FC<{
         onSelect();
         onModalOpen();
       }}
+      className={`${cardStyles.goobCard} ${isSelected ? cardStyles.selected : ''}`}
       style={{ 
-        background: 'transparent',
-        cursor: 'pointer',
         WebkitTapHighlightColor: 'rgba(16, 185, 129, 0.2)',
-        width: '99px',
-        height: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: '4px',
-        border: isSelected ? '2px solid rgb(16, 185, 129)' : '1px solid rgba(255, 255, 255, 0.2)',
-        overflow: 'visible',
-        transition: 'all 0.2s',
-        margin: '0',
-        padding: '0',
-        boxSizing: 'border-box',
-        flexShrink: 0,
-        position: 'relative',
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
@@ -228,14 +215,7 @@ const GoobCard: React.FC<{
           <img
             src={imageUrl}
             alt={`Goob #${tokenId.toString()}`}
-            style={{ 
-              width: '99px',
-              height: 'auto',
-              objectFit: 'contain',
-              padding: '0',
-              margin: '0',
-              display: 'block',
-            }}
+            className={cardStyles.goobImage}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
@@ -262,23 +242,16 @@ const GoobCard: React.FC<{
         }}
       >
         <div 
+          className={cardStyles.goobIdText}
           style={{ 
-            fontSize: '12px',
-            fontWeight: 300,
-            lineHeight: '1.2',
-            textAlign: 'center',
             color: isSelected ? 'rgb(110, 231, 183)' : 'var(--muted)',
             marginBottom: isSelected ? '2px' : '0',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            width: '100%',
           }}
         >
           #{tokenId.toString()}
         </div>
         {isSelected && (
-          <div style={{ fontSize: '10px', color: 'rgb(16, 185, 129)', fontWeight: 300 }}>✓</div>
+          <div className={cardStyles.checkmark}>✓</div>
         )}
       </div>
 
