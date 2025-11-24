@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { GoobModal } from './GoobModal';
+import styles from './GoobSelector.module.css';
 
 interface GoobSelectorProps {
   selectedId: bigint | null;
@@ -110,13 +111,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 99px)',
-        gap: '2px',
-        width: '100%',
-        justifyContent: 'start',
-      }}>
+      <div className={styles.goobGrid}>
         {goobs.map((g: { tokenId: bigint }) => {
           const isSelected = selectedId === g.tokenId;
           return (

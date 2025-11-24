@@ -1,0 +1,14 @@
+.goobGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(99px, 1fr));
+  gap: 2px;
+  width: 100%;
+  justify-content: start;
+}
+
+@media (max-width: 480px) {
+  .goobGrid {
+    grid-template-columns: repeat(3, 99px);
+  }
+}
+
