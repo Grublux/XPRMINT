@@ -2,7 +2,7 @@
   background: transparent;
   cursor: pointer;
   width: 132px;
-  height: auto;
+  min-height: 132px;
   display: flex;
   flex-direction: column;
   border-radius: 4px;
@@ -49,11 +49,13 @@
 
 @media (max-width: 480px) {
   .goobCard {
-    width: 99px;
+    width: 100%;
+    max-width: 100%;
   }
 
   .goobImage {
-    width: 99px;
+    width: 100%;
+    max-width: 100%;
   }
 
   .goobIdText {

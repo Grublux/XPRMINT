@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import { ItemModal } from './ItemModal';
+import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './ItemSelector.module.css';
 
 type ItemSelectorProps = {
@@ -73,8 +74,19 @@ const ItemCard: React.FC<{
   balance: bigint;
   onModalOpen: () => void;
 }> = ({ itemId, balance, onModalOpen }) => {
-  // Only load metadata when the item is visible (lazy loading)
-  const [isVisible, setIsVisible] = useState(false);
+  // Check if we have cached metadata - if so, load immediately
+  const getCachedMetadata = (): any => {
+    try {
+      const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${itemId}`);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return null;
+  };
+  
+  const hasCached = getCachedMetadata() !== null;
+  
+  // Only load metadata when the item is visible (lazy loading), unless we have cached data
+  const [isVisible, setIsVisible] = useState(hasCached);
   const cardRef = useRef<HTMLDivElement>(null);
   const { metadata, isLoading } = useItemMetadata(isVisible ? itemId : null);
 
@@ -109,12 +121,14 @@ const ItemCard: React.FC<{
         background: 'transparent',
         cursor: 'pointer',
         WebkitTapHighlightColor: 'rgba(16, 185, 129, 0.2)',
-        height: 'auto',
+        width: '100%',
+        maxWidth: '100%',
+        minHeight: '132px',
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '4px',
         border: '1px solid rgba(255, 255, 255, 0.2)',
-        overflow: 'visible',
+        overflow: 'hidden',
         transition: 'all 0.2s',
         margin: '0',
         padding: '0',
@@ -147,12 +161,12 @@ const ItemCard: React.FC<{
       <div 
         style={{ 
           width: '100%',
-          height: 'auto',
+          minHeight: '99px',
           backgroundColor: 'rgba(128, 128, 128, 0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'visible',
+          overflow: 'hidden',
           flexShrink: 0,
           padding: '0',
           margin: '0',
@@ -172,7 +186,7 @@ const ItemCard: React.FC<{
               margin: '0',
               display: 'block',
             }}
-            loading="lazy"
+            loading={hasCached ? "eager" : "lazy"}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}

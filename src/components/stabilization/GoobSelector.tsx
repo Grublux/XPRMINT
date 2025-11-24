@@ -196,13 +196,13 @@ const GoobCard: React.FC<{
       {/* Image Section */}
       <div 
         style={{ 
-          width: 'auto',
-          height: 'auto',
+          width: '100%',
+          minHeight: '132px',
           backgroundColor: 'rgba(128, 128, 128, 0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'visible',
+          overflow: 'hidden',
           flexShrink: 0,
           padding: '0',
           margin: '0',
@@ -216,6 +216,7 @@ const GoobCard: React.FC<{
             src={imageUrl}
             alt={`Goob #${tokenId.toString()}`}
             className={cardStyles.goobImage}
+            loading="eager"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}

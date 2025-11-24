@@ -68,6 +68,10 @@
   box-sizing: border-box;
   margin-top: 0;
   margin-bottom: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .itemInventoryContainer {
@@ -87,8 +91,10 @@
   box-sizing: border-box;
   margin-top: 0;
   margin-bottom: 0;
-  display: block;
-  overflow: visible;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .spSection {
@@ -210,9 +216,13 @@
 }
 
 @media (max-width: 768px) {
+  .dashboardWrapper {
+    padding: 0 8px;
+  }
+  
   .dashboardContainer {
-    width: 99%;
-    max-width: 900px;
+    width: 100%;
+    max-width: 100%;
   }
   
   .title {
@@ -228,10 +238,12 @@
   
   .goobInventoryContainer {
     padding: 4px;
+    width: 100%;
   }
   
   .itemInventoryContainer {
     padding: 4px;
+    width: 100%;
   }
   
   .traitsSection {
@@ -248,9 +260,13 @@
 }
 
 @media (max-width: 480px) {
+  .dashboardWrapper {
+    padding: 0 4px;
+  }
+  
   .dashboardContainer {
-    width: 99%;
-    max-width: 900px;
+    width: 100%;
+    max-width: 100%;
   }
   
   .title {
@@ -265,11 +281,13 @@
   }
   
   .goobInventoryContainer {
-    padding: 4px;
+    padding: 2px;
+    width: 100%;
   }
   
   .itemInventoryContainer {
-    padding: 4px;
+    padding: 2px;
+    width: 100%;
   }
   
   .traitsSection {

@@ -1,9 +1,12 @@
 // src/hooks/stabilizationV3/useItemMetadata.ts
 // Hook to fetch item metadata (image, name, etc.) from ItemToken1155
 
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { usePublicClient } from 'wagmi';
 import { ITEM_V3_ADDRESS, itemToken1155V3Abi } from '../../config/contracts/stabilizationV3';
+
+const STORAGE_KEY_PREFIX = 'item-metadata-';
 
 export type ItemMetadata = {
   name?: string;
@@ -18,6 +21,26 @@ export type ItemMetadata = {
 
 export function useItemMetadata(itemId: number | null) {
   const publicClient = usePublicClient();
+
+  const getCacheKey = () => `${STORAGE_KEY_PREFIX}${ITEM_V3_ADDRESS}-${itemId}`;
+  
+  const getCachedMetadata = (): ItemMetadata | null => {
+    if (itemId === null) return null;
+    try {
+      const cached = localStorage.getItem(getCacheKey());
+      if (cached) {
+        return JSON.parse(cached) as ItemMetadata;
+      }
+    } catch {}
+    return null;
+  };
+
+  const setCachedMetadata = (metadata: ItemMetadata) => {
+    if (itemId === null) return;
+    try {
+      localStorage.setItem(getCacheKey(), JSON.stringify(metadata));
+    } catch {}
+  };
 
   const query = useQuery({
     queryKey: ['item-metadata', ITEM_V3_ADDRESS, itemId?.toString()],
@@ -61,6 +84,10 @@ export function useItemMetadata(itemId: number | null) {
                }
 
                const metadata = JSON.parse(jsonString) as ItemMetadata;
+               
+               // Cache the metadata
+               setCachedMetadata(metadata);
+               
                return metadata;
       } catch (err) {
         console.error('[useItemMetadata] Failed to fetch metadata:', err);
@@ -69,9 +96,24 @@ export function useItemMetadata(itemId: number | null) {
     },
   });
 
+  // Return cached data immediately if available, otherwise use query data
+  const cachedMetadata = itemId !== null ? getCachedMetadata() : null;
+  const metadata = query.data ?? cachedMetadata;
+
+  // Preload image if metadata is available
+  React.useEffect(() => {
+    if (metadata?.image) {
+      const img = new Image();
+      img.src = metadata.image;
+    } else if (metadata?.image_data) {
+      const img = new Image();
+      img.src = metadata.image_data;
+    }
+  }, [metadata?.image, metadata?.image_data]);
+
   return {
-    metadata: query.data ?? null,
-    isLoading: query.isLoading,
+    metadata,
+    isLoading: query.isLoading && !cachedMetadata, // Don't show loading if we have cached data
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,

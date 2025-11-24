@@ -3,7 +3,8 @@
   grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   gap: 2px;
   width: 100%;
-  justify-content: start;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .itemCard {
@@ -13,10 +14,15 @@
 
 @media (max-width: 480px) {
   .itemGrid {
-    grid-template-columns: repeat(3, 99px);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .itemCard {
-    width: 99px;
+    width: 100%;
+    max-width: 100%;
   }
 }
