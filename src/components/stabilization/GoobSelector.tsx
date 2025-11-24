@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
+import { GoobModal } from './GoobModal';
 
 interface GoobSelectorProps {
   selectedId: bigint | null;
   onChange: (id: bigint | null) => void;
   goobs?: Array<{ tokenId: bigint }>;
   isLoading?: boolean;
+  isSimulating?: boolean;
 }
 
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
@@ -17,6 +19,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   onChange,
   goobs: providedGoobs,
   isLoading: providedIsLoading,
+  isSimulating = false,
 }) => {
   const { chain } = useAccount();
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
@@ -26,6 +29,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const isLoading = providedIsLoading ?? walletIsLoading;
   const [manualId, setManualId] = useState<string>('');
   const [showManual, setShowManual] = useState(false);
+  const [selectedGoobForModal, setSelectedGoobForModal] = useState<bigint | null>(null);
 
   if (isLoading) {
     return (
@@ -127,6 +131,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
               tokenId={g.tokenId}
               isSelected={isSelected}
               onSelect={() => onChange(isSelected ? null : g.tokenId)}
+              onModalOpen={() => setSelectedGoobForModal(g.tokenId)}
             />
           );
         })}
@@ -135,6 +140,14 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         <div className="text-xs text-muted-foreground text-center">
           Selected: Goob #{selectedId.toString()}
         </div>
+      )}
+      {selectedGoobForModal !== null && (
+        <GoobModal
+          tokenId={selectedGoobForModal}
+          isOpen={selectedGoobForModal !== null}
+          onClose={() => setSelectedGoobForModal(null)}
+          isSimulating={isSimulating}
+        />
       )}
     </div>
   );
@@ -145,7 +158,8 @@ const GoobCard: React.FC<{
   tokenId: bigint;
   isSelected: boolean;
   onSelect: () => void;
-}> = ({ tokenId, isSelected, onSelect }) => {
+  onModalOpen: () => void;
+}> = ({ tokenId, isSelected, onSelect, onModalOpen }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
@@ -153,7 +167,11 @@ const GoobCard: React.FC<{
 
   return (
     <button
-      onClick={onSelect}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+        onModalOpen();
+      }}
       style={{ 
         background: 'transparent',
         cursor: 'pointer',

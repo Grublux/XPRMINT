@@ -1,8 +1,9 @@
 // src/components/stabilization/ItemSelector.tsx
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
+import { ItemModal } from './ItemModal';
 import styles from './ItemSelector.module.css';
 
 type ItemSelectorProps = {
@@ -11,6 +12,7 @@ type ItemSelectorProps = {
 
 export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems }) => {
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
+  const [selectedItemForModal, setSelectedItemForModal] = useState<number | null>(null);
   
   // Use provided items if in simulate mode, otherwise use wallet items
   const items = providedItems ?? walletItems;
@@ -46,9 +48,21 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems
     <div style={{ paddingTop: '20px', width: '100%' }}>
       <div className={styles.itemGrid}>
         {items.map((item) => (
-          <ItemCard key={item.id} itemId={item.id} balance={item.balance} />
+          <ItemCard 
+            key={item.id} 
+            itemId={item.id} 
+            balance={item.balance}
+            onModalOpen={() => setSelectedItemForModal(item.id)}
+          />
         ))}
       </div>
+      {selectedItemForModal !== null && (
+        <ItemModal
+          itemId={selectedItemForModal}
+          isOpen={selectedItemForModal !== null}
+          onClose={() => setSelectedItemForModal(null)}
+        />
+      )}
     </div>
   );
 };
@@ -57,14 +71,39 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems
 const ItemCard: React.FC<{
   itemId: number;
   balance: bigint;
-}> = ({ itemId, balance }) => {
-  const { metadata, isLoading } = useItemMetadata(itemId);
+  onModalOpen: () => void;
+}> = ({ itemId, balance, onModalOpen }) => {
+  // Only load metadata when the item is visible (lazy loading)
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { metadata, isLoading } = useItemMetadata(isVisible ? itemId : null);
 
-  // Get image URL (prefer image for HTTP URLs, fallback to image_data for on-chain)
-  const imageUrl = metadata?.image || metadata?.image_data || null;
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    if (!cardRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '50px' } // Start loading 50px before item is visible
+    );
+
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // For thumbnails, prefer HTTP image URLs (faster, more reliable), fallback to image_data
+  const thumbnailUrl = metadata?.image || metadata?.image_data || null;
 
   return (
     <div
+      ref={cardRef}
       className={styles.itemCard}
       style={{ 
         background: 'transparent',
@@ -80,6 +119,10 @@ const ItemCard: React.FC<{
         margin: '0',
         padding: '0',
         boxSizing: 'border-box',
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onModalOpen();
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)';
@@ -117,9 +160,9 @@ const ItemCard: React.FC<{
       >
         {isLoading ? (
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>Loading...</div>
-        ) : imageUrl ? (
+        ) : thumbnailUrl ? (
           <img
-            src={imageUrl}
+            src={thumbnailUrl}
             alt={metadata?.name || `Item #${itemId}`}
             style={{ 
               width: '100%',
@@ -129,6 +172,7 @@ const ItemCard: React.FC<{
               margin: '0',
               display: 'block',
             }}
+            loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}

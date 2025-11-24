@@ -22,6 +22,8 @@ export function useItemMetadata(itemId: number | null) {
   const query = useQuery({
     queryKey: ['item-metadata', ITEM_V3_ADDRESS, itemId?.toString()],
     enabled: Boolean(itemId !== null && publicClient),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     queryFn: async (): Promise<ItemMetadata | null> => {
       if (itemId === null || !publicClient) return null;
 

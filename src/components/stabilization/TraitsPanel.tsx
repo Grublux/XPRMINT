@@ -1,7 +1,9 @@
 // src/components/stabilization/TraitsPanel.tsx
 
 import React from 'react';
+import { useAccount } from 'wagmi';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
+import styles from './TraitsPanel.module.css';
 
 const TRAIT_LABELS = ['Salinity', 'pH', 'Temperature', 'Frequency'];
 
@@ -10,6 +12,7 @@ interface TraitsPanelProps {
 }
 
 export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
+  const { address } = useAccount();
   const enabled = creatureId !== null;
   const { state, isLoading, isError } = useCreatureState(
     enabled && creatureId !== null ? Number(creatureId) : 0
@@ -24,9 +27,24 @@ export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
   }
 
   if (isError || !state) {
+    const handleClaimStarterPack = () => {
+      // Placeholder - button does nothing for now
+      // TODO: Implement navigation to experiment page
+      // if (creatureId) {
+      //   navigate(`/experiment?goob=${creatureId.toString()}`);
+      // }
+    };
+
     return (
-      <div className="text-sm text-red-400">
-        Unable to load creature state. Make sure this Goob has been initialized in the lab.
+      <div className={styles.notInitializedContainer}>
+        {address && creatureId && (
+          <button 
+            onClick={handleClaimStarterPack}
+            className={styles.claimButton}
+          >
+            Claim Your Starter Pack
+          </button>
+        )}
       </div>
     );
   }

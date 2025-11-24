@@ -80,9 +80,10 @@ export const StabilizationDashboard: React.FC = () => {
               onChange={setSelectedGoobId}
               goobs={loadingSimulatedGoobs ? [] : simulatedGoobs}
               isLoading={loadingSimulatedGoobs}
+              isSimulating={true}
             />
           ) : (
-            <GoobSelector selectedId={selectedGoobId} onChange={setSelectedGoobId} />
+            <GoobSelector selectedId={selectedGoobId} onChange={setSelectedGoobId} isSimulating={false} />
           )}
         </div>
         <div className={styles.traitsSection}>
