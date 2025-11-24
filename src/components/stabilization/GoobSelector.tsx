@@ -34,18 +34,12 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2">
-        <div className="text-sm text-muted-foreground">{progress.message}</div>
+        <div className="text-sm text-muted-foreground">Scanning For Goobs</div>
         <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-emerald-500 transition-all duration-300 ease-out"
             style={{ width: `${progress.progress}%` }}
           />
-        </div>
-        <div className="text-xs text-muted-foreground/70">
-          {progress.stage === 'balance' && 'Checking wallet...'}
-          {progress.stage === 'enumerate' && 'Trying enumeration...'}
-          {progress.stage === 'events' && 'Scanning blockchain events...'}
-          {progress.stage === 'verify' && 'Verifying ownership...'}
         </div>
       </div>
     );

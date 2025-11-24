@@ -212,16 +212,32 @@ export function useUserGoobs() {
           setProgress({ stage: 'events', progress: 30, message: 'Querying Transfer events...' });
           await new Promise(resolve => setTimeout(resolve, 10)); // Allow React to render
           
-          // Use deployment block as start, or last 100k blocks if deployment block is 0
-          // If deployment block is 0, we'll find it by scanning backwards from first Transfer event
-          let fromBlock = GOOBS_DEPLOYMENT_BLOCK > 0n 
-            ? GOOBS_DEPLOYMENT_BLOCK 
-            : (currentBlock > 100000n ? currentBlock - 100000n : 0n);
+          // Use deployment block as start, or find it efficiently
+          // Contract deployed ~147 days ago (Jun-29-2025) - check cache first
+          let fromBlock = GOOBS_DEPLOYMENT_BLOCK;
           
-          // If we don't have deployment block, try to find it by getting first Transfer event
-          if (GOOBS_DEPLOYMENT_BLOCK === 0n && fromBlock > 0n) {
+          // Check localStorage for cached deployment block
+          if (fromBlock === 0n) {
+            try {
+              const cached = localStorage.getItem('goobs-deployment-block');
+              if (cached) {
+                fromBlock = BigInt(cached);
+                console.log('[useUserGoobs] Using cached deployment block:', fromBlock.toString());
+              }
+            } catch {}
+          }
+          
+          // If still not found, find it by querying first Transfer event
+          // Start from a reasonable point: ~147 days ago = ~6.35M blocks (at ~2s/block)
+          if (fromBlock === 0n) {
             setProgress({ stage: 'events', progress: 35, message: 'Finding contract deployment block...' });
             try {
+              // Estimate: 147 days ago = roughly 6.35M blocks ago (at 2s per block)
+              const estimatedBlocksAgo = 6350000n;
+              const searchStartBlock = currentBlock > estimatedBlocksAgo 
+                ? currentBlock - estimatedBlocksAgo 
+                : 0n;
+              
               // Get first Transfer event to find deployment block
               const firstLogs = await publicClient.getLogs({
                 address: GOOBS_ADDRESS,
@@ -234,18 +250,27 @@ export function useUserGoobs() {
                     { type: 'uint256', indexed: true, name: 'tokenId' },
                   ],
                 },
-                fromBlock: 0n,
+                fromBlock: searchStartBlock,
                 toBlock: currentBlock,
               });
               
-              // Just use the first one
+              // Use the first Transfer event's block minus 1 as deployment block
               if (firstLogs.length > 0 && firstLogs[0].blockNumber) {
-                // Use the block before the first Transfer as deployment block (contract deployed, then first mint)
                 fromBlock = firstLogs[0].blockNumber > 0n ? firstLogs[0].blockNumber - 1n : 0n;
                 console.log('[useUserGoobs] Found deployment block:', fromBlock.toString());
+                // Cache this in localStorage for future use
+                try {
+                  localStorage.setItem('goobs-deployment-block', fromBlock.toString());
+                } catch {}
+              } else {
+                // Fallback: use estimated block
+                fromBlock = searchStartBlock;
+                console.warn('[useUserGoobs] Could not find first Transfer, using estimated block:', fromBlock.toString());
               }
             } catch (err) {
               console.warn('[useUserGoobs] Could not find deployment block, using fallback:', err);
+              // Fallback: use last 100k blocks
+              fromBlock = currentBlock > 100000n ? currentBlock - 100000n : 0n;
             }
           }
           
