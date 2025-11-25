@@ -32,16 +32,16 @@ export function useWalletItemsSummary() {
       const balances = await Promise.all(
         ITEM_IDS.map(async (id) => {
           try {
-            const bal = await publicClient.readContract({
+            const bal = (await publicClient.readContract({
               address: ITEM_V3_ADDRESS,
               abi: itemToken1155V3Abi,
               functionName: 'balanceOf',
               args: [address as Address, id],
-            });
+            })) as bigint;
             if (bal > 0n) {
               console.log(`[useWalletItemsSummary] Found item ${id} with balance:`, bal.toString());
             }
-            return { id: Number(id), balance: bal as bigint };
+            return { id: Number(id), balance: bal };
           } catch (err) {
             console.error(`[useWalletItemsSummary] balanceOf failed for id ${id}:`, err);
             return { id: Number(id), balance: 0n };
