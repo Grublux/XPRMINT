@@ -33,6 +33,12 @@
   align-items: center;
   gap: 12px;
 }
+.walletMenuContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .walletButton {
   padding: 8px 16px;
   background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.15));
@@ -49,6 +55,47 @@
   background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 200, 100, 0.25));
   box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
   transform: translateY(-1px);
+}
+
+.walletMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.walletAddress {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  word-break: break-all;
+  font-family: monospace;
+}
+
+.walletMenuItem {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.walletMenuItem:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 .title{ 
   font-weight:800; 
