@@ -168,7 +168,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       {/* Hint Text - hidden when Goob is expanded */}
       {!expandedGoobId && labFilter === 'Waiting Room' && (
         <div className={styles.goobHint}>
-          Hit '+' to add to lab and claim starter pack(s)
+          Click Goobs to send to lab
         </div>
       )}
 
@@ -228,11 +228,6 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
               />
             );
           })}
-        </div>
-      )}
-      {selectedId && labFilter === 'Waiting Room' && (
-        <div className="text-xs text-muted-foreground text-center">
-          Selected: Goob #{selectedId.toString()}
         </div>
       )}
     </div>
