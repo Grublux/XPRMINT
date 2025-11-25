@@ -23,7 +23,7 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
   const items = isSimulating ? [] : walletItems;
   const isLoading = isSimulating ? false : walletIsLoading;
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
+  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('All');
   
   // Track selected items for the Goob (items added via "+")
   // Map of itemId -> count
@@ -34,12 +34,19 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
   
   // Initialize balances from items
   React.useEffect(() => {
+    console.log('[ItemSelector] items changed:', items);
     const balances = new Map<number, bigint>();
     items.forEach(item => {
       balances.set(item.id, item.balance);
     });
+    console.log('[ItemSelector] setting itemBalances:', Array.from(balances.entries()));
     setItemBalances(balances);
   }, [items]);
+  
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[ItemSelector] render - items.length:', items.length, 'walletItems.length:', walletItems.length, 'isLoading:', isLoading, 'isError:', isError);
+  }, [items, walletItems, isLoading, isError]);
   
 
   if (isLoading) {
