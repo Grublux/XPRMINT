@@ -185,8 +185,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
             className={styles.batchSendButton}
             onClick={handleBatchSendToLab}
           >
-            Send <span className={styles.batchNumber}>{selectedForLabCount}</span> {selectedForLabCount === 1 ? 'Goob' : 'Goobs'} to Lab and claim <span className={styles.batchNumber}>{selectedForLabCount * 5}</span> starter items
+            Send <span className={styles.batchNumber}>{selectedForLabCount}</span> {selectedForLabCount === 1 ? 'Goob' : 'Goobs'} TO LAB
           </button>
+          <div className={styles.batchSendText}>
+            And receive <span className={styles.batchNumber}>{selectedForLabCount * 5}</span> starter items
+          </div>
         </div>
       )}
 

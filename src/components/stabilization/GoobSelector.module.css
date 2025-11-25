@@ -105,7 +105,9 @@
 
 .batchSendContainer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
@@ -133,6 +135,13 @@
 .batchNumber {
   color: var(--text);
   font-weight: 700;
+}
+
+.batchSendText {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 400;
 }
 
 .expandedGoobContainer {
