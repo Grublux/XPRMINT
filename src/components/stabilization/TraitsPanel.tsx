@@ -9,9 +9,10 @@ const TRAIT_LABELS = ['Salinity', 'pH', 'Temperature', 'Frequency'];
 
 interface TraitsPanelProps {
   creatureId: bigint | null;
+  isReadOnly?: boolean;
 }
 
-export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
+export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId, isReadOnly }) => {
   const { address } = useAccount();
   const enabled = creatureId !== null;
   const { state, isLoading, isError } = useCreatureState(
@@ -39,10 +40,11 @@ export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
       <div className={styles.notInitializedContainer}>
         {address && creatureId && (
           <button 
-            onClick={handleClaimStarterPack}
+            onClick={isReadOnly ? undefined : handleClaimStarterPack}
+            disabled={isReadOnly}
             className={styles.claimButton}
           >
-            Claim Your Starter Pack
+            {isReadOnly ? "No Access" : "Claim Your Starter Pack"}
           </button>
         )}
       </div>

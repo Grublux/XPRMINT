@@ -705,7 +705,7 @@
 }
 .panel{
   background-color: var(--panel) !important; /* Use background-color instead of background to preserve background-image */
-  background-image: url('/active_lab_3.png') !important; /* Lab background image */
+  background-image: url('/jug_cartoon1.png') !important; /* Jar background image */
   background-size: auto 115% !important; /* 115% height, width adjusts automatically */
   background-position: center center !important; /* Center the background */
   background-repeat: no-repeat !important;

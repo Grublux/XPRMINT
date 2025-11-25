@@ -7,17 +7,15 @@ import { ItemModal } from './ItemModal';
 import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './ItemSelector.module.css';
 
-type ItemSelectorProps = {
-  items?: Array<{ id: number; balance: bigint }>;
-};
+type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity';
 
-export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems }) => {
+export const ItemSelector: React.FC = () => {
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   const [selectedItemForModal, setSelectedItemForModal] = useState<number | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
   
-  // Use provided items if in simulate mode, otherwise use wallet items
-  const items = providedItems ?? walletItems;
-  const isLoading = providedItems ? false : walletIsLoading;
+  const items = walletItems;
+  const isLoading = walletIsLoading;
 
   if (isLoading) {
     return (
@@ -35,11 +33,12 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems
     );
   }
 
+
   if (!items.length) {
     return (
       <div className="flex flex-col gap-2 items-center text-center w-full">
         <div className="text-sm text-muted-foreground">
-          No items detected. Claim your starter pack or daily drip from the lab.
+          You have no items. Select Goobs above to claim starter packs.
         </div>
       </div>
     );
@@ -47,6 +46,19 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems
 
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
+      {/* Filter Buttons */}
+      <div className={styles.filterContainer}>
+        {(['Freq', 'Temp', 'pH', 'Salinity', 'All'] as FilterCategory[]).map((category) => (
+          <button
+            key={category}
+            className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
+            onClick={() => setSelectedFilter(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+      
       <div className={styles.itemGrid}>
         {items.map((item) => (
           <ItemCard 
@@ -54,6 +66,7 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ items: providedItems
             itemId={item.id} 
             balance={item.balance}
             onModalOpen={() => setSelectedItemForModal(item.id)}
+            filterCategory={selectedFilter}
           />
         ))}
       </div>
@@ -73,7 +86,8 @@ const ItemCard: React.FC<{
   itemId: number;
   balance: bigint;
   onModalOpen: () => void;
-}> = ({ itemId, balance, onModalOpen }) => {
+  filterCategory: FilterCategory;
+}> = ({ itemId, balance, onModalOpen, filterCategory }) => {
   // Check if we have cached metadata - if so, load immediately
   const getCachedMetadata = (): any => {
     try {
@@ -112,6 +126,26 @@ const ItemCard: React.FC<{
 
   // For thumbnails, prefer HTTP image URLs (faster, more reliable), fallback to image_data
   const thumbnailUrl = metadata?.image || metadata?.image_data || null;
+
+  // Check if item matches the selected filter (only checks Primary Trait)
+  const matchesFilter = React.useMemo(() => {
+    if (filterCategory === 'All') return true;
+    if (!metadata?.attributes) return true; // Show while loading
+    
+    for (const attr of metadata.attributes) {
+      if (attr.trait_type === 'Primary Trait') {
+        const value = String(attr.value).toLowerCase();
+        if (filterCategory === 'Freq' && value.includes('frequency')) return true;
+        if (filterCategory === 'Temp' && value.includes('temperature')) return true;
+        if (filterCategory === 'pH' && (value.includes('ph') || value === 'ph')) return true;
+        if (filterCategory === 'Salinity' && value.includes('salinity')) return true;
+      }
+    }
+    return false;
+  }, [metadata, filterCategory]);
+
+  // Don't render if it doesn't match the filter
+  if (!matchesFilter) return null;
 
   return (
     <div

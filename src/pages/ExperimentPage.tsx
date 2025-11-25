@@ -1,3 +1,15 @@
+/**
+ * LEGACY PAGE - NOT CURRENTLY LINKED
+ * 
+ * This page is kept for a different version later on.
+ * For now, focus is on:
+ * - Dashboard page (/dashboard) - Main stabilization dashboard
+ * - Lab page (to be created) - New lab interface
+ * - Landing page (to be created) - Entry point
+ * 
+ * This experiment page will not have navigation links to it in the current version.
+ */
+
 import { useState } from 'react';
 import CreatureCanvas from '../components/CreatureCanvas/CreatureCanvas';
 import FrequencyReadout, { PlusButton } from '../components/FrequencyReadout/FrequencyReadout';

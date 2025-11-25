@@ -10,8 +10,11 @@ export const router = createBrowserRouter([
     element: <AppLayout/>,
     children: [
       { index: true, element: <HomePage/> },
+      // LEGACY: Experiment page kept for future version, not currently linked
       { path: 'experiment', element: <ExperimentPage/> },
-            { path: 'dashboard', element: <StabilizationPage/> },
+      { path: 'dashboard', element: <StabilizationPage/> },
+      // TODO: Add 'lab' route for new Lab page
+      // TODO: Update landing page (home/index) as needed
     ],
   },
 ]);

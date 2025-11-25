@@ -11,10 +11,10 @@ type GoobModalProps = {
   tokenId: bigint;
   isOpen: boolean;
   onClose: () => void;
-  isSimulating?: boolean;
+  isReadOnly?: boolean;
 };
 
-export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, isSimulating = false }) => {
+export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, isReadOnly }) => {
   const { address } = useAccount();
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState, isError: stateError } = useCreatureState(Number(tokenId));
@@ -28,11 +28,8 @@ export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, 
     !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
       creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
   
-  // Show button when:
-  // 1. Wallet is connected OR in simulation mode
-  // 2. Creature is NOT initialized (state is null OR all zeros OR error)
-  // In simulation mode, always show button if creature is not initialized
-  const shouldShowButton = (Boolean(address) || isSimulating) && (creatureState === null || !isInitialized || stateError);
+  // Show button when wallet is connected and creature is NOT initialized
+  const shouldShowButton = Boolean(address) && (creatureState === null || !isInitialized || stateError);
 
   const handleClaimStarterPack = () => {
     // Placeholder - button does nothing for now
@@ -82,10 +79,11 @@ export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, 
               {shouldShowButton && (
                 <div className={styles.notInitialized}>
                   <button 
-                    onClick={handleClaimStarterPack}
+                    onClick={isReadOnly ? undefined : handleClaimStarterPack}
+                    disabled={isReadOnly}
                     className={styles.claimButton}
                   >
-                    Claim Your Starter Pack
+                    {isReadOnly ? "No Access" : "Claim Your Starter Pack"}
                   </button>
                 </div>
               )}

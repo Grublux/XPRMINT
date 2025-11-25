@@ -11,4 +11,5 @@ export { useApplyItem } from './useApplyItem';
 export { useBurnItemForSP } from './useBurnItemForSP';
 export { useSendVibes } from './useSendVibes';
 export { useLockTrait } from './useLockTrait';
+export { useWhitelistStatus } from './useWhitelistStatus';
 

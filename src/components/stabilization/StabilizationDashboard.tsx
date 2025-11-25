@@ -7,30 +7,25 @@ import { GoobSelector } from './GoobSelector';
 import { TraitsPanel } from './TraitsPanel';
 import { ItemSelector } from './ItemSelector';
 import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
-import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
-import { useSimulatedItems } from '../../hooks/stabilizationV3/useSimulatedItems';
 import styles from './StabilizationDashboard.module.css';
 
-export const StabilizationDashboard: React.FC = () => {
+type Props = {
+  whitelistEnabled?: boolean;
+  isTester?: boolean;
+  isReadOnly?: boolean;
+};
+
+export const StabilizationDashboard: React.FC<Props> = ({
+  whitelistEnabled,
+  isTester,
+  isReadOnly: isReadOnlyProp,
+}) => {
+  const isReadOnly = Boolean(isReadOnlyProp);
   const { address } = useAccount();
   const { connect, connectors } = useConnect();
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
-  const [isSimulating, setIsSimulating] = useState(false);
   
-  // Always call hooks unconditionally (React rules), but only use results when simulating
-  const simulateGoobsQuery = useSimulatedGoobs();
-  const simulateItemsQuery = useSimulatedItems();
-  
-  // Always call useWalletSP unconditionally (React rules)
   const { sp, isLoading: spLoading } = useWalletSP();
-  
-  const simulatedGoobs = isSimulating ? simulateGoobsQuery.goobs : [];
-  const loadingSimulatedGoobs = isSimulating ? simulateGoobsQuery.isLoading : false;
-  const simulatedItems = isSimulating ? simulateItemsQuery.items : [];
-
-  const handleSimulate = () => {
-    setIsSimulating(true);
-  };
 
   const handleConnect = () => {
     const connector = connectors[0];
@@ -39,7 +34,7 @@ export const StabilizationDashboard: React.FC = () => {
     }
   };
 
-  if (!address && !isSimulating) {
+  if (!address) {
     return (
       <div className={styles.dashboardWrapper}>
         <div className={styles.dashboardContainer}>
@@ -52,13 +47,6 @@ export const StabilizationDashboard: React.FC = () => {
               className={styles.connectButton}
             >
               Connect Wallet
-            </button>
-            <div className={styles.orText}>or</div>
-            <button
-              onClick={handleSimulate}
-              className={styles.simulateButton}
-            >
-              Simulate
             </button>
           </div>
         </div>
@@ -74,20 +62,14 @@ export const StabilizationDashboard: React.FC = () => {
         </div>
         <div className={styles.goobInventoryContainer}>
           <div className={styles.goobHint}>Click a Goob to view details</div>
-          {isSimulating ? (
-            <GoobSelector 
-              selectedId={selectedGoobId} 
-              onChange={setSelectedGoobId}
-              goobs={loadingSimulatedGoobs ? [] : simulatedGoobs}
-              isLoading={loadingSimulatedGoobs}
-              isSimulating={true}
-            />
-          ) : (
-            <GoobSelector selectedId={selectedGoobId} onChange={setSelectedGoobId} isSimulating={false} />
-          )}
+          <GoobSelector 
+            selectedId={selectedGoobId} 
+            onChange={setSelectedGoobId} 
+            isReadOnly={isReadOnly}
+          />
         </div>
         <div className={styles.traitsSection}>
-          <TraitsPanel creatureId={selectedGoobId} />
+          <TraitsPanel creatureId={selectedGoobId} isReadOnly={isReadOnly} />
         </div>
       </div>
 
@@ -96,16 +78,12 @@ export const StabilizationDashboard: React.FC = () => {
           <h2 className={styles.title}>Item Inventory</h2>
         </div>
         <div className={styles.itemInventoryContainer}>
-          {isSimulating ? (
-            <ItemSelector items={simulatedItems} />
-          ) : (
-            <ItemSelector />
-          )}
+          <ItemSelector />
         </div>
         <div className={styles.spSection}>
           <div className={styles.spLabel}>Stabilization Points (SP)</div>
           <div className={styles.spValue}>
-            {spLoading ? '…' : (address ? sp.toString() : '0')}
+            {spLoading ? '…' : sp.toString()}
           </div>
           <p className={styles.spDescription}>
             Earned by burning items. SP is required to lock traits.

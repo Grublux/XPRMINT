@@ -59,6 +59,10 @@ contract CreatureStabilizer is
     IGoobs public goobs;
     bool public enforceGoobsOwnership;
 
+    // Whitelist testing gate (appended at end of storage layout)
+    bool private _whitelistEnabled;
+    mapping(address => bool) private _testerWhitelist;
+
     // ============ Structs ============
 
     struct CreatureState {
@@ -111,6 +115,12 @@ contract CreatureStabilizer is
     event Stabilized(uint256 indexed creatureId);
     event Evolved(uint256 indexed creatureId);
 
+    /// @notice Emitted when whitelist gating is enabled or disabled.
+    event WhitelistEnabled(bool enabled);
+
+    /// @notice Emitted when a tester address is added or removed.
+    event TesterUpdated(address indexed account, bool approved);
+
     // ============ Modifiers ============
 
     modifier onlyStabilizer() {
@@ -121,6 +131,16 @@ contract CreatureStabilizer is
     modifier onlyCreatureOwner(uint256 creatureId) {
         if (enforceGoobsOwnership && address(goobs) != address(0)) {
             require(goobs.ownerOf(creatureId) == msg.sender, "CreatureStabilizer: not Goob owner");
+        }
+        _;
+    }
+
+    modifier onlyTesterOrOpen() {
+        if (_whitelistEnabled) {
+            // Owner bypass: always allowed
+            if (msg.sender != owner()) {
+                require(_testerWhitelist[msg.sender], "CreatureStabilizer: not whitelisted tester");
+            }
         }
         _;
     }
@@ -202,6 +222,33 @@ contract CreatureStabilizer is
         enforceGoobsOwnership = _enforce;
     }
 
+    /// @notice Enable or disable whitelist gating for the V3 stabilizer.
+    /// @dev When disabled, anyone may interact with the contract as normal.
+    function setWhitelistEnabled(bool enabled) external onlyOwner {
+        _whitelistEnabled = enabled;
+        emit WhitelistEnabled(enabled);
+    }
+
+    /// @notice Add or remove a single tester address.
+    /// @param account The address to update.
+    /// @param approved True to add as tester, false to remove.
+    function setTester(address account, bool approved) external onlyOwner {
+        _testerWhitelist[account] = approved;
+        emit TesterUpdated(account, approved);
+    }
+
+    /// @notice Batch update tester addresses for convenience.
+    /// @param accounts Array of addresses to update.
+    /// @param approved True to add all as testers, false to remove all.
+    function batchSetTesters(address[] calldata accounts, bool approved) external onlyOwner {
+        uint256 len = accounts.length;
+        for (uint256 i = 0; i < len; i++) {
+            address account = accounts[i];
+            _testerWhitelist[account] = approved;
+            emit TesterUpdated(account, approved);
+        }
+    }
+
     // ============ Daily Item Claims ============
 
     /**
@@ -210,7 +257,7 @@ contract CreatureStabilizer is
      */
     function claimDailyItems(
         uint256 creatureId
-    ) external nonReentrant onlyCreatureOwner(creatureId) {
+    ) external nonReentrant onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         uint256[] memory ids = new uint256[](1);
         ids[0] = creatureId;
         uint256[] memory idsArray = ids;
@@ -223,7 +270,7 @@ contract CreatureStabilizer is
      */
     function claimDailyItemsBatch(
         uint256[] memory creatureIds
-    ) public {
+    ) public onlyTesterOrOpen {
         // Check ownership for each creature in batch
         for (uint256 i = 0; i < creatureIds.length; i++) {
             if (enforceGoobsOwnership && address(goobs) != address(0)) {
@@ -437,7 +484,7 @@ contract CreatureStabilizer is
     function applyItem(
         uint256 creatureId,
         uint256 itemId
-    ) external nonReentrant onlyCreatureOwner(creatureId) {
+    ) external nonReentrant onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         CreatureState storage c = creatures[creatureId];
         require(c.lockedCount < 4, "CreatureStabilizer: already stabilized");
 
@@ -737,7 +784,7 @@ contract CreatureStabilizer is
     function burnItemForSP(
         uint256 creatureId,
         uint256 itemId
-    ) external nonReentrant onlyCreatureOwner(creatureId) {
+    ) external nonReentrant onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         // Burn item from user's balance
         ItemToken1155(itemToken).burnItem(msg.sender, itemId, 1);
 
@@ -768,7 +815,7 @@ contract CreatureStabilizer is
     function lockTrait(
         uint256 creatureId,
         uint8 traitIndex
-    ) external nonReentrant onlyCreatureOwner(creatureId) {
+    ) external nonReentrant onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         CreatureState storage c = creatures[creatureId];
         require(c.lockedCount < 4, "CreatureStabilizer: already stabilized");
         require(_isLockable(c, traitIndex), "CreatureStabilizer: not lockable");
@@ -888,7 +935,7 @@ contract CreatureStabilizer is
         uint16 currPH,
         uint16 currTemp,
         uint16 currFreq
-    ) external onlyCreatureOwner(creatureId) {
+    ) external onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         CreatureState storage c = creatures[creatureId];
         // Check if creature is already initialized by checking if target values are set
         // lockedCount alone isn't sufficient since we set it to 0 after initialization
@@ -942,7 +989,7 @@ contract CreatureStabilizer is
      * @notice Send vibes to a creature (once per day)
      * @param creatureId Creature identifier
      */
-    function sendVibes(uint256 creatureId) external onlyCreatureOwner(creatureId) {
+    function sendVibes(uint256 creatureId) external onlyCreatureOwner(creatureId) onlyTesterOrOpen {
         CreatureState storage c = creatures[creatureId];
         uint256 day = currentDay();
 
@@ -1012,7 +1059,7 @@ contract CreatureStabilizer is
      * @notice Incubate a creature (after resonance phase)
      * @param creatureId Creature identifier
      */
-    function incubate(uint256 creatureId) external {
+    function incubate(uint256 creatureId) external onlyTesterOrOpen {
         CreatureState storage c = creatures[creatureId];
         require(c.lockedCount >= 4, "CreatureStabilizer: not stabilized");
         require(
@@ -1034,6 +1081,17 @@ contract CreatureStabilizer is
      */
     function getCreatureState(uint256 creatureId) external view returns (CreatureState memory) {
         return creatures[creatureId];
+    }
+
+    /// @notice Returns true if whitelist gating is currently enabled.
+    function isWhitelistEnabled() external view returns (bool) {
+        return _whitelistEnabled;
+    }
+
+    /// @notice Returns true if `account` is explicitly marked as a tester in the whitelist mapping.
+    /// @dev This reflects only the raw whitelist mapping and does not consider owner bypass.
+    function isTester(address account) external view returns (bool) {
+        return _testerWhitelist[account];
     }
 
     function _clampTrait(int256 value) internal pure returns (uint16) {

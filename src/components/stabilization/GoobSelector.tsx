@@ -11,24 +11,19 @@ import cardStyles from './GoobCard.module.css';
 interface GoobSelectorProps {
   selectedId: bigint | null;
   onChange: (id: bigint | null) => void;
-  goobs?: Array<{ tokenId: bigint }>;
-  isLoading?: boolean;
-  isSimulating?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
   selectedId, 
   onChange,
-  goobs: providedGoobs,
-  isLoading: providedIsLoading,
-  isSimulating = false,
+  isReadOnly,
 }) => {
   const { chain } = useAccount();
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   
-  // Use provided goobs if in simulate mode, otherwise use wallet goobs
-  const goobs = providedGoobs ?? walletGoobs;
-  const isLoading = providedIsLoading ?? walletIsLoading;
+  const goobs = walletGoobs;
+  const isLoading = walletIsLoading;
   const [manualId, setManualId] = useState<string>('');
   const [showManual, setShowManual] = useState(false);
   const [selectedGoobForModal, setSelectedGoobForModal] = useState<bigint | null>(null);
@@ -136,7 +131,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           tokenId={selectedGoobForModal}
           isOpen={selectedGoobForModal !== null}
           onClose={() => setSelectedGoobForModal(null)}
-          isSimulating={isSimulating}
+          isReadOnly={isReadOnly}
         />
       )}
     </div>
