@@ -28,6 +28,8 @@ export default function StabilizationPage() {
         </div>
       )}
       <StabilizationDashboard
+        whitelistEnabled={whitelistEnabled}
+        isTester={isTester}
         isReadOnly={isReadOnly}
       />
     </div>

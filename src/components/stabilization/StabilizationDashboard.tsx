@@ -10,10 +10,14 @@ import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
 import styles from './StabilizationDashboard.module.css';
 
 type Props = {
+  whitelistEnabled?: boolean;
+  isTester?: boolean;
   isReadOnly?: boolean;
 };
 
 export const StabilizationDashboard: React.FC<Props> = ({
+  whitelistEnabled,
+  isTester,
   isReadOnly: isReadOnlyProp,
 }) => {
   const isReadOnly = Boolean(isReadOnlyProp);
