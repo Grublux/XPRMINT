@@ -13,9 +13,16 @@ type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity';
 type ItemSelectorProps = {
   creatureId?: bigint | number | null;
   isSimulating?: boolean;
+  selectedItemsForGoob?: Map<number, number>;
+  setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
 };
 
-export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimulating = false }) => {
+export const ItemSelector: React.FC<ItemSelectorProps> = ({ 
+  creatureId, 
+  isSimulating = false,
+  selectedItemsForGoob: externalSelectedItems,
+  setSelectedItemsForGoob: externalSetSelectedItems,
+}) => {
   const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   
@@ -26,9 +33,10 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
   const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
   
-  // Track selected items for the Goob (items added via "+")
-  // Map of itemId -> count
-  const [selectedItemsForGoob, setSelectedItemsForGoob] = useState<Map<number, number>>(new Map());
+  // Use external state if provided, otherwise use local state
+  const [localSelectedItems, setLocalSelectedItems] = useState<Map<number, number>>(new Map());
+  const selectedItemsForGoob = externalSelectedItems ?? localSelectedItems;
+  const setSelectedItemsForGoob = externalSetSelectedItems ?? setLocalSelectedItems;
   
   // Track item balances (decremented when items are added to Goob)
   const [itemBalances, setItemBalances] = useState<Map<number, bigint>>(new Map());
@@ -201,7 +209,30 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
                   key={item.id} 
                   itemId={item.id} 
                   balance={balance}
-                  onModalOpen={() => setExpandedItemId(item.id)}
+                  onModalOpen={() => {
+                    if (creatureId) {
+                      // In Lab view: clicking item adds it to selected items (same as + button)
+                      setSelectedItemsForGoob(prev => {
+                        const next = new Map(prev);
+                        const currentCount = next.get(item.id) || 0;
+                        next.set(item.id, currentCount + 1);
+                        return next;
+                      });
+                      
+                      // Decrement balance
+                      setItemBalances(prev => {
+                        const next = new Map(prev);
+                        const currentBalance = next.get(item.id) ?? item.balance;
+                        if (currentBalance > 0n) {
+                          next.set(item.id, currentBalance - 1n);
+                        }
+                        return next;
+                      });
+                    } else {
+                      // Not in Lab view: just expand
+                      setExpandedItemId(item.id);
+                    }
+                  }}
                   filterCategory={selectedFilter}
                   creatureId={creatureId}
                   onAddItem={(itemId) => {

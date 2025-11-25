@@ -11,15 +11,25 @@ import styles from './StabilizationDashboard.module.css';
 
 type Props = {
   isReadOnly?: boolean;
+  isSimulating?: boolean;
 };
 
 export const StabilizationDashboard: React.FC<Props> = ({
   isReadOnly: isReadOnlyProp,
+  isSimulating: isSimulatingProp = false,
 }) => {
   const isReadOnly = Boolean(isReadOnlyProp);
+  const isSimulating = Boolean(isSimulatingProp);
+  
+  // TODO: Wire up simulation mode when isSimulating is true
+  // For now, the toggle is just a UI element for the deployer
+  if (isSimulating) {
+    // Simulation mode will be implemented here
+  }
   const { address } = useAccount();
   const { connect, connectors } = useConnect();
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
+  const [selectedItemsForGoob, setSelectedItemsForGoob] = useState<Map<number, number>>(new Map());
   
   const { sp, isLoading: spLoading } = useWalletSP();
 
@@ -61,6 +71,8 @@ export const StabilizationDashboard: React.FC<Props> = ({
             selectedId={selectedGoobId} 
             onChange={setSelectedGoobId} 
             isReadOnly={isReadOnly}
+            isSimulating={isSimulating}
+            selectedItemsForGoob={selectedItemsForGoob}
           />
         </div>
         <div className={styles.traitsSection}>
@@ -73,7 +85,12 @@ export const StabilizationDashboard: React.FC<Props> = ({
           <h2 className={styles.title}>Item Inventory</h2>
         </div>
         <div className={styles.itemInventoryContainer}>
-          <ItemSelector creatureId={selectedGoobId} />
+          <ItemSelector 
+            creatureId={selectedGoobId} 
+            isSimulating={isSimulating}
+            selectedItemsForGoob={selectedItemsForGoob}
+            setSelectedItemsForGoob={setSelectedItemsForGoob}
+          />
         </div>
         <div className={styles.spSection}>
           <div className={styles.spLabel}>Stabilization Points (SP)</div>

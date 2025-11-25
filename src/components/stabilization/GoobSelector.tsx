@@ -5,6 +5,7 @@ import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
+import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -13,6 +14,7 @@ interface GoobSelectorProps {
   onChange: (id: bigint | null) => void;
   isReadOnly?: boolean;
   isSimulating?: boolean;
+  selectedItemsForGoob?: Map<number, number>;
 }
 
 type LabFilter = 'Waiting Room' | 'Lab';
@@ -21,6 +23,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   selectedId, 
   onChange,
   isSimulating = false,
+  selectedItemsForGoob = new Map(),
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
@@ -201,6 +204,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         <ExpandedGoobView
           tokenId={expandedGoobId}
           onClose={() => setExpandedGoobId(null)}
+          selectedItemsForGoob={selectedItemsForGoob}
         />
       ) : (
         <div className={styles.goobGrid}>
@@ -236,7 +240,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 const ExpandedGoobView: React.FC<{
   tokenId: bigint;
   onClose: () => void;
-}> = ({ tokenId, onClose }) => {
+  selectedItemsForGoob?: Map<number, number>;
+}> = ({ tokenId, onClose, selectedItemsForGoob = new Map() }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   const imageUrl = metadata?.image_data || metadata?.image || null;
@@ -358,7 +363,20 @@ const ExpandedGoobView: React.FC<{
         {/* Items instruction container */}
         {imageUrl && !isLoading && (
           <div className={styles.expandedItemsInstruction}>
-            Choose items below to apply to Goob
+            {selectedItemsForGoob.size > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
+                  Place items in order to finalize effects
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                  {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
+                    <SelectedItemDisplay key={itemId} itemId={itemId} count={count} />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>Choose items below to apply to Goob</div>
+            )}
           </div>
         )}
       </div>
@@ -536,6 +554,56 @@ const GoobCard: React.FC<{
       </div>
 
     </button>
+  );
+};
+
+// Component to display a selected item in the "Choose items below" area
+const SelectedItemDisplay: React.FC<{ itemId: number; count: number }> = ({ itemId, count }) => {
+  const { metadata } = useItemMetadata(itemId);
+  const imageUrl = metadata?.image || metadata?.image_data || null;
+  
+  return (
+    <div style={{
+      position: 'relative',
+      width: '60px',
+      height: '60px',
+      borderRadius: '4px',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      backgroundColor: 'rgba(128, 128, 128, 0.1)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    }}>
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={metadata?.name || `Item #${itemId}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      ) : (
+        <div style={{ fontSize: '8px', color: 'var(--muted)' }}>#{itemId}</div>
+      )}
+      {count > 1 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '2px',
+          right: '2px',
+          fontSize: '10px',
+          color: 'rgb(110, 231, 183)',
+          fontWeight: 600,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          padding: '2px 4px',
+          borderRadius: '2px',
+        }}>
+          x{count}
+        </div>
+      )}
+    </div>
   );
 };
 
