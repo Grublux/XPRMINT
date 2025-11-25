@@ -13,7 +13,7 @@ export default function StabilizationPage() {
         <h1 className={styles.title}>Dashboard</h1>
       </div>
       {address && whitelistEnabled && (
-        <div className={styles.whitelistBanner}>
+        <div className={isTester ? styles.whitelistBanner : styles.whitelistBannerNoAccess}>
           {isTester ? (
             <span>
               <strong>

@@ -10,8 +10,24 @@ export default function AppLayout(){
   const [showWalletMenu, setShowWalletMenu] = useState(false);
   const walletMenuRef = useRef<HTMLDivElement>(null);
   const { address, isConnected } = useAccount();
-  const { connectors, connect, isPending } = useConnect();
+  const { connectors, connect, isPending, error: connectError, reset: resetConnect } = useConnect();
   const { disconnect } = useDisconnect();
+
+  // Reset connect state when error occurs or connection is cancelled
+  useEffect(() => {
+    if (connectError) {
+      // Reset immediately when there's an error (user dismissed prompt, etc.)
+      resetConnect();
+    }
+  }, [connectError, resetConnect]);
+
+  // Also reset if isPending becomes false without a connection (timeout or cancellation)
+  useEffect(() => {
+    if (!isPending && !isConnected && !address) {
+      // Connection attempt finished but didn't connect - reset state
+      resetConnect();
+    }
+  }, [isPending, isConnected, address, resetConnect]);
 
   // Close wallet menu when clicking outside
   useEffect(() => {
