@@ -1,6 +1,7 @@
 // src/components/stabilization/ItemSelector.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useAccount } from 'wagmi';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import { ItemModal } from './ItemModal';
@@ -14,6 +15,7 @@ type ItemSelectorProps = {
 };
 
 export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId }) => {
+  const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   const [selectedItemForModal, setSelectedItemForModal] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
@@ -39,6 +41,26 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId }) => {
 
 
   if (!items.length) {
+    if (address) {
+      // Connected wallet with no items
+      return (
+        <div className={styles.noItemsContainer}>
+          <div className={styles.noItemsMessage}>
+            You have no items, claim a starter pack or head to{' '}
+            <a 
+              href="https://magiceden.us/u/0x634989990acb7F95d07Ac09a6c35491Ac8dFa3Cf?chains=%5B%22apechain%22%5D&wallets=%5B%220x634989990acb7F95d07Ac09a6c35491Ac8dFa3Cf%22%5D&activeTab=%22allItems%22"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.magicEdenLink}
+            >
+              Magic Eden
+            </a>
+            {' '}to buy on secondary
+          </div>
+        </div>
+      );
+    }
+    // Not connected - show generic message
     return (
       <div className="flex flex-col gap-2 items-center text-center w-full">
         <div className="text-sm text-muted-foreground">

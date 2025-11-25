@@ -174,30 +174,38 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           <div className={styles.noGoobsTitle}>You have no Goobs in the lab</div>
         </div>
       ) : (
-        <div className={styles.goobGrid}>
-          {filteredGoobs.map((g: { tokenId: bigint }) => {
-            const isSelected = selectedId === g.tokenId;
-            const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
-            return (
-              <GoobCard
-                key={g.tokenId.toString()}
-                tokenId={g.tokenId}
-                isSelected={isSelected}
-                isSelectedForBatch={isSelectedForBatch}
-                onSelect={() => onChange(isSelected ? null : g.tokenId)}
-                onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
-                onModalOpen={() => setSelectedGoobForModal(g.tokenId)}
-              />
-            );
-          })}
-        </div>
+      <div className={styles.goobGrid}>
+        {filteredGoobs.map((g: { tokenId: bigint }) => {
+          const isSelected = selectedId === g.tokenId;
+          const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
+          return (
+            <GoobCard
+              key={g.tokenId.toString()}
+              tokenId={g.tokenId}
+              isSelected={isSelected}
+              isSelectedForBatch={isSelectedForBatch}
+              showPlusButton={labFilter === 'Waiting Room'}
+                onSelect={() => {
+                if (labFilter === 'In Lab') {
+                  // In Lab: open modal
+                  setSelectedGoobForModal(g.tokenId);
+                } else {
+                  // Waiting Room: just select for batch (no modal)
+                  onChange(isSelected ? null : g.tokenId);
+                }
+              }}
+              onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
+            />
+          );
+        })}
+      </div>
       )}
       {selectedId && (
         <div className="text-xs text-muted-foreground text-center">
           Selected: Goob #{selectedId.toString()}
         </div>
       )}
-      {selectedGoobForModal !== null && (
+      {selectedGoobForModal !== null && labFilter === 'In Lab' && (
         <GoobModal
           tokenId={selectedGoobForModal}
           isOpen={selectedGoobForModal !== null}
@@ -214,10 +222,10 @@ const GoobCard: React.FC<{
   tokenId: bigint;
   isSelected: boolean;
   isSelectedForBatch: boolean;
+  showPlusButton: boolean;
   onSelect: () => void;
   onSelectForBatch: (e: React.MouseEvent) => void;
-  onModalOpen: () => void;
-}> = ({ tokenId, isSelected, isSelectedForBatch, onSelect, onSelectForBatch, onModalOpen }) => {
+}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, onSelect, onSelectForBatch }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
@@ -228,7 +236,6 @@ const GoobCard: React.FC<{
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
-        onModalOpen();
       }}
       className={`${cardStyles.goobCard} ${isSelected ? cardStyles.selected : ''} ${isSelectedForBatch ? cardStyles.selectedForBatch : ''}`}
       style={{ 
@@ -299,16 +306,18 @@ const GoobCard: React.FC<{
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
         )}
 
-        {/* Plus button in top right */}
-        <button
-          onClick={onSelectForBatch}
-          className={cardStyles.addButton}
-          style={{
-            color: isSelectedForBatch ? 'rgb(16, 185, 129)' : 'var(--muted)',
-          }}
-        >
-          +
-        </button>
+        {/* Plus button in top right - only show in Waiting Room */}
+        {showPlusButton && (
+          <button
+            onClick={onSelectForBatch}
+            className={cardStyles.addButton}
+            style={{
+              color: isSelectedForBatch ? 'rgb(16, 185, 129)' : 'var(--muted)',
+            }}
+          >
+            +
+          </button>
+        )}
 
         {/* Essence traits in bottom left */}
         {metadata?.essence && Object.keys(metadata.essence).length > 0 && (
