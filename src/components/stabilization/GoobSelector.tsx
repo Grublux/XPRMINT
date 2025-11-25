@@ -364,11 +364,11 @@ const ExpandedGoobView: React.FC<{
         {imageUrl && !isLoading && (
           <div className={styles.expandedItemsInstruction}>
             {selectedItemsForGoob.size > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
                   Place items in order to finalize effects
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                <div className={styles.selectedItemsGrid}>
                   {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
                     <SelectedItemDisplay key={itemId} itemId={itemId} count={count} />
                   ))}
@@ -564,14 +564,21 @@ const SelectedItemDisplay: React.FC<{ itemId: number; count: number }> = ({ item
   
   return (
     <div style={{
-      width: '132px',
+      background: 'transparent',
+      cursor: 'default',
+      width: '100%',
+      maxWidth: '100%',
       minHeight: '132px',
       display: 'flex',
       flexDirection: 'column',
       borderRadius: '4px',
       border: '1px solid rgba(255, 255, 255, 0.2)',
       overflow: 'visible',
-      background: 'transparent',
+      transition: 'all 0.2s',
+      margin: '0',
+      padding: '0',
+      boxSizing: 'border-box',
+      position: 'relative',
     }}>
       {/* Image Section */}
       <div style={{

@@ -361,3 +361,22 @@
   background: transparent;
 }
 
+.selectedItemsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 2px;
+  width: 100%;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .selectedItemsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
