@@ -60,3 +60,73 @@
   color: rgb(16, 185, 129);
 }
 
+.filterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.filterButton {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filterButton:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.1);
+  color: rgb(16, 185, 129);
+}
+
+.filterButtonActive {
+  border-color: rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+}
+
+.goobHint {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.batchSendContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.batchSendButton {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.batchSendButton:hover {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: rgb(5, 150, 105);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+

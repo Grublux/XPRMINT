@@ -13,6 +13,8 @@ interface GoobSelectorProps {
   isReadOnly?: boolean;
 }
 
+type LabFilter = 'Waiting Room' | 'In Lab';
+
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
   selectedId, 
   onChange,
@@ -23,6 +25,9 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const goobs = walletGoobs;
   const isLoading = walletIsLoading;
   const [selectedGoobForModal, setSelectedGoobForModal] = useState<bigint | null>(null);
+  const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
+  const [goobsInLab, setGoobsInLab] = useState<Set<string>>(new Set());
+  const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
 
   if (isLoading) {
     return (
@@ -66,22 +71,127 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     );
   }
 
+  const handleSelectForBatch = (tokenId: bigint, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const idStr = tokenId.toString();
+    setGoobsSelectedForBatch(prev => {
+      const next = new Set(prev);
+      if (next.has(idStr)) {
+        next.delete(idStr);
+      } else {
+        next.add(idStr);
+      }
+      return next;
+    });
+  };
+
+  const filteredGoobs = goobs.filter((g: { tokenId: bigint }) => {
+    const idStr = g.tokenId.toString();
+    const inLab = goobsInLab.has(idStr);
+    return labFilter === 'In Lab' ? inLab : !inLab;
+  });
+
+  const selectedForLabCount = goobsSelectedForBatch.size;
+
+  const handleBatchSendToLab = () => {
+    const selectedGoobIds = Array.from(goobsSelectedForBatch).map(id => BigInt(id));
+    
+    if (selectedGoobIds.length === 0) {
+      console.log('[Batch Send] No Goobs selected');
+      return;
+    }
+
+    console.log('[Batch Send] Would send to lab:', selectedGoobIds.map(id => id.toString()));
+    
+    // TODO: For testing only - placeholder for actual implementation
+    // Sending to lab = Initialize creature + Claim starter pack (5 items per Goob)
+    // This would:
+    // 1. For each goobId in selectedGoobIds:
+    //    - Initialize creature with creatureId = goobId (initializeCreature)
+    //    - Claim initial starter pack (claimDailyItems) - this gives 5 items
+    // 2. After successful batch, move them to "In Lab" and clear selection
+    
+    // For now, just log what would happen
+    selectedGoobIds.forEach((goobId) => {
+      console.log(`[Batch Send] Would initialize creature ${goobId.toString()} and claim starter pack (5 items)`);
+    });
+
+    // After successful batch (for now, immediately for testing):
+    // Move selected Goobs to "In Lab" and clear selection
+    setGoobsInLab(prev => {
+      const next = new Set(prev);
+      goobsSelectedForBatch.forEach(id => next.add(id));
+      return next;
+    });
+    setGoobsSelectedForBatch(new Set());
+  };
+
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
-      <div className={styles.goobGrid}>
-        {goobs.map((g: { tokenId: bigint }) => {
-          const isSelected = selectedId === g.tokenId;
-          return (
-            <GoobCard
-              key={g.tokenId.toString()}
-              tokenId={g.tokenId}
-              isSelected={isSelected}
-              onSelect={() => onChange(isSelected ? null : g.tokenId)}
-              onModalOpen={() => setSelectedGoobForModal(g.tokenId)}
-            />
-          );
-        })}
+      {/* Filter Buttons */}
+      <div className={styles.filterContainer}>
+        <button
+          className={`${styles.filterButton} ${labFilter === 'Waiting Room' ? styles.filterButtonActive : ''}`}
+          onClick={() => setLabFilter('Waiting Room')}
+        >
+          Waiting Room
+        </button>
+        <button
+          className={`${styles.filterButton} ${labFilter === 'In Lab' ? styles.filterButtonActive : ''}`}
+          onClick={() => setLabFilter('In Lab')}
+        >
+          In Lab
+        </button>
       </div>
+
+      {/* Hint Text */}
+      {labFilter === 'Waiting Room' && (
+        <div className={styles.goobHint}>
+          Hit '+' to add to lab and claim starter pack(s)
+        </div>
+      )}
+
+      {labFilter === 'In Lab' && (
+        <div className={styles.goobHint}>
+          Click a Goob to view details
+        </div>
+      )}
+
+      {/* Batch Send Button */}
+      {selectedForLabCount > 0 && labFilter === 'Waiting Room' && (
+        <div className={styles.batchSendContainer}>
+          <button
+            className={styles.batchSendButton}
+            onClick={handleBatchSendToLab}
+          >
+            Send {selectedForLabCount} {selectedForLabCount === 1 ? 'Goob' : 'Goobs'} to Lab and claim {selectedForLabCount * 5} starter items
+          </button>
+        </div>
+      )}
+
+      {filteredGoobs.length === 0 && labFilter === 'In Lab' ? (
+        <div className={styles.noGoobsContainer}>
+          <div className={styles.noGoobsTitle}>You have no Goobs in the lab</div>
+        </div>
+      ) : (
+        <div className={styles.goobGrid}>
+          {filteredGoobs.map((g: { tokenId: bigint }) => {
+            const isSelected = selectedId === g.tokenId;
+            const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
+            return (
+              <GoobCard
+                key={g.tokenId.toString()}
+                tokenId={g.tokenId}
+                isSelected={isSelected}
+                isSelectedForBatch={isSelectedForBatch}
+                onSelect={() => onChange(isSelected ? null : g.tokenId)}
+                onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
+                onModalOpen={() => setSelectedGoobForModal(g.tokenId)}
+              />
+            );
+          })}
+        </div>
+      )}
       {selectedId && (
         <div className="text-xs text-muted-foreground text-center">
           Selected: Goob #{selectedId.toString()}
@@ -103,9 +213,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 const GoobCard: React.FC<{
   tokenId: bigint;
   isSelected: boolean;
+  isSelectedForBatch: boolean;
   onSelect: () => void;
+  onSelectForBatch: (e: React.MouseEvent) => void;
   onModalOpen: () => void;
-}> = ({ tokenId, isSelected, onSelect, onModalOpen }) => {
+}> = ({ tokenId, isSelected, isSelectedForBatch, onSelect, onSelectForBatch, onModalOpen }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
@@ -118,34 +230,40 @@ const GoobCard: React.FC<{
         onSelect();
         onModalOpen();
       }}
-      className={`${cardStyles.goobCard} ${isSelected ? cardStyles.selected : ''}`}
+      className={`${cardStyles.goobCard} ${isSelected ? cardStyles.selected : ''} ${isSelectedForBatch ? cardStyles.selectedForBatch : ''}`}
       style={{ 
         WebkitTapHighlightColor: 'rgba(16, 185, 129, 0.2)',
       }}
       onMouseEnter={(e) => {
-        if (!isSelected) {
+        if (!isSelected && !isSelectedForBatch) {
           e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)';
           e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
         }
       }}
       onMouseLeave={(e) => {
-        if (!isSelected) {
+        if (!isSelected && !isSelectedForBatch) {
           e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
           e.currentTarget.style.backgroundColor = 'transparent';
+        } else if (isSelectedForBatch) {
+          // Maintain green border for batch-selected Goobs
+          e.currentTarget.style.borderColor = 'rgb(16, 185, 129)';
         }
       }}
       onTouchStart={(e) => {
-        if (!isSelected) {
+        if (!isSelected && !isSelectedForBatch) {
           e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)';
           e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
         }
       }}
       onTouchEnd={(e) => {
-        if (!isSelected) {
+        if (!isSelected && !isSelectedForBatch) {
           setTimeout(() => {
             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             e.currentTarget.style.backgroundColor = 'transparent';
           }, 150);
+        } else if (isSelectedForBatch) {
+          // Maintain green border for batch-selected Goobs
+          e.currentTarget.style.borderColor = 'rgb(16, 185, 129)';
         }
       }}
     >
@@ -180,6 +298,46 @@ const GoobCard: React.FC<{
         ) : (
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
         )}
+
+        {/* Plus button in top right */}
+        <button
+          onClick={onSelectForBatch}
+          className={cardStyles.addButton}
+          style={{
+            color: isSelectedForBatch ? 'rgb(16, 185, 129)' : 'var(--muted)',
+          }}
+        >
+          +
+        </button>
+
+        {/* Essence traits in bottom left */}
+        {metadata?.essence && Object.keys(metadata.essence).length > 0 && (
+          <div style={{ 
+            position: 'absolute',
+            bottom: '4px',
+            left: '4px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '4px',
+          }}>
+            {Object.entries(metadata.essence).slice(0, 2).map(([key, value]) => (
+              <div
+                key={key}
+                style={{ 
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  backdropFilter: 'blur(4px)',
+                  fontWeight: 300,
+                  color: 'var(--muted)',
+                }}
+              >
+                {String(value)}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Info Section */}
@@ -212,34 +370,6 @@ const GoobCard: React.FC<{
         )}
       </div>
 
-      {/* Essence traits preview (if available) */}
-      {metadata?.essence && Object.keys(metadata.essence).length > 0 && (
-        <div style={{ 
-          position: 'absolute',
-          top: '4px',
-          right: '4px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '4px',
-        }}>
-          {Object.entries(metadata.essence).slice(0, 2).map(([key, value]) => (
-            <div
-              key={key}
-              style={{ 
-                fontSize: '10px',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                backdropFilter: 'blur(4px)',
-                fontWeight: 300,
-                color: 'var(--muted)',
-              }}
-            >
-              {String(value)}
-            </div>
-          ))}
-        </div>
-      )}
     </button>
   );
 };

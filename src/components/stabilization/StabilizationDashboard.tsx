@@ -57,7 +57,6 @@ export const StabilizationDashboard: React.FC<Props> = ({
           <h2 className={styles.title}>My Goobs</h2>
         </div>
         <div className={styles.goobInventoryContainer}>
-          <div className={styles.goobHint}>Click a Goob to view details</div>
           <GoobSelector 
             selectedId={selectedGoobId} 
             onChange={setSelectedGoobId} 
@@ -74,7 +73,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
           <h2 className={styles.title}>Item Inventory</h2>
         </div>
         <div className={styles.itemInventoryContainer}>
-          <ItemSelector />
+          <ItemSelector creatureId={selectedGoobId} />
         </div>
         <div className={styles.spSection}>
           <div className={styles.spLabel}>Stabilization Points (SP)</div>

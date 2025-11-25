@@ -20,6 +20,10 @@
   border: 2px solid rgb(16, 185, 129);
 }
 
+.goobCard.selectedForBatch {
+  border: 2px solid rgb(16, 185, 129) !important;
+}
+
 .goobImage {
   width: 132px;
   height: auto;
@@ -45,6 +49,34 @@
   font-size: 13px;
   color: rgb(16, 185, 129);
   font-weight: 300;
+}
+
+.addButton {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.addButton:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 @media (max-width: 480px) {

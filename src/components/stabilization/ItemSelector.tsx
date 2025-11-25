@@ -9,7 +9,11 @@ import styles from './ItemSelector.module.css';
 
 type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity';
 
-export const ItemSelector: React.FC = () => {
+type ItemSelectorProps = {
+  creatureId?: bigint | number | null;
+};
+
+export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId }) => {
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   const [selectedItemForModal, setSelectedItemForModal] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
@@ -75,6 +79,7 @@ export const ItemSelector: React.FC = () => {
           itemId={selectedItemForModal}
           isOpen={selectedItemForModal !== null}
           onClose={() => setSelectedItemForModal(null)}
+          creatureId={creatureId}
         />
       )}
     </div>
