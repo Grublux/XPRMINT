@@ -375,7 +375,7 @@ const ExpandedGoobView: React.FC<{
                 </div>
               </div>
             ) : (
-              <div>Choose items below to apply to Goob</div>
+              <div>Choose up to 3 items below to apply to Goob</div>
             )}
           </div>
         )}

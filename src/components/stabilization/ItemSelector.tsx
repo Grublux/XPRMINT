@@ -212,6 +212,12 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({
                   onModalOpen={() => {
                     if (creatureId) {
                       // In Lab view: clicking item adds it to selected items (same as + button)
+                      // Check if we've already reached the 3-item limit
+                      const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
+                      if (currentTotal >= 3) {
+                        return; // Don't add if already at limit
+                      }
+                      
                       setSelectedItemsForGoob(prev => {
                         const next = new Map(prev);
                         const currentCount = next.get(item.id) || 0;
@@ -235,7 +241,14 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({
                   }}
                   filterCategory={selectedFilter}
                   creatureId={creatureId}
+                  selectedItemsForGoob={selectedItemsForGoob}
                   onAddItem={(itemId) => {
+                    // Check if we've already reached the 3-item limit
+                    const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
+                    if (currentTotal >= 3) {
+                      return; // Don't add if already at limit
+                    }
+                    
                     // Add item to selected items
                     setSelectedItemsForGoob(prev => {
                       const next = new Map(prev);
@@ -270,8 +283,9 @@ const ItemCard: React.FC<{
   onModalOpen: () => void;
   filterCategory: FilterCategory;
   creatureId?: bigint | number | null;
+  selectedItemsForGoob?: Map<number, number>;
   onAddItem?: (itemId: number) => void;
-}> = ({ itemId, balance, onModalOpen, filterCategory, creatureId, onAddItem }) => {
+}> = ({ itemId, balance, onModalOpen, filterCategory, creatureId, selectedItemsForGoob, onAddItem }) => {
   // Check if we have cached metadata - if so, load immediately
   const getCachedMetadata = (): any => {
     try {
@@ -334,11 +348,18 @@ const ItemCard: React.FC<{
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onAddItem && balance > 0n) {
+      // Check if we've already reached the 3-item limit
+      const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
+      if (currentTotal >= 3) {
+        return; // Don't add if already at limit
+      }
       onAddItem(itemId);
     }
   };
 
   const showPlusButton = Boolean(creatureId); // Only show in Lab view when Goob is selected
+  const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
+  const isAtLimit = currentTotal >= 3;
 
   return (
     <div
@@ -364,6 +385,13 @@ const ItemCard: React.FC<{
       }}
       onClick={(e) => {
         e.stopPropagation();
+        // In Lab view, check if we're at the limit before allowing click
+        if (creatureId) {
+          const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
+          if (currentTotal >= 3) {
+            return; // Don't add if already at limit
+          }
+        }
         onModalOpen();
       }}
       onMouseEnter={(e) => {
@@ -430,8 +458,11 @@ const ItemCard: React.FC<{
             onClick={handleAddClick}
             className={styles.addButton}
             style={{
-              color: 'var(--muted)',
+              color: isAtLimit ? 'rgba(128, 128, 128, 0.5)' : 'var(--muted)',
+              cursor: isAtLimit ? 'not-allowed' : 'pointer',
+              opacity: isAtLimit ? 0.5 : 1,
             }}
+            disabled={isAtLimit}
           >
             +
           </button>
