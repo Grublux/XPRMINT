@@ -176,11 +176,6 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           <div className={styles.goobCountReadout}>
             Waiting Room: {waitingRoomCount} | Lab: {labCount}
           </div>
-          
-          {/* Help text */}
-          <div className={styles.goobHelpText}>
-            Qty
-          </div>
         </>
       )}
       
