@@ -566,8 +566,8 @@ const SelectedItemDisplay: React.FC<{ itemId: number; count: number }> = ({ item
     <div style={{
       background: 'transparent',
       cursor: 'default',
-      width: '100%',
-      maxWidth: '100%',
+      width: '132px',
+      flexShrink: 0,
       minHeight: '132px',
       display: 'flex',
       flexDirection: 'column',
