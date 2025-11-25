@@ -25,6 +25,10 @@ export function useWalletItemsSummary() {
     queryFn: async () => {
       if (!address || !publicClient) return [] as WalletItem[];
 
+      console.log('[useWalletItemsSummary] Scanning items for address:', address);
+      console.log('[useWalletItemsSummary] Item contract:', ITEM_V3_ADDRESS);
+      console.log('[useWalletItemsSummary] Checking IDs:', ITEM_IDS.map(id => id.toString()));
+
       const balances = await Promise.all(
         ITEM_IDS.map(async (id) => {
           try {
@@ -34,15 +38,20 @@ export function useWalletItemsSummary() {
               functionName: 'balanceOf',
               args: [address as Address, id],
             });
+            if (bal > 0n) {
+              console.log(`[useWalletItemsSummary] Found item ${id} with balance:`, bal.toString());
+            }
             return { id: Number(id), balance: bal as bigint };
           } catch (err) {
-            console.warn('[useWalletItemsSummary] balanceOf failed for id', id, err);
+            console.error(`[useWalletItemsSummary] balanceOf failed for id ${id}:`, err);
             return { id: Number(id), balance: 0n };
           }
         })
       );
 
-      return balances.filter((b) => b.balance > 0n);
+      const itemsWithBalance = balances.filter((b) => b.balance > 0n);
+      console.log('[useWalletItemsSummary] Found items:', itemsWithBalance.map(i => `ID ${i.id}: ${i.balance.toString()}`));
+      return itemsWithBalance;
     },
   });
 
