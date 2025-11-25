@@ -462,7 +462,7 @@ const GoobCard: React.FC<{
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
         )}
 
-        {/* Plus button in top right - only show in Waiting Room */}
+        {/* Plus/Checkmark button in top right - only show in Waiting Room */}
         {showPlusButton && (
           <button
             onClick={onSelectForBatch}
@@ -471,7 +471,7 @@ const GoobCard: React.FC<{
               color: isSelectedForBatch ? 'rgb(16, 185, 129)' : 'var(--muted)',
             }}
           >
-            +
+            {isSelectedForBatch ? '✓' : '+'}
           </button>
         )}
 
