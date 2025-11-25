@@ -21,7 +21,7 @@ export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
   }
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading creature state…</div>;
+    return null;
   }
 
   if (isError || !state) {

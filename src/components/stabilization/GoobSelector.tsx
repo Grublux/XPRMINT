@@ -214,14 +214,12 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
                 isSelected={isSelected}
                 isSelectedForBatch={isSelectedForBatch}
                 showPlusButton={labFilter === 'Waiting Room'}
+                isWaitingRoom={labFilter === 'Waiting Room'}
                 onSelect={() => {
                   if (labFilter === 'Lab') {
                     // In Lab: expand the Goob and set selectedId so ItemSelector knows
                     setExpandedGoobId(g.tokenId);
                     onChange(g.tokenId);
-                  } else {
-                    // Waiting Room: just select for batch (no modal)
-                    onChange(isSelected ? null : g.tokenId);
                   }
                 }}
                 onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
@@ -374,9 +372,10 @@ const GoobCard: React.FC<{
   isSelected: boolean;
   isSelectedForBatch: boolean;
   showPlusButton: boolean;
+  isWaitingRoom: boolean;
   onSelect: () => void;
   onSelectForBatch: (e: React.MouseEvent) => void;
-}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, onSelect, onSelectForBatch }) => {
+}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, isWaitingRoom, onSelect, onSelectForBatch }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
@@ -386,7 +385,13 @@ const GoobCard: React.FC<{
     <button
       onClick={(e) => {
         e.stopPropagation();
-        onSelect();
+        if (isWaitingRoom) {
+          // In Waiting Room: clicking anywhere on card = same as clicking + button
+          onSelectForBatch(e);
+        } else {
+          // In Lab: expand the Goob
+          onSelect();
+        }
       }}
       className={`${cardStyles.goobCard} ${isSelected ? cardStyles.selected : ''} ${isSelectedForBatch ? cardStyles.selectedForBatch : ''}`}
       style={{ 
