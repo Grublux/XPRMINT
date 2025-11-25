@@ -38,6 +38,21 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
 
+  // Count Goobs in each category (calculate before early returns for useEffect)
+  const labCount = goobs.filter((g: { tokenId: bigint }) => {
+    const idStr = g.tokenId.toString();
+    return goobsInLab.has(idStr);
+  }).length;
+
+  // Detect when new goobs are added to lab (must be before any conditional returns)
+  useEffect(() => {
+    if (labCount > previousLabCountRef.current && previousLabCountRef.current > 0) {
+      // New goob(s) added to lab
+      setHasNewLabActivity(true);
+    }
+    previousLabCountRef.current = labCount;
+  }, [labCount]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2">
@@ -102,25 +117,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   const selectedForLabCount = goobsSelectedForBatch.size;
   
-  // Count Goobs in each category
+  // Count Goobs in waiting room
   const waitingRoomCount = goobs.filter((g: { tokenId: bigint }) => {
     const idStr = g.tokenId.toString();
     return !goobsInLab.has(idStr);
   }).length;
-  
-  const labCount = goobs.filter((g: { tokenId: bigint }) => {
-    const idStr = g.tokenId.toString();
-    return goobsInLab.has(idStr);
-  }).length;
-
-  // Detect when new goobs are added to lab
-  useEffect(() => {
-    if (labCount > previousLabCountRef.current && previousLabCountRef.current > 0) {
-      // New goob(s) added to lab
-      setHasNewLabActivity(true);
-    }
-    previousLabCountRef.current = labCount;
-  }, [labCount]);
 
   const handleBatchSendToLab = () => {
     const selectedGoobIds = Array.from(goobsSelectedForBatch).map(id => BigInt(id));
