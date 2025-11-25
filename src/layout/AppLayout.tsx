@@ -30,7 +30,10 @@ export default function AppLayout(){
     };
   }, [showWalletMenu]);
 
-  const handleWalletClick = () => {
+  const handleWalletClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isConnected) {
       setShowWalletMenu(!showWalletMenu);
     } else {

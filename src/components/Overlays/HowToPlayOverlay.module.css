@@ -6,6 +6,7 @@
   align-items:center; 
   justify-content:center; 
   z-index: 10000; /* Above BoltAnimation (9999) and other overlays */
+  pointer-events: auto;
 }
 
 .box{ 

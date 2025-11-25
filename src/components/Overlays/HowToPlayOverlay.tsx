@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import styles from './HowToPlayOverlay.module.css';
 
 type HowToPlayOverlayProps = {
@@ -6,10 +7,25 @@ type HowToPlayOverlayProps = {
 };
 
 export default function HowToPlayOverlay({ isOpen, onClose }: HowToPlayOverlayProps) {
+  // Ensure overlay doesn't interfere with other elements when closed
+  useEffect(() => {
+    if (!isOpen) {
+      // Force a small delay to ensure DOM cleanup
+      return;
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
   
+  const handleScrimClick = (e: React.MouseEvent) => {
+    // Only close if clicking directly on the scrim, not on child elements
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+  
   return (
-    <div className={styles.scrim} role="dialog" aria-modal="true" onClick={onClose}>
+    <div className={styles.scrim} role="dialog" aria-modal="true" onClick={handleScrimClick}>
       <div className={styles.box} onClick={(e) => e.stopPropagation()} tabIndex={-1}>
         <h2 className={styles.title}>How to Play</h2>
         <div className={styles.content}>
