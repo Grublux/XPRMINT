@@ -559,50 +559,98 @@ const GoobCard: React.FC<{
 
 // Component to display a selected item in the "Choose items below" area
 const SelectedItemDisplay: React.FC<{ itemId: number; count: number }> = ({ itemId, count }) => {
-  const { metadata } = useItemMetadata(itemId);
+  const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
   
   return (
     <div style={{
-      position: 'relative',
-      width: '60px',
-      height: '60px',
-      borderRadius: '4px',
-      border: '1px solid rgba(255, 255, 255, 0.3)',
-      backgroundColor: 'rgba(128, 128, 128, 0.1)',
+      width: '132px',
+      minHeight: '132px',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
+      flexDirection: 'column',
+      borderRadius: '4px',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      overflow: 'visible',
+      background: 'transparent',
     }}>
-      {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt={metadata?.name || `Item #${itemId}`}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-          }}
-        />
-      ) : (
-        <div style={{ fontSize: '8px', color: 'var(--muted)' }}>#{itemId}</div>
-      )}
-      {count > 1 && (
+      {/* Image Section */}
+      <div style={{
+        width: '100%',
+        minHeight: '99px',
+        backgroundColor: 'rgba(128, 128, 128, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        flexShrink: 0,
+        padding: '0',
+        margin: '0',
+        position: 'relative',
+      }}>
+        {isLoading ? (
+          <div style={{ fontSize: '8px', color: 'var(--muted)' }}>Loading...</div>
+        ) : imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={metadata?.name || `Item #${itemId}`}
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+              padding: '0',
+              margin: '0',
+              display: 'block',
+            }}
+          />
+        ) : (
+          <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
+        )}
+        {count > 1 && (
+          <div style={{
+            position: 'absolute',
+            top: '4px',
+            right: '4px',
+            fontSize: '10px',
+            color: 'rgb(110, 231, 183)',
+            fontWeight: 600,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            padding: '2px 4px',
+            borderRadius: '2px',
+          }}>
+            x{count}
+          </div>
+        )}
+      </div>
+
+      {/* Info Section */}
+      <div style={{
+        width: '100%',
+        height: 'auto',
+        minHeight: '33px',
+        padding: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparent',
+        flexShrink: 0,
+        boxSizing: 'border-box',
+      }}>
         <div style={{
-          position: 'absolute',
-          bottom: '2px',
-          right: '2px',
-          fontSize: '10px',
-          color: 'rgb(110, 231, 183)',
-          fontWeight: 600,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: '2px 4px',
-          borderRadius: '2px',
+          fontSize: '12px',
+          fontWeight: 300,
+          lineHeight: '1.2',
+          textAlign: 'center',
+          color: 'var(--muted)',
+          marginBottom: '2px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          width: '100%',
         }}>
-          x{count}
+          {metadata?.name || `Item #${itemId}`}
         </div>
-      )}
+      </div>
     </div>
   );
 };
