@@ -34,7 +34,8 @@ export default function AppLayout(){
     e.preventDefault();
     e.stopPropagation();
     
-    if (isConnected) {
+    // Only show menu if actually connected with an address
+    if (isConnected && address) {
       setShowWalletMenu(!showWalletMenu);
     } else {
       // Use the first available connector (usually injected/MetaMask)
@@ -65,9 +66,13 @@ export default function AppLayout(){
                 onClick={handleWalletClick}
                 disabled={isPending}
               >
-                {isPending ? 'Connecting...' : isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Connect Wallet'}
+                {isPending 
+                  ? 'Connecting...' 
+                  : isConnected && address 
+                    ? `${address.slice(0, 6)}...${address.slice(-4)}` 
+                    : 'Connect Wallet'}
               </button>
-              {isConnected && showWalletMenu && (
+              {isConnected && address && showWalletMenu && (
                 <div className={styles.walletMenu}>
                   <div className={styles.walletAddress}>
                     {address}
