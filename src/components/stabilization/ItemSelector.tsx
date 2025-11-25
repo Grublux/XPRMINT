@@ -48,7 +48,7 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId }) => {
           <div className={styles.noItemsMessage}>
             You have no items, claim a starter pack or head to{' '}
             <a 
-              href="https://magiceden.us/u/0x634989990acb7F95d07Ac09a6c35491Ac8dFa3Cf?chains=%5B%22apechain%22%5D&wallets=%5B%220x634989990acb7F95d07Ac09a6c35491Ac8dFa3Cf%22%5D&activeTab=%22allItems%22"
+              href="https://magiceden.us/collections/apechain/ITEMS"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.magicEdenLink}
