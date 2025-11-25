@@ -6,7 +6,7 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
@@ -25,13 +25,13 @@
   position: relative;
   padding: 24px;
   margin: 20px;
+  margin-top: 80px;
 }
 
 .closeButton {
-  position: sticky;
-  top: 0;
-  right: 0;
-  float: right;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: var(--text);
@@ -46,8 +46,7 @@
   justify-content: center;
   transition: all 0.2s;
   z-index: 10;
-  margin-bottom: -32px;
-  margin-left: auto;
+  margin: 0;
 }
 
 .closeButton:hover {
@@ -139,20 +138,20 @@
   .modalOverlay {
     padding: 10px;
     align-items: flex-start;
-    padding-top: 20px;
   }
 
   .modalContent {
     padding: 16px;
     max-height: calc(100vh - 20px);
-    margin: 0;
+    margin: 10px;
+    margin-top: 80px;
   }
 
   .closeButton {
-    position: sticky;
-    top: 0;
-    float: right;
-    margin-bottom: -32px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
   }
 
   .title {
