@@ -13,21 +13,23 @@ export default function AppLayout(){
   const { connectors, connect, isPending, error: connectError, reset: resetConnect } = useConnect();
   const { disconnect } = useDisconnect();
 
-  // Reset connect state when error occurs or connection is cancelled
+  // Reset connect state when error occurs (user dismissed prompt, connection rejected, etc.)
   useEffect(() => {
     if (connectError) {
-      // Reset immediately when there's an error (user dismissed prompt, etc.)
+      // Reset immediately when there's an error to clear the pending state
       resetConnect();
     }
   }, [connectError, resetConnect]);
 
-  // Also reset if isPending becomes false without a connection (timeout or cancellation)
+  // Timeout: if isPending has been true for more than 30 seconds without connecting, reset
   useEffect(() => {
-    if (!isPending && !isConnected && !address) {
-      // Connection attempt finished but didn't connect - reset state
-      resetConnect();
+    if (isPending && !isConnected) {
+      const timeout = setTimeout(() => {
+        resetConnect();
+      }, 30000); // 30 second timeout
+      return () => clearTimeout(timeout);
     }
-  }, [isPending, isConnected, address, resetConnect]);
+  }, [isPending, isConnected, resetConnect]);
 
   // Close wallet menu when clicking outside
   useEffect(() => {
