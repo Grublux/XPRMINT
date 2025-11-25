@@ -19,6 +19,12 @@
   align-items: center;
   gap: 12px;
 }
+
+.flaskIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
 .titleText {
   font-size: 21.6px;
   font-weight: 900;

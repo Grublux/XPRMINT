@@ -130,3 +130,8 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
+.batchNumber {
+  color: var(--text);
+  font-weight: 700;
+}
+

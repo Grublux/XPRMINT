@@ -114,10 +114,10 @@ export default function AppLayout(){
     <div className={styles.shell}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <div className={styles.headerLeft}>
-            <HamburgerMenu onHowToPlayClick={() => setShowHowToPlay(true)} />
-            <div className={styles.titleText}>XPRMINT</div>
-          </div>
+                <div className={styles.headerLeft}>
+                  <HamburgerMenu onHowToPlayClick={() => setShowHowToPlay(true)} />
+                  <div className={styles.titleText}>XPRMINT</div>
+                </div>
           <div className={styles.headerRight}>
             <div className={styles.walletMenuContainer} ref={walletMenuRef}>
               <button 
