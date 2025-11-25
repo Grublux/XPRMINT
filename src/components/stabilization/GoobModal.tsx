@@ -2,7 +2,6 @@
 // Modal component for displaying expanded Goob details
 
 import React from 'react';
-import { useAccount } from 'wagmi';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import styles from './GoobModal.module.css';
@@ -14,10 +13,9 @@ type GoobModalProps = {
   isReadOnly?: boolean;
 };
 
-export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, isReadOnly }) => {
-  const { address } = useAccount();
+export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
-  const { state: creatureState, isError: stateError } = useCreatureState(Number(tokenId));
+  const { state: creatureState } = useCreatureState(Number(tokenId));
 
   if (!isOpen) return null;
 

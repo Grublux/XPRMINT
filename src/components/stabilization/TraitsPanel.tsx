@@ -1,9 +1,7 @@
 // src/components/stabilization/TraitsPanel.tsx
 
 import React from 'react';
-import { useAccount } from 'wagmi';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
-import styles from './TraitsPanel.module.css';
 
 const TRAIT_LABELS = ['Salinity', 'pH', 'Temperature', 'Frequency'];
 
@@ -12,8 +10,7 @@ interface TraitsPanelProps {
   isReadOnly?: boolean;
 }
 
-export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId, isReadOnly }) => {
-  const { address } = useAccount();
+export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId }) => {
   const enabled = creatureId !== null;
   const { state, isLoading, isError } = useCreatureState(
     enabled && creatureId !== null ? Number(creatureId) : 0

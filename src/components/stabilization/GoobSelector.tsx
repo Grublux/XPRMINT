@@ -20,7 +20,6 @@ type LabFilter = 'Waiting Room' | 'Lab';
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
   selectedId, 
   onChange,
-  isReadOnly,
   isSimulating = false,
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
