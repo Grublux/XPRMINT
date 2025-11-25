@@ -23,7 +23,8 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
   const items = isSimulating ? [] : walletItems;
   const isLoading = isSimulating ? false : walletIsLoading;
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('All');
+  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
+  const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
   
   // Track selected items for the Goob (items added via "+")
   // Map of itemId -> count
@@ -34,19 +35,77 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({ creatureId, isSimula
   
   // Initialize balances from items
   React.useEffect(() => {
-    console.log('[ItemSelector] items changed:', items);
     const balances = new Map<number, bigint>();
     items.forEach(item => {
       balances.set(item.id, item.balance);
     });
-    console.log('[ItemSelector] setting itemBalances:', Array.from(balances.entries()));
     setItemBalances(balances);
   }, [items]);
   
-  // Debug logging
+  // Auto-select first available category if Freq has no items
   React.useEffect(() => {
-    console.log('[ItemSelector] render - items.length:', items.length, 'walletItems.length:', walletItems.length, 'isLoading:', isLoading, 'isError:', isError);
-  }, [items, walletItems, isLoading, isError]);
+    if (isLoading || !items.length || hasInitializedFilter) return;
+    
+    // Helper to get category from cached metadata
+    const getCategoryFromCachedMetadata = (itemId: number): FilterCategory | null => {
+      try {
+        const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${itemId}`);
+        if (cached) {
+          const metadata = JSON.parse(cached);
+          if (metadata?.attributes) {
+            for (const attr of metadata.attributes) {
+              if (attr.trait_type === 'Primary Trait') {
+                const value = String(attr.value).toLowerCase();
+                if (value.includes('frequency')) return 'Freq';
+                if (value.includes('temperature')) return 'Temp';
+                if (value.includes('ph') || value === 'ph') return 'pH';
+                if (value.includes('salinity')) return 'Salinity';
+              }
+            }
+          }
+        }
+      } catch {}
+      return null;
+    };
+    
+    // Check which categories have items (only from cached metadata)
+    const categoriesWithItems = new Set<FilterCategory>();
+    let hasAnyCachedMetadata = false;
+    
+    items.forEach(item => {
+      const balance = itemBalances.get(item.id) ?? item.balance;
+      if (balance > 0n) {
+        const category = getCategoryFromCachedMetadata(item.id);
+        if (category) {
+          categoriesWithItems.add(category);
+          hasAnyCachedMetadata = true;
+        }
+      }
+    });
+    
+    // If we have cached metadata and Freq has no items, find the first available category
+    if (hasAnyCachedMetadata && !categoriesWithItems.has('Freq')) {
+      const categoryOrder: FilterCategory[] = ['Freq', 'Temp', 'pH', 'Salinity', 'All'];
+      for (const category of categoryOrder) {
+        if (categoriesWithItems.has(category) || category === 'All') {
+          setSelectedFilter(category);
+          setHasInitializedFilter(true);
+          return;
+        }
+      }
+    }
+    
+    // If no cached metadata yet, wait a bit and try again, or just use 'All' as fallback
+    if (!hasAnyCachedMetadata) {
+      const timeout = setTimeout(() => {
+        // Try one more time after a short delay
+        setHasInitializedFilter(true);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+    
+    setHasInitializedFilter(true);
+  }, [items, itemBalances, isLoading, hasInitializedFilter]);
   
 
   if (isLoading) {
