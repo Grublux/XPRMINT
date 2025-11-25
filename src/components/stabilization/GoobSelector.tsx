@@ -46,7 +46,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   // Detect when new goobs are added to lab (must be before any conditional returns)
   useEffect(() => {
-    if (labCount > previousLabCountRef.current && previousLabCountRef.current > 0) {
+    if (labCount > previousLabCountRef.current) {
       // New goob(s) added to lab
       setHasNewLabActivity(true);
     }
