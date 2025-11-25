@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './HamburgerMenu.module.css';
 
 type HamburgerMenuProps = {
@@ -8,6 +9,7 @@ type HamburgerMenuProps = {
 export default function HamburgerMenu({ onHowToPlayClick }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -31,6 +33,11 @@ export default function HamburgerMenu({ onHowToPlayClick }: HamburgerMenuProps) 
     setIsOpen(false);
   };
 
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+
   return (
     <div className={styles.menuContainer} ref={menuRef}>
       <button
@@ -44,6 +51,18 @@ export default function HamburgerMenu({ onHowToPlayClick }: HamburgerMenuProps) 
       </button>
       {isOpen && (
         <div className={styles.menu}>
+          <button 
+            className={styles.menuItem} 
+            onClick={() => handleNavigation('/dashboard')}
+          >
+            Dashboard
+          </button>
+          <button 
+            className={styles.menuItem} 
+            onClick={() => handleNavigation('/experiment')}
+          >
+            Lab
+          </button>
           <button className={styles.menuItem} onClick={handleHowToPlay}>
             How to Play
           </button>
