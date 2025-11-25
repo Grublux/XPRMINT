@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
+import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
-import { GoobModal } from './GoobModal';
+import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -11,20 +12,24 @@ interface GoobSelectorProps {
   selectedId: bigint | null;
   onChange: (id: bigint | null) => void;
   isReadOnly?: boolean;
+  isSimulating?: boolean;
 }
 
-type LabFilter = 'Waiting Room' | 'In Lab';
+type LabFilter = 'Waiting Room' | 'Lab';
 
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
   selectedId, 
   onChange,
   isReadOnly,
+  isSimulating = false,
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
+  const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
   
-  const goobs = walletGoobs;
-  const isLoading = walletIsLoading;
-  const [selectedGoobForModal, setSelectedGoobForModal] = useState<bigint | null>(null);
+  // Use simulated Goobs when simulation is on, otherwise use wallet Goobs
+  const goobs = isSimulating ? simulatedGoobs : walletGoobs;
+  const isLoading = isSimulating ? simulatedIsLoading : walletIsLoading;
+  const [expandedGoobId, setExpandedGoobId] = useState<bigint | null>(null);
   const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(new Set());
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
@@ -88,7 +93,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const filteredGoobs = goobs.filter((g: { tokenId: bigint }) => {
     const idStr = g.tokenId.toString();
     const inLab = goobsInLab.has(idStr);
-    return labFilter === 'In Lab' ? inLab : !inLab;
+    return labFilter === 'Lab' ? inLab : !inLab;
   });
 
   const selectedForLabCount = goobsSelectedForBatch.size;
@@ -128,32 +133,49 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
-      {/* Filter Buttons */}
-      <div className={styles.filterContainer}>
+      {/* Filter Buttons - hidden when Goob is expanded */}
+      {!expandedGoobId && (
+        <div className={styles.filterContainer}>
         <button
           className={`${styles.filterButton} ${labFilter === 'Waiting Room' ? styles.filterButtonActive : ''}`}
-          onClick={() => setLabFilter('Waiting Room')}
+          onClick={() => {
+            setLabFilter('Waiting Room');
+            setExpandedGoobId(null);
+            onChange(null); // Clear selection when switching tabs
+          }}
         >
           Waiting Room
         </button>
         <button
-          className={`${styles.filterButton} ${labFilter === 'In Lab' ? styles.filterButtonActive : ''}`}
-          onClick={() => setLabFilter('In Lab')}
+          className={`${styles.filterButton} ${labFilter === 'Lab' ? styles.filterButtonActive : ''}`}
+          onClick={() => {
+            setLabFilter('Lab');
+            setExpandedGoobId(null);
+            onChange(null); // Clear selection when switching tabs
+          }}
         >
-          In Lab
+          Lab
         </button>
-      </div>
+        </div>
+      )}
+      
+      {/* Title - "Goobs ####" when expanded */}
+      {expandedGoobId && labFilter === 'Lab' && (
+        <div className={styles.expandedTitle}>
+          Goobs #{expandedGoobId.toString()}
+        </div>
+      )}
 
-      {/* Hint Text */}
-      {labFilter === 'Waiting Room' && (
+      {/* Hint Text - hidden when Goob is expanded */}
+      {!expandedGoobId && labFilter === 'Waiting Room' && (
         <div className={styles.goobHint}>
           Hit '+' to add to lab and claim starter pack(s)
         </div>
       )}
 
-      {labFilter === 'In Lab' && (
+      {!expandedGoobId && labFilter === 'Lab' && (
         <div className={styles.goobHint}>
-          Click a Goob to view details
+          Click a Goob to expand
         </div>
       )}
 
@@ -169,50 +191,182 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         </div>
       )}
 
-      {filteredGoobs.length === 0 && labFilter === 'In Lab' ? (
+      {filteredGoobs.length === 0 && labFilter === 'Lab' ? (
         <div className={styles.noGoobsContainer}>
           <div className={styles.noGoobsTitle}>You have no Goobs in the lab</div>
         </div>
+      ) : expandedGoobId && labFilter === 'Lab' ? (
+        <ExpandedGoobView
+          tokenId={expandedGoobId}
+          onClose={() => setExpandedGoobId(null)}
+        />
       ) : (
-      <div className={styles.goobGrid}>
-        {filteredGoobs.map((g: { tokenId: bigint }) => {
-          const isSelected = selectedId === g.tokenId;
-          const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
-          return (
-            <GoobCard
-              key={g.tokenId.toString()}
-              tokenId={g.tokenId}
-              isSelected={isSelected}
-              isSelectedForBatch={isSelectedForBatch}
-              showPlusButton={labFilter === 'Waiting Room'}
+        <div className={styles.goobGrid}>
+          {filteredGoobs.map((g: { tokenId: bigint }) => {
+            const isSelected = selectedId === g.tokenId;
+            const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
+            return (
+              <GoobCard
+                key={g.tokenId.toString()}
+                tokenId={g.tokenId}
+                isSelected={isSelected}
+                isSelectedForBatch={isSelectedForBatch}
+                showPlusButton={labFilter === 'Waiting Room'}
                 onSelect={() => {
-                if (labFilter === 'In Lab') {
-                  // In Lab: open modal
-                  setSelectedGoobForModal(g.tokenId);
-                } else {
-                  // Waiting Room: just select for batch (no modal)
-                  onChange(isSelected ? null : g.tokenId);
-                }
-              }}
-              onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
-            />
-          );
-        })}
-      </div>
+                  if (labFilter === 'Lab') {
+                    // In Lab: expand the Goob and set selectedId so ItemSelector knows
+                    setExpandedGoobId(g.tokenId);
+                    onChange(g.tokenId);
+                  } else {
+                    // Waiting Room: just select for batch (no modal)
+                    onChange(isSelected ? null : g.tokenId);
+                  }
+                }}
+                onSelectForBatch={(e) => handleSelectForBatch(g.tokenId, e)}
+              />
+            );
+          })}
+        </div>
       )}
-      {selectedId && (
+      {selectedId && labFilter === 'Waiting Room' && (
         <div className="text-xs text-muted-foreground text-center">
           Selected: Goob #{selectedId.toString()}
         </div>
       )}
-      {selectedGoobForModal !== null && labFilter === 'In Lab' && (
-        <GoobModal
-          tokenId={selectedGoobForModal}
-          isOpen={selectedGoobForModal !== null}
-          onClose={() => setSelectedGoobForModal(null)}
-          isReadOnly={isReadOnly}
-        />
-      )}
+    </div>
+  );
+};
+
+// Expanded Goob view component
+const ExpandedGoobView: React.FC<{
+  tokenId: bigint;
+  onClose: () => void;
+}> = ({ tokenId, onClose }) => {
+  const { metadata, isLoading } = useGoobMetadata(tokenId);
+  const { state: creatureState } = useCreatureState(Number(tokenId));
+  const imageUrl = metadata?.image_data || metadata?.image || null;
+
+  const isInitialized = creatureState !== null && 
+    !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
+      creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
+
+  return (
+    <div className={styles.expandedGoobContainer}>
+      <button
+        className={styles.expandedCloseButton}
+        onClick={onClose}
+        aria-label="Close expanded view"
+      >
+        ×
+      </button>
+      <div className={styles.expandedGoobContent}>
+        {isLoading ? (
+          <div className={styles.expandedLoading}>Loading...</div>
+        ) : imageUrl ? (
+          <div className={styles.expandedImageWrapper}>
+            <div className={styles.expandedVibesReadout}>
+              Vibes: {isInitialized && creatureState ? creatureState.vibes : '—'}
+            </div>
+            <img
+              src={imageUrl}
+              alt={`Goob #${tokenId.toString()}`}
+              className={styles.expandedGoobImage}
+            />
+            {/* Traits Table - positioned at bottom of image */}
+            <div className={styles.expandedTraitsTable}>
+          <div className={styles.expandedTraitsHeader}>
+            <div className={styles.expandedTraitHeader}>Freq</div>
+            <div className={styles.expandedTraitHeader}>Temp</div>
+            <div className={styles.expandedTraitHeader}>pH</div>
+            <div className={styles.expandedTraitHeader}>Salinity</div>
+          </div>
+          <div className={styles.expandedTraitsRow}>
+            <span className={styles.expandedTraitRowLabel}>Current</span>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                <>
+                  {creatureState.currFreq}
+                  {creatureState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
+                </>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                <>
+                  {creatureState.currTemp}
+                  {creatureState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
+                </>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                <>
+                  {creatureState.currPH}
+                  {creatureState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
+                </>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                <>
+                  {creatureState.currSal}
+                  {creatureState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
+                </>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+          </div>
+          <div className={styles.expandedTraitsRow}>
+            <span className={styles.expandedTraitRowLabel}>Target</span>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                creatureState.targetFreq
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                creatureState.targetTemp
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                creatureState.targetPH
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && creatureState ? (
+                creatureState.targetSal
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+          </div>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.expandedLoading}>No image available</div>
+        )}
+        
+        {/* Items instruction container */}
+        {imageUrl && !isLoading && (
+          <div className={styles.expandedItemsInstruction}>
+            Choose items below to apply to Goob
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -27,15 +27,6 @@ export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, 
   const isInitialized = creatureState !== null && 
     !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
       creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
-  
-  // Show button when wallet is connected and creature is NOT initialized
-  const shouldShowButton = Boolean(address) && (creatureState === null || !isInitialized || stateError);
-
-  const handleClaimStarterPack = () => {
-    // Placeholder - button does nothing for now
-    // TODO: Implement navigation to experiment page
-    // navigate(`/experiment?goob=${tokenId.toString()}`);
-  };
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -76,17 +67,6 @@ export const GoobModal: React.FC<GoobModalProps> = ({ tokenId, isOpen, onClose, 
 
             {/* Stabilization Traits (always show, even if not initialized) */}
             <div className={styles.traitsSection}>
-              {shouldShowButton && (
-                <div className={styles.notInitialized}>
-                  <button 
-                    onClick={isReadOnly ? undefined : handleClaimStarterPack}
-                    disabled={isReadOnly}
-                    className={styles.claimButton}
-                  >
-                    {isReadOnly ? "No Access" : "Claim Your Starter Pack"}
-                  </button>
-                </div>
-              )}
               <h3 className={styles.sectionTitle}>Stabilization Traits</h3>
               <div className={styles.traitsList}>
                 <div className={styles.traitItem}>

@@ -135,3 +135,216 @@
   font-weight: 700;
 }
 
+.expandedGoobContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.expandedCloseButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--muted);
+  font-size: 24px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  z-index: 10;
+}
+
+.expandedCloseButton:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+}
+
+.expandedGoobContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.expandedImageWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* TEST: Traits table positioned at bottom of image - easy to revert */
+.expandedImageWrapper .expandedTraitsTable {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  margin-top: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 8px 12px;
+  border-radius: 8px 8px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.expandedGoobImage {
+  width: 100%;
+  max-width: 100%;
+  max-height: 85vh;
+  height: auto;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.expandedGoobId {
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--muted);
+  text-align: center;
+}
+
+.expandedLoading {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  padding: 40px;
+}
+
+.expandedTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.expandedTraitsTable {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 24px;
+  border-collapse: collapse;
+}
+
+.expandedTraitsHeader {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 4px;
+}
+
+.expandedTraitHeader {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.expandedTraitsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.expandedTraitsRow:last-child {
+  border-bottom: none;
+}
+
+.expandedTraitRowLabel {
+  position: absolute;
+  left: 0;
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+
+.expandedTraitCell {
+  font-size: 14px;
+  color: var(--text);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.expandedTraitEmpty {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.lockedBadge {
+  font-size: 10px;
+  color: rgb(16, 185, 129);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.expandedVibesReadout {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 5;
+}
+
+.expandedItemsInstruction {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto 0;
+  padding: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  background: transparent;
+}
+

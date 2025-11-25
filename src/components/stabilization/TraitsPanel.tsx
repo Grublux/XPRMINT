@@ -28,27 +28,7 @@ export const TraitsPanel: React.FC<TraitsPanelProps> = ({ creatureId, isReadOnly
   }
 
   if (isError || !state) {
-    const handleClaimStarterPack = () => {
-      // Placeholder - button does nothing for now
-      // TODO: Implement navigation to experiment page
-      // if (creatureId) {
-      //   navigate(`/experiment?goob=${creatureId.toString()}`);
-      // }
-    };
-
-    return (
-      <div className={styles.notInitializedContainer}>
-        {address && creatureId && (
-          <button 
-            onClick={isReadOnly ? undefined : handleClaimStarterPack}
-            disabled={isReadOnly}
-            className={styles.claimButton}
-          >
-            {isReadOnly ? "No Access" : "Claim Your Starter Pack"}
-          </button>
-        )}
-      </div>
-    );
+    return null;
   }
 
   const targetTraits = [state.targetSal, state.targetPH, state.targetTemp, state.targetFreq];
