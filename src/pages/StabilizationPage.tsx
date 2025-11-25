@@ -1,8 +1,10 @@
+import { useAccount } from 'wagmi';
 import { StabilizationDashboard } from '../components/stabilization/StabilizationDashboard';
 import { useWhitelistStatus } from '../hooks/stabilizationV3';
 import styles from './StabilizationPage.module.css';
 
 export default function StabilizationPage() {
+  const { address } = useAccount();
   const { whitelistEnabled, isTester, isReadOnly, isOwner } = useWhitelistStatus();
 
   return (
@@ -10,7 +12,7 @@ export default function StabilizationPage() {
       <div className={styles.titleContainer}>
         <h1 className={styles.title}>Dashboard</h1>
       </div>
-      {whitelistEnabled && (
+      {address && whitelistEnabled && (
         <div className={styles.whitelistBanner}>
           {isTester ? (
             <span>
@@ -28,8 +30,6 @@ export default function StabilizationPage() {
         </div>
       )}
       <StabilizationDashboard
-        whitelistEnabled={whitelistEnabled}
-        isTester={isTester}
         isReadOnly={isReadOnly}
       />
     </div>

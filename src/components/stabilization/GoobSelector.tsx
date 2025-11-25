@@ -1,7 +1,6 @@
 // src/components/stabilization/GoobSelector.tsx
 
 import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { GoobModal } from './GoobModal';
@@ -19,13 +18,10 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   onChange,
   isReadOnly,
 }) => {
-  const { chain } = useAccount();
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   
   const goobs = walletGoobs;
   const isLoading = walletIsLoading;
-  const [manualId, setManualId] = useState<string>('');
-  const [showManual, setShowManual] = useState(false);
   const [selectedGoobForModal, setSelectedGoobForModal] = useState<bigint | null>(null);
 
   if (isLoading) {
@@ -52,55 +48,13 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   if (!goobs.length) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 items-center text-center">
         <div className="text-sm text-muted-foreground">
-          No Goobs detected automatically on {chain?.name || 'current network'}. 
-          {chain?.id !== 33139 && (
-            <span className="block mt-1 text-xs text-yellow-400">
-              ⚠️ Make sure you're connected to ApeChain (chain ID: 33139)
-            </span>
-          )}
+          You Have No Goobs
         </div>
-        {!showManual ? (
-          <button
-            onClick={() => setShowManual(true)}
-            className="text-xs text-emerald-400 hover:text-emerald-300 underline"
-          >
-            Enter Goob ID manually
-          </button>
-        ) : (
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">Goob ID</label>
-            <input
-              type="number"
-              value={manualId}
-              onChange={(e) => setManualId(e.target.value)}
-              placeholder="Enter Goob token ID"
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  if (manualId) {
-                    onChange(BigInt(manualId));
-                  }
-                }}
-                className="text-xs px-3 py-1 rounded bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30"
-              >
-                Use This ID
-              </button>
-              <button
-                onClick={() => {
-                  setShowManual(false);
-                  setManualId('');
-                }}
-                className="text-xs px-3 py-1 rounded bg-muted text-muted-foreground hover:bg-muted/80"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="text-sm text-muted-foreground">
+          Head to thegoblinn.com/protogoobs to mint your Goob now!
+        </div>
       </div>
     );
   }
