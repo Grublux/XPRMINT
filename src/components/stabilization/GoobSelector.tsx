@@ -99,6 +99,17 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   });
 
   const selectedForLabCount = goobsSelectedForBatch.size;
+  
+  // Count Goobs in each category
+  const waitingRoomCount = goobs.filter((g: { tokenId: bigint }) => {
+    const idStr = g.tokenId.toString();
+    return !goobsInLab.has(idStr);
+  }).length;
+  
+  const labCount = goobs.filter((g: { tokenId: bigint }) => {
+    const idStr = g.tokenId.toString();
+    return goobsInLab.has(idStr);
+  }).length;
 
   const handleBatchSendToLab = () => {
     const selectedGoobIds = Array.from(goobsSelectedForBatch).map(id => BigInt(id));
@@ -137,28 +148,40 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     <div style={{ paddingTop: '20px', width: '100%' }}>
       {/* Filter Buttons - hidden when Goob is expanded */}
       {!expandedGoobId && (
-        <div className={styles.filterContainer}>
-        <button
-          className={`${styles.filterButton} ${labFilter === 'Waiting Room' ? styles.filterButtonActive : ''}`}
-          onClick={() => {
-            setLabFilter('Waiting Room');
-            setExpandedGoobId(null);
-            onChange(null); // Clear selection when switching tabs
-          }}
-        >
-          Waiting Room
-        </button>
-        <button
-          className={`${styles.filterButton} ${labFilter === 'Lab' ? styles.filterButtonActive : ''}`}
-          onClick={() => {
-            setLabFilter('Lab');
-            setExpandedGoobId(null);
-            onChange(null); // Clear selection when switching tabs
-          }}
-        >
-          Lab
-        </button>
-        </div>
+        <>
+          <div className={styles.filterContainer}>
+            <button
+              className={`${styles.filterButton} ${labFilter === 'Waiting Room' ? styles.filterButtonActive : ''}`}
+              onClick={() => {
+                setLabFilter('Waiting Room');
+                setExpandedGoobId(null);
+                onChange(null); // Clear selection when switching tabs
+              }}
+            >
+              Waiting Room
+            </button>
+            <button
+              className={`${styles.filterButton} ${labFilter === 'Lab' ? styles.filterButtonActive : ''}`}
+              onClick={() => {
+                setLabFilter('Lab');
+                setExpandedGoobId(null);
+                onChange(null); // Clear selection when switching tabs
+              }}
+            >
+              Lab
+            </button>
+          </div>
+          
+          {/* Count readout */}
+          <div className={styles.goobCountReadout}>
+            Waiting Room: {waitingRoomCount} | Lab: {labCount}
+          </div>
+          
+          {/* Help text */}
+          <div className={styles.goobHelpText}>
+            Qty
+          </div>
+        </>
       )}
       
       {/* Title - "Goobs ####" when expanded */}
@@ -366,7 +389,7 @@ const ExpandedGoobView: React.FC<{
             {selectedItemsForGoob.size > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                 <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
-                  Place items in order to finalize effects
+                  Drag Items in order to preview effects
                 </div>
                 <div className={styles.selectedItemsGrid}>
                   {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
