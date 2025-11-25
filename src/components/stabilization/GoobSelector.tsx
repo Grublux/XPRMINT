@@ -1,6 +1,6 @@
 // src/components/stabilization/GoobSelector.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
@@ -35,6 +35,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(new Set());
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
+  const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
+  const previousLabCountRef = useRef<number>(0);
 
   if (isLoading) {
     return (
@@ -111,6 +113,15 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     return goobsInLab.has(idStr);
   }).length;
 
+  // Detect when new goobs are added to lab
+  useEffect(() => {
+    if (labCount > previousLabCountRef.current && previousLabCountRef.current > 0) {
+      // New goob(s) added to lab
+      setHasNewLabActivity(true);
+    }
+    previousLabCountRef.current = labCount;
+  }, [labCount]);
+
   const handleBatchSendToLab = () => {
     const selectedGoobIds = Array.from(goobsSelectedForBatch).map(id => BigInt(id));
     
@@ -161,11 +172,12 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
               Waiting Room
             </button>
             <button
-              className={`${styles.filterButton} ${labFilter === 'Lab' ? styles.filterButtonActive : ''}`}
+              className={`${styles.filterButton} ${labFilter === 'Lab' ? styles.filterButtonActive : ''} ${hasNewLabActivity && labFilter !== 'Lab' ? styles.filterButtonPulse : ''}`}
               onClick={() => {
                 setLabFilter('Lab');
                 setExpandedGoobId(null);
                 onChange(null); // Clear selection when switching tabs
+                setHasNewLabActivity(false); // Stop pulsing when Lab tab is clicked
               }}
             >
               Lab
