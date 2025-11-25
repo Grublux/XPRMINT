@@ -17,3 +17,46 @@
   }
 }
 
+.noGoobsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  width: 100%;
+}
+
+.noGoobsTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.noGoobsMessage {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+.noGoobsLink {
+  color: rgb(16, 185, 129);
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.noGoobsLink:hover {
+  color: rgb(5, 150, 105);
+  text-decoration: underline;
+}
+
+.noGoobsLink:visited {
+  color: rgb(16, 185, 129);
+}
+

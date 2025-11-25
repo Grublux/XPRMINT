@@ -48,12 +48,19 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
   if (!goobs.length) {
     return (
-      <div className="flex flex-col gap-2 items-center text-center">
-        <div className="text-sm text-muted-foreground">
-          You Have No Goobs
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Head to thegoblinn.com/protogoobs to mint your Goob now!
+      <div className={styles.noGoobsContainer}>
+        <div className={styles.noGoobsTitle}>You Have No Goobs</div>
+        <div className={styles.noGoobsMessage}>
+          Head to{' '}
+          <a 
+            href="https://thegoblinn.com/protogoobs" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.noGoobsLink}
+          >
+            thegoblinn.com/protogoobs
+          </a>
+          {' '}to mint your Goob now!
         </div>
       </div>
     );
