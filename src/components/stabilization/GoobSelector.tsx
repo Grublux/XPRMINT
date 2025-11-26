@@ -79,6 +79,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
+  const [showFakeTransactionModal, setShowFakeTransactionModal] = useState(false);
   const [showReceivedItemsModal, setShowReceivedItemsModal] = useState(false);
   const [receivedItems, setReceivedItems] = useState<Array<{ 
     id: number; 
@@ -91,6 +92,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     rarity?: string;
   }>>([]);
   const [sentGoobIds, setSentGoobIds] = useState<bigint[]>([]);
+  const [pendingGoobIds, setPendingGoobIds] = useState<bigint[]>([]);
 
   // Count Goobs in each category (calculate before early returns for useEffect)
   const labCount = goobs.filter((g: { tokenId: bigint }) => {
@@ -204,30 +206,27 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       return;
     }
 
-    console.log('[Batch Send] Would send to lab:', selectedGoobIds.map(id => id.toString()));
-    
-    // TODO: For testing only - placeholder for actual implementation
-    // Sending to lab = Initialize creature + Claim starter pack (5 items per Goob)
-    // This would:
-    // 1. For each goobId in selectedGoobIds:
-    //    - Initialize creature with creatureId = goobId (initializeCreature)
-    //    - Claim initial starter pack (claimDailyItems) - this gives 5 items
-    // 2. After successful batch, move them to "In Lab" and clear selection
-    
-    // For now, just log what would happen
-    selectedGoobIds.forEach((goobId) => {
-      console.log(`[Batch Send] Would initialize creature ${goobId.toString()} and claim starter pack (5 items)`);
-    });
+    // Store pending Goob IDs and show fake transaction modal
+    setPendingGoobIds(selectedGoobIds);
+    setShowFakeTransactionModal(true);
+  };
 
-    // After successful batch (for now, immediately for testing):
+  const handleFakeTransactionSign = () => {
+    const selectedGoobIds = pendingGoobIds;
+    
+    console.log('[Batch Send] Fake transaction signed, sending to lab:', selectedGoobIds.map(id => id.toString()));
+    
     // Move selected Goobs to "In Lab" and clear selection
     setGoobsInLab(prev => {
       const next = new Set(prev);
-      goobsSelectedForBatch.forEach(id => next.add(id));
+      selectedGoobIds.forEach(id => next.add(id.toString()));
       return next;
     });
     
-    // In simulation mode, track received items and show modal
+    // Close fake transaction modal
+    setShowFakeTransactionModal(false);
+    
+    // In simulation mode, track received items and show received items modal
     if (isSimulating && onAddSimulationItems) {
       // Store the Goob IDs that were sent
       setSentGoobIds(selectedGoobIds);
@@ -265,6 +264,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     }
     
     setGoobsSelectedForBatch(new Set());
+    setPendingGoobIds([]);
   };
 
   return (
@@ -377,6 +377,30 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         </div>
       )}
       
+      {/* Fake Transaction Modal */}
+      {showFakeTransactionModal && (
+        <FakeTransactionModal
+          goobCount={pendingGoobIds.length}
+          onSign={handleFakeTransactionSign}
+          onClose={() => {
+            setShowFakeTransactionModal(false);
+            setPendingGoobIds([]);
+          }}
+        />
+      )}
+      
+      {/* Fake Transaction Modal */}
+      {showFakeTransactionModal && (
+        <FakeTransactionModal
+          goobCount={pendingGoobIds.length}
+          onSign={handleFakeTransactionSign}
+          onClose={() => {
+            setShowFakeTransactionModal(false);
+            setPendingGoobIds([]);
+          }}
+        />
+      )}
+      
       {/* Received Items Modal */}
       {showReceivedItemsModal && (
         <ReceivedItemsModal
@@ -394,6 +418,44 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     </div>
   );
 };
+
+// Fake Transaction Modal Component
+const FakeTransactionModal: React.FC<{
+  goobCount: number;
+  onSign: () => void;
+  onClose: () => void;
+}> = ({ goobCount, onSign, onClose }) => {
+  return (
+    <div 
+      className={styles.modalOverlay}
+      onClick={onClose}
+    >
+      <div 
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className={styles.modalCloseButton}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className={styles.fakeTransactionText}>
+          Approve and Send {goobCount} {goobCount === 1 ? 'Goob' : 'Goobs'} to Lab
+        </div>
+        <button 
+          className={styles.fakeTransactionButton}
+          onClick={onSign}
+        >
+          Sign Fake Transaction
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Received Items Modal Component
 
 // Received Items Modal Component
 const ReceivedItemsModal: React.FC<{

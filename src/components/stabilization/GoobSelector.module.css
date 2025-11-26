@@ -612,3 +612,33 @@
   color: rgb(5, 150, 105);
 }
 
+/* Fake Transaction Modal */
+.fakeTransactionText {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.fakeTransactionButton {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fakeTransactionButton:hover {
+  border-color: rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.3);
+  color: rgb(5, 150, 105);
+}
+
