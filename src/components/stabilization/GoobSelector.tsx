@@ -1016,7 +1016,7 @@ const ExpandedGoobView: React.FC<{
             else if (value.includes('ph') || value === 'ph') secondaryTrait = 'pH';
             else if (value.includes('salinity')) secondaryTrait = 'Salinity';
           } else if (attr.trait_type === 'Secondary Delta Magnitude') {
-            secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+            secondaryDeltaMagnitude = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
           }
         }
         
@@ -1120,13 +1120,10 @@ const ExpandedGoobView: React.FC<{
             setCurrent(primaryTrait, current + delta);
           }
           
-          // Apply secondary delta (if exists)
+          // Apply secondary delta (if exists) - use signed value directly
           if (secondaryTrait && secondaryDeltaMagnitude !== null && !getLocked(secondaryTrait)) {
             const current = getCurrent(secondaryTrait);
-            const target = getTarget(secondaryTrait);
-            const direction = current > target ? -1 : 1;
-            const delta = direction * secondaryDeltaMagnitude;
-            setCurrent(secondaryTrait, current + delta);
+            setCurrent(secondaryTrait, current + secondaryDeltaMagnitude);
           }
         }
       }
@@ -2118,7 +2115,7 @@ const SelectedItemDisplay: React.FC<{
           
           // Helper to determine if secondary effect moves towards target
           const isSecondaryTowardsTarget = (trait: string, delta: number): boolean => {
-            if (!goobState) return true; // Default to green if no state
+            if (!goobState || delta === 0) return true; // Default to green if no state or no change
             const getCurrent = (t: string) => {
               if (t === 'Freq') return goobState.currFreq;
               if (t === 'Temp') return goobState.currTemp;
@@ -2135,14 +2132,13 @@ const SelectedItemDisplay: React.FC<{
             };
             const current = getCurrent(trait);
             const target = getTarget(trait);
-            // If current > target, negative delta moves towards target
-            // If current < target, positive delta moves towards target
-            if (current > target) {
-              return delta < 0; // Negative delta moves towards target
-            } else if (current < target) {
-              return delta > 0; // Positive delta moves towards target
-            }
-            return true; // Already at target
+            // Calculate new value after applying delta
+            const newValue = current + delta;
+            // Calculate distance from target before and after
+            const distanceBefore = Math.abs(current - target);
+            const distanceAfter = Math.abs(newValue - target);
+            // If distance decreases, we're moving towards target
+            return distanceAfter < distanceBefore;
           };
           
           return (
