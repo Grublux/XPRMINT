@@ -17,6 +17,7 @@ type ItemSelectorProps = {
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
   simulationItems?: Map<number, bigint>; // itemId -> balance for simulation mode
+  setSimulationItems?: React.Dispatch<React.SetStateAction<Map<number, bigint>>>; // Update simulation items
 };
 
 export type ItemSelectorRef = {
@@ -30,6 +31,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   setSelectedItemsForGoob: externalSetSelectedItems,
   onRestoreItem: externalOnRestoreItem,
   simulationItems = new Map(),
+  setSimulationItems: externalSetSimulationItems,
 }, ref) => {
   const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
@@ -77,11 +79,21 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       return next;
     });
     
+    // In simulation mode, also update simulationItems in parent
+    if (isSimulating && externalSetSimulationItems) {
+      externalSetSimulationItems(prev => {
+        const next = new Map(prev);
+        const currentBalance = next.get(itemId) ?? 0n;
+        next.set(itemId, currentBalance + 1n);
+        return next;
+      });
+    }
+    
     // Call external callback if provided
     if (externalOnRestoreItem) {
       externalOnRestoreItem(itemId);
     }
-  }, [externalOnRestoreItem]);
+  }, [externalOnRestoreItem, isSimulating, externalSetSimulationItems]);
   
   // Expose restore function via ref
   useImperativeHandle(ref, () => ({
@@ -278,6 +290,18 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                       }
                       return next;
                     });
+                    
+                    // In simulation mode, also update simulationItems in parent
+                    if (isSimulating && externalSetSimulationItems) {
+                      externalSetSimulationItems(prev => {
+                        const next = new Map(prev);
+                        const currentBalance = next.get(itemId) ?? 0n;
+                        if (currentBalance > 0n) {
+                          next.set(itemId, currentBalance - 1n);
+                        }
+                        return next;
+                      });
+                    }
                   }}
                 />
               );

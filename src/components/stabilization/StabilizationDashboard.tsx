@@ -112,6 +112,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
             selectedItemsForGoob={selectedItemsForGoob}
             setSelectedItemsForGoob={setSelectedItemsForGoob}
             simulationItems={simulationItems}
+            setSimulationItems={setSimulationItems}
           />
         </div>
         <div className={styles.spSection}>
