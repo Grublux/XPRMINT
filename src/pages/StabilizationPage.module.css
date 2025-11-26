@@ -6,67 +6,217 @@
   justify-content: center;
 }
 
+.topBar {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.topBarLeft {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.topBarRight {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.accessGranted {
+  padding: 8px 16px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  color: rgb(16, 185, 129);
+  width: fit-content;
+  box-sizing: border-box;
+  line-height: 1;
+  display: inline-block;
+}
+
+.accessGrantedNoAccess {
+  padding: 8px 16px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  color: rgb(239, 68, 68);
+  width: fit-content;
+  box-sizing: border-box;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .accessGranted,
+  .accessGrantedNoAccess {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  
+  .simulationToggle {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  
+  .topBar {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+}
+
 .titleContainer {
   margin-bottom: 24px;
   width: 100%;
   text-align: center;
+  margin-top: 0;
 }
 
 .title {
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-}
-
-.whitelistBanner {
-  width: 100%;
-  max-width: 900px;
-  padding: 12px 16px;
   margin-bottom: 16px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 8px;
-  text-align: center;
-  color: rgb(16, 185, 129);
 }
 
-.whitelistBannerNoAccess {
-  width: 100%;
-  max-width: 900px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
-  text-align: center;
-  color: rgb(239, 68, 68);
-}
-
-.whitelistBanner strong,
-.whitelistBannerNoAccess strong {
-  font-weight: 600;
-}
-
-.simulationToggleContainer {
-  width: 100%;
-  max-width: 900px;
+.statsSection {
   display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 16px auto 0;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-sizing: border-box;
 }
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.claimDripButton {
+  padding: 6px 12px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  line-height: 1.2;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.claimDripButton:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  background: rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .statsSection {
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .statLabel {
+    font-size: 9px;
+  }
+  
+  .statValue {
+    font-size: 16px;
+  }
+  
+  .claimDripButton {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsSection {
+    gap: 8px;
+    padding: 10px;
+  }
+  
+  .statLabel {
+    font-size: 8px;
+  }
+  
+  .statValue {
+    font-size: 14px;
+  }
+  
+  .claimDripButton {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+
 
 .simulationToggle {
   padding: 8px 16px;
-  font-size: 14px;
+  margin: 0;
+  font-size: 12px;
   font-weight: 600;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.05);
-  color: var(--muted);
+  color: rgba(128, 128, 128, 0.6);
   cursor: pointer;
   transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  box-sizing: border-box;
+  line-height: 1;
+  display: inline-block;
 }
 
 .simulationToggle:hover {

@@ -900,6 +900,224 @@ const ReceivedItemsModal: React.FC<{
   );
 };
 
+// Burning Item Thumbnail Component (for modal)
+const BurningItemThumbnail: React.FC<{
+  itemId: number;
+  count: number;
+}> = ({ itemId, count }) => {
+  const { metadata, isLoading } = useItemMetadata(itemId);
+  const imageUrl = metadata?.image || metadata?.image_data || null;
+  
+  return (
+    <div style={{
+      position: 'relative',
+      width: '60px',
+      height: '60px',
+      borderRadius: '4px',
+      overflow: 'hidden',
+      border: '1px solid rgba(239, 68, 68, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      {/* Minus sign overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(239, 68, 68, 0.3)',
+        zIndex: 2,
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: '#ef4444',
+      }}>
+        −
+      </div>
+      {/* Item image */}
+      {isLoading ? (
+        <div style={{ fontSize: '8px', color: 'var(--muted)' }}>Loading...</div>
+      ) : imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={metadata?.name || `Item #${itemId}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            opacity: 0.6,
+          }}
+        />
+      ) : (
+        <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
+      )}
+      {/* Count badge */}
+      {count > 1 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '2px',
+          right: '2px',
+          fontSize: '10px',
+          fontWeight: 600,
+          color: '#ef4444',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: '2px 4px',
+          borderRadius: '2px',
+          zIndex: 3,
+        }}>
+          x{count}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Apply Changes Modal Component
+const ApplyChangesModal: React.FC<{
+  itemCount: number;
+  changes: { freq: number; temp: number; ph: number; salinity: number };
+  currentState: { freq: number; temp: number; ph: number; salinity: number };
+  targetState: { freq: number; temp: number; ph: number; salinity: number };
+  selectedItems: Map<number, number>;
+  onApply: () => void;
+  onClose: () => void;
+}> = ({ itemCount, changes, currentState, targetState, selectedItems, onApply, onClose }) => {
+  // Helper to determine if change moves closer to target
+  const isCloserToTarget = (change: number, current: number, target: number): boolean => {
+    if (change === 0) return true;
+    const currentDistance = Math.abs(current - target);
+    const newState = current + change;
+    const newDistance = Math.abs(newState - target);
+    return newDistance <= currentDistance;
+  };
+  
+  const getChangeColor = (change: number, trait: 'freq' | 'temp' | 'ph' | 'salinity'): string => {
+    const current = trait === 'freq' ? currentState.freq : trait === 'temp' ? currentState.temp : trait === 'ph' ? currentState.ph : currentState.salinity;
+    const target = trait === 'freq' ? targetState.freq : trait === 'temp' ? targetState.temp : trait === 'ph' ? targetState.ph : targetState.salinity;
+    return isCloserToTarget(change, current, target) ? '#10b981' : '#ef4444';
+  };
+  return (
+    <div 
+      className={styles.fakeTransactionOverlay}
+      onClick={onClose}
+    >
+      <div 
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className={styles.modalCloseButton}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className={styles.fakeTransactionText} style={{ marginBottom: '24px' }}>
+          Burn {itemCount} {itemCount === 1 ? 'item' : 'items'} and apply Changes?
+        </div>
+        
+        {/* Items being burned */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'center',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+        }}>
+          {Array.from(selectedItems.entries()).map(([itemId, count]) => (
+            <BurningItemThumbnail key={itemId} itemId={itemId} count={count} />
+          ))}
+        </div>
+        
+        {/* Changes Table */}
+        <div style={{
+          width: '100%',
+          marginBottom: '24px',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          borderRadius: '8px',
+          padding: '12px',
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr 1fr',
+            gap: '8px',
+            marginBottom: '8px',
+          }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textAlign: 'center' }}>Freq</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textAlign: 'center' }}>Temp</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textAlign: 'center' }}>pH</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textAlign: 'center' }}>Salinity</div>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr 1fr',
+            gap: '8px',
+          }}>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: getChangeColor(changes.freq, 'freq'), textAlign: 'center' }}>
+              {changes.freq > 0 ? '+' : ''}{changes.freq}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: getChangeColor(changes.temp, 'temp'), textAlign: 'center' }}>
+              {changes.temp > 0 ? '+' : ''}{changes.temp}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: getChangeColor(changes.ph, 'ph'), textAlign: 'center' }}>
+              {changes.ph > 0 ? '+' : ''}{changes.ph}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: getChangeColor(changes.salinity, 'salinity'), textAlign: 'center' }}>
+              {changes.salinity > 0 ? '+' : ''}{changes.salinity}
+            </div>
+          </div>
+        </div>
+        
+        <button 
+          className={styles.fakeTransactionButton}
+          onClick={onApply}
+        >
+          Burn Items and Apply
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Apply Success Modal Component
+const ApplySuccessModal: React.FC<{
+  onClose: () => void;
+}> = ({ onClose }) => {
+  return (
+    <div 
+      className={styles.modalOverlay}
+      onClick={onClose}
+    >
+      <div 
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className={styles.modalCloseButton}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <h2 className={styles.modalTitle} style={{ marginBottom: '24px' }}>
+          Changes Applied Successfully
+        </h2>
+        <button 
+          className={styles.modalGoToLabButton}
+          onClick={onClose}
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Expanded Goob view component
 const ExpandedGoobView: React.FC<{
   tokenId: bigint;
@@ -914,13 +1132,51 @@ const ExpandedGoobView: React.FC<{
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
+  // State for apply changes flow (declared early to avoid initialization errors)
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  
+  // Track scroll position when first item is added to prevent focus jump
+  const goobItemAreaRef = React.useRef<HTMLDivElement | null>(null);
+  const previousItemCountRef = React.useRef(selectedItemsForGoob.size);
+  
+  React.useEffect(() => {
+    // Check if we just added the first item (went from 0 to 1)
+    const currentCount = selectedItemsForGoob.size;
+    const previousCount = previousItemCountRef.current;
+    
+    if (previousCount === 0 && currentCount === 1 && goobItemAreaRef.current) {
+      // Store the current position of the Goob Item Area before expansion
+      const goobItemAreaElement = goobItemAreaRef.current;
+      const rectBefore = goobItemAreaElement.getBoundingClientRect();
+      const scrollYBefore = window.scrollY;
+      
+      // Use requestAnimationFrame to wait for DOM update, then adjust scroll
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const rectAfter = goobItemAreaElement.getBoundingClientRect();
+          const heightDifference = rectAfter.height - rectBefore.height;
+          
+          // If the area expanded, scroll down by that amount to keep item inventory in same relative position
+          if (heightDifference > 0) {
+            window.scrollBy({
+              top: heightDifference,
+              behavior: 'instant' as ScrollBehavior
+            });
+          }
+        });
+      });
+    }
+    
+    previousItemCountRef.current = currentCount;
+  }, [selectedItemsForGoob.size]);
+  
   // Get simulated state if in simulation mode
   const simulatedState = React.useMemo(() => {
     if (isSimulating) {
       return getSimulatedCreatureState(tokenId);
     }
     return null;
-  }, [isSimulating, tokenId]);
+  }, [isSimulating, tokenId, refreshKey]);
   
   // Use simulated state if available, otherwise use on-chain state
   const displayState = simulatedState || creatureState;
@@ -1006,6 +1262,11 @@ const ExpandedGoobView: React.FC<{
   const isInitialized = displayState !== null && 
     !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
       displayState.targetTemp === 0 && displayState.targetFreq === 0);
+  
+  // State for apply changes flow
+  const [showApplyChangesModal, setShowApplyChangesModal] = React.useState(false);
+  const [isProcessingApply, setIsProcessingApply] = React.useState(false);
+  const [showApplySuccessModal, setShowApplySuccessModal] = React.useState(false);
   
   // Helper to get item metadata from cache
   const getItemMetadata = React.useCallback((itemId: number): any => {
@@ -1244,6 +1505,45 @@ const ExpandedGoobView: React.FC<{
     return styles.differenceRed;
   };
   
+  // Handler for applying changes
+  const handleApplyChanges = () => {
+    if (!previewState || !displayState || !setSelectedItemsForGoob) return;
+    
+    // Close apply modal and show processing
+    setShowApplyChangesModal(false);
+    setIsProcessingApply(true);
+    
+    // After 1 second delay, apply changes
+    setTimeout(() => {
+      // Update simulated creature state if in simulation mode
+      if (isSimulating) {
+        const updatedState = {
+          ...displayState,
+          currFreq: previewState.currFreq,
+          currTemp: previewState.currTemp,
+          currPH: previewState.currPH,
+          currSal: previewState.currSal,
+        };
+        setSimulatedCreatureState(tokenId, updatedState);
+        // Force refresh to pick up new state
+        setRefreshKey(prev => prev + 1);
+      }
+      
+      // Clear items from Goob Item Area (simulated burn)
+      if (setSelectedItemsForGoob) {
+        setSelectedItemsForGoob(new Map());
+      }
+      
+      // Hide processing and show success modal
+      setIsProcessingApply(false);
+      setShowApplySuccessModal(true);
+    }, 1000);
+  };
+  
+  // Calculate total item count for modal
+  const totalItemCount = React.useMemo(() => {
+    return Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
+  }, [selectedItemsForGoob]);
 
   return (
     <div className={styles.expandedGoobContainer}>
@@ -1496,12 +1796,40 @@ const ExpandedGoobView: React.FC<{
                 </div>
               </div>
             </div>
+            {/* Apply Button */}
+            <button
+              onClick={() => setShowApplyChangesModal(true)}
+              style={{
+                marginTop: '16px',
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#000',
+                backgroundColor: '#10b981',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                width: '100%',
+                maxWidth: '300px',
+                margin: '16px auto 0',
+                display: 'block',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#059669';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#10b981';
+              }}
+            >
+              Apply Changes
+            </button>
           </div>
         )}
         
         {/* Items instruction container */}
         {imageUrl && !isLoading && (
-          <div className={styles.expandedItemsInstruction}>
+          <div className={styles.expandedItemsInstruction} ref={goobItemAreaRef}>
             {selectedItemsForGoob.size > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                 {hasEpicItem ? (
@@ -1575,6 +1903,52 @@ const ExpandedGoobView: React.FC<{
           </div>
         )}
       </div>
+      
+      {/* Apply Changes Modal */}
+      {showApplyChangesModal && previewState && displayState && (
+        <ApplyChangesModal
+          itemCount={totalItemCount}
+          changes={{
+            freq: previewState.currFreq - displayState.currFreq,
+            temp: previewState.currTemp - displayState.currTemp,
+            ph: previewState.currPH - displayState.currPH,
+            salinity: previewState.currSal - displayState.currSal,
+          }}
+          currentState={{
+            freq: displayState.currFreq,
+            temp: displayState.currTemp,
+            ph: displayState.currPH,
+            salinity: displayState.currSal,
+          }}
+          targetState={{
+            freq: displayState.targetFreq,
+            temp: displayState.targetTemp,
+            ph: displayState.targetPH,
+            salinity: displayState.targetSal,
+          }}
+          selectedItems={selectedItemsForGoob}
+          onApply={handleApplyChanges}
+          onClose={() => setShowApplyChangesModal(false)}
+        />
+      )}
+      
+      {/* Processing Overlay */}
+      {isProcessingApply && (
+        <div className={styles.fakeTransactionOverlay}>
+          <div className={styles.processingOverlay}>
+            <div className={styles.spinner}></div>
+          </div>
+        </div>
+      )}
+      
+      {/* Apply Success Modal */}
+      {showApplySuccessModal && (
+        <ApplySuccessModal
+          onClose={() => {
+            setShowApplySuccessModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -729,6 +729,7 @@ const ItemCard: React.FC<{
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault(); // Prevent focus jump
     if (onAddItem && balance > 0n) {
       // Check if we've already reached the 3-item limit
       const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
