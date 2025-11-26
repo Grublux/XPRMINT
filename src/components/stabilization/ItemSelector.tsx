@@ -497,6 +497,23 @@ const ItemCard: React.FC<{
             +
           </button>
         )}
+
+        {/* Quantity readout in bottom right of image */}
+        <div 
+          style={{ 
+            position: 'absolute',
+            bottom: '4px',
+            right: '4px',
+            fontSize: '10px',
+            color: 'rgb(110, 231, 183)',
+            fontWeight: 300,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            padding: '2px 4px',
+            borderRadius: '2px',
+          }}
+        >
+          x{balance.toString()}
+        </div>
       </div>
 
       {/* Info Section */}
@@ -522,7 +539,6 @@ const ItemCard: React.FC<{
             lineHeight: '1.2',
             textAlign: 'center',
             color: 'var(--muted)',
-            marginBottom: '2px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -530,15 +546,6 @@ const ItemCard: React.FC<{
           }}
         >
           {metadata?.name || `Item #${itemId}`}
-        </div>
-        <div 
-          style={{ 
-            fontSize: '10px',
-            color: 'rgb(110, 231, 183)',
-            fontWeight: 300,
-          }}
-        >
-          x{balance.toString()}
         </div>
       </div>
     </div>
