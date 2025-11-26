@@ -1016,7 +1016,8 @@ const ExpandedGoobView: React.FC<{
             else if (value.includes('ph') || value === 'ph') secondaryTrait = 'pH';
             else if (value.includes('salinity')) secondaryTrait = 'Salinity';
           } else if (attr.trait_type === 'Secondary Delta Magnitude') {
-            secondaryDeltaMagnitude = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+            // Store as absolute value - sign will be determined by primary delta direction
+            secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
           }
         }
         
@@ -1112,18 +1113,20 @@ const ExpandedGoobView: React.FC<{
           };
           
           // Apply primary delta (toward target)
+          let primaryDirection = 1;
           if (!getLocked(primaryTrait)) {
             const current = getCurrent(primaryTrait);
             const target = getTarget(primaryTrait);
-            const direction = current > target ? -1 : 1;
-            const delta = direction * primaryDeltaMagnitude;
+            primaryDirection = current > target ? -1 : 1;
+            const delta = primaryDirection * primaryDeltaMagnitude;
             setCurrent(primaryTrait, current + delta);
           }
           
-          // Apply secondary delta (if exists) - use signed value directly
+          // Apply secondary delta (if exists) - same sign as primary delta
           if (secondaryTrait && secondaryDeltaMagnitude !== null && !getLocked(secondaryTrait)) {
             const current = getCurrent(secondaryTrait);
-            setCurrent(secondaryTrait, current + secondaryDeltaMagnitude);
+            const delta = primaryDirection * secondaryDeltaMagnitude; // Same sign as primary
+            setCurrent(secondaryTrait, current + delta);
           }
         }
       }
