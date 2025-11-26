@@ -547,6 +547,47 @@ const ItemCard: React.FC<{
         >
           {metadata?.name || `Item #${itemId}`}
         </div>
+        {/* Trait and magnitude display */}
+        {metadata?.attributes && (() => {
+          let primaryTrait: string | null = null;
+          let primaryDelta: number | null = null;
+          
+          for (const attr of metadata.attributes) {
+            if (attr.trait_type === 'Primary Trait') {
+              const value = String(attr.value).toLowerCase();
+              if (value.includes('frequency')) {
+                primaryTrait = 'Freq';
+              } else if (value.includes('temperature')) {
+                primaryTrait = 'Temp';
+              } else if (value.includes('ph') || value === 'ph') {
+                primaryTrait = 'pH';
+              } else if (value.includes('salinity')) {
+                primaryTrait = 'Salinity';
+              }
+            } else if (attr.trait_type === 'Primary Delta') {
+              primaryDelta = typeof attr.value === 'number' ? attr.value : parseFloat(String(attr.value));
+            }
+          }
+          
+          if (primaryTrait && primaryDelta !== null) {
+            return (
+              <div 
+                style={{ 
+                  fontSize: '10px',
+                  fontWeight: 300,
+                  lineHeight: '1.2',
+                  textAlign: 'center',
+                  color: 'var(--muted)',
+                  marginTop: '2px',
+                  width: '100%',
+                }}
+              >
+                {primaryTrait} {primaryDelta > 0 ? '+' : ''}{primaryDelta}
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
     </div>
   );
