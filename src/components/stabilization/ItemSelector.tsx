@@ -256,6 +256,32 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
               const balance = itemBalances.get(item.id) ?? item.balance;
               return balance > 0n;
             })
+            .sort((a, b) => {
+              // Helper to get primary delta magnitude from cached metadata
+              const getMagnitude = (itemId: number): number => {
+                try {
+                  const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${itemId}`);
+                  if (cached) {
+                    const metadata = JSON.parse(cached);
+                    if (metadata?.attributes) {
+                      for (const attr of metadata.attributes) {
+                        if (attr.trait_type === 'Primary Delta Magnitude') {
+                          const value = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+                          return isNaN(value) ? Infinity : Math.abs(value);
+                        }
+                      }
+                    }
+                  }
+                } catch {}
+                return Infinity; // Items without metadata go to the end
+              };
+              
+              const magnitudeA = getMagnitude(a.id);
+              const magnitudeB = getMagnitude(b.id);
+              
+              // Sort by magnitude (lowest first)
+              return magnitudeA - magnitudeB;
+            })
             .map((item) => {
               const balance = itemBalances.get(item.id) ?? item.balance;
               return (
