@@ -60,6 +60,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
   const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
+  const [recalculateTrigger, setRecalculateTrigger] = useState(0);
   
   // Use external state if provided, otherwise use local state
   const [localSelectedItems, setLocalSelectedItems] = useState<Map<number, number>>(new Map());
@@ -82,6 +83,8 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   React.useEffect(() => {
     if (!publicClient || items.length === 0) return;
     
+    const prefetchPromises: Promise<any>[] = [];
+    
     // Prefetch metadata for all items (React Query will cache it)
     items.forEach(item => {
       const queryKey = ['item-metadata', ITEM_V3_ADDRESS, item.id.toString()];
@@ -89,7 +92,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       
       // Only prefetch if not already cached
       if (!cached) {
-        queryClient.prefetchQuery({
+        const prefetchPromise = queryClient.prefetchQuery({
           queryKey,
           queryFn: async () => {
             try {
@@ -136,8 +139,23 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
           },
           staleTime: 5 * 60 * 1000,
         });
+        prefetchPromises.push(prefetchPromise);
       }
     });
+    
+    // After all prefetches complete (or immediately if none needed), trigger recalculation
+    if (prefetchPromises.length > 0) {
+      Promise.allSettled(prefetchPromises).then(() => {
+        setTimeout(() => {
+          setRecalculateTrigger(prev => prev + 1);
+        }, 500);
+      });
+    } else {
+      // All items already cached, trigger recalculation immediately
+      setTimeout(() => {
+        setRecalculateTrigger(prev => prev + 1);
+      }, 100);
+    }
   }, [items, publicClient, queryClient]);
   
   // Create restore callback
@@ -337,7 +355,29 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     });
 
     return counts;
-  }, [items, itemBalances]);
+  }, [items, itemBalances, queryClient, recalculateTrigger]);
+  
+  // Validate category counts: sum of individual categories should equal "All"
+  // If mismatch, trigger a rescan after a delay
+  React.useEffect(() => {
+    const allCount = categoryCounts['All'];
+    if (allCount === 0) return; // No items yet
+    
+    const categorySum = categoryCounts['Freq'] + 
+                        categoryCounts['Temp'] + 
+                        categoryCounts['pH'] + 
+                        categoryCounts['Salinity'] + 
+                        categoryCounts['Epic'];
+    
+    // If sum doesn't match "All", metadata might not be loaded yet - trigger rescan
+    if (categorySum !== allCount) {
+      const timeout = setTimeout(() => {
+        setRecalculateTrigger(prev => prev + 1);
+      }, 1000); // Wait 1 second for metadata to load, then rescan
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [categoryCounts]);
   
   if (isLoading) {
     return (
