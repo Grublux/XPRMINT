@@ -177,7 +177,14 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }, [storageKey, address]);
   
   // Persist goobsInLab to localStorage whenever it changes
+  // Only save if goobsInLab actually has items (don't save empty arrays)
   useEffect(() => {
+    // Skip saving if goobsInLab is empty - this prevents overwriting with empty data
+    if (goobsInLab.size === 0) {
+      console.log('[GoobsInLab] Skipping save - goobsInLab is empty');
+      return;
+    }
+    
     try {
       const ids = Array.from(goobsInLab);
       console.log('[GoobsInLab] Saving to localStorage:', storageKey, ids);
@@ -186,6 +193,27 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       console.error('[GoobsInLab] Failed to save to localStorage', error);
     }
   }, [goobsInLab, storageKey]);
+  
+  // When storageKey changes, migrate existing data to new key BEFORE saving
+  const prevStorageKeyRef2 = useRef<string>(storageKey);
+  useEffect(() => {
+    if (prevStorageKeyRef2.current === storageKey) return;
+    
+    const oldKey = prevStorageKeyRef2.current;
+    prevStorageKeyRef2.current = storageKey;
+    
+    // If we have data in state, save it to the new key
+    if (goobsInLab.size > 0) {
+      try {
+        const ids = Array.from(goobsInLab);
+        console.log('[GoobsInLab] Migrating data to new key:', oldKey, '->', storageKey, ids);
+        localStorage.setItem(storageKey, JSON.stringify(ids));
+        // Keep old key as backup
+      } catch (error) {
+        console.error('[GoobsInLab] Failed to migrate to new key', error);
+      }
+    }
+  }, [storageKey, goobsInLab]);
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
