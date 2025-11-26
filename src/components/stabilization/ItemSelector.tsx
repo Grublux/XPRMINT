@@ -223,21 +223,82 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     );
   }
 
+  // Calculate item counts per category
+  const categoryCounts = React.useMemo(() => {
+    const counts: Record<FilterCategory, number> = {
+      'Freq': 0,
+      'Temp': 0,
+      'pH': 0,
+      'Salinity': 0,
+      'Epic': 0,
+      'All': 0,
+    };
+
+    // Helper to get category from cached metadata
+    const getCategoryFromCachedMetadata = (itemId: number): FilterCategory | null => {
+      try {
+        const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${itemId}`);
+        if (cached) {
+          const metadata = JSON.parse(cached);
+          if (metadata?.attributes) {
+            for (const attr of metadata.attributes) {
+              if (attr.trait_type === 'Rarity') {
+                const value = String(attr.value).toLowerCase();
+                if (value === 'epic') return 'Epic';
+              }
+              if (attr.trait_type === 'Primary Trait') {
+                const value = String(attr.value).toLowerCase();
+                if (value.includes('frequency')) return 'Freq';
+                if (value.includes('temperature')) return 'Temp';
+                if (value.includes('ph') || value === 'ph') return 'pH';
+                if (value.includes('salinity')) return 'Salinity';
+              }
+            }
+          }
+        }
+      } catch {}
+      return null;
+    };
+
+    items.forEach(item => {
+      const balance = itemBalances.get(item.id) ?? item.balance;
+      if (balance > 0n) {
+        const category = getCategoryFromCachedMetadata(item.id);
+        if (category) {
+          counts[category] = (counts[category] || 0) + Number(balance);
+        }
+        counts['All'] = (counts['All'] || 0) + Number(balance);
+      }
+    });
+
+    return counts;
+  }, [items, itemBalances]);
+
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
       {/* Filter Buttons - hidden when item is expanded */}
       {!expandedItemId && (
-        <div className={styles.filterContainer}>
-          {(['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'] as FilterCategory[]).map((category) => (
-            <button
-              key={category}
-              className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
-              onClick={() => setSelectedFilter(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className={styles.filterContainer}>
+            {(['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'] as FilterCategory[]).map((category) => (
+              <button
+                key={category}
+                className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
+                onClick={() => setSelectedFilter(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          {/* Category counters */}
+          <div className={styles.categoryCounters}>
+            {(['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'] as FilterCategory[]).map((category) => (
+              <span key={category} className={styles.categoryCount}>
+                {categoryCounts[category] || 0}
+              </span>
+            ))}
+          </div>
+        </>
       )}
       
       {/* Helper text - only in Lab view (when creatureId is set), hide when items are selected */}
