@@ -527,6 +527,11 @@ const ReceivedItemsModal: React.FC<{
     return Array.from(grouped.values());
   }, [items]);
 
+  // Calculate total item count
+  const totalItemCount = React.useMemo(() => {
+    return groupedItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [groupedItems]);
+
   return (
     <div 
       className={styles.modalOverlay}
@@ -548,7 +553,7 @@ const ReceivedItemsModal: React.FC<{
             Goob{sentGoobIds.length === 1 ? '' : 's'} {sentGoobIds.map(id => `#${id.toString()}`).join(', ')} sent to the lab
           </div>
         )}
-        <h2 className={styles.modalTitle}>You received:</h2>
+        <h2 className={styles.modalTitle}>You received {totalItemCount} items:</h2>
         <div className={styles.modalItemsList}>
           {groupedItems.map((item) => (
             <div key={item.id} className={styles.modalItem}>
