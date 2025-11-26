@@ -1145,7 +1145,7 @@ const ExpandedGoobView: React.FC<{
   const getDifferenceColorClass = (percentDiff: number): string => {
     if (percentDiff < 5) return styles.differenceGreen;
     if (percentDiff < 10) return styles.differenceYellow;
-    if (percentDiff < 25) return styles.differenceOrange;
+    if (percentDiff < 20) return styles.differenceOrange;
     return styles.differenceRed;
   };
   
@@ -2031,6 +2031,47 @@ const SelectedItemDisplay: React.FC<{
         }}>
           {metadata?.name || `Item #${itemId}`}
         </div>
+        {/* Trait and magnitude display */}
+        {metadata?.attributes && (() => {
+          let primaryTrait: string | null = null;
+          let primaryDelta: number | null = null;
+          
+          for (const attr of metadata.attributes) {
+            if (attr.trait_type === 'Primary Trait') {
+              const value = String(attr.value).toLowerCase();
+              if (value.includes('frequency')) {
+                primaryTrait = 'Freq';
+              } else if (value.includes('temperature')) {
+                primaryTrait = 'Temp';
+              } else if (value.includes('ph') || value === 'ph') {
+                primaryTrait = 'pH';
+              } else if (value.includes('salinity')) {
+                primaryTrait = 'Salinity';
+              }
+            } else if (attr.trait_type === 'Primary Delta Magnitude') {
+              primaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+            }
+          }
+          
+          if (primaryTrait && primaryDelta !== null) {
+            return (
+              <div 
+                style={{ 
+                  fontSize: '15px',
+                  fontWeight: 300,
+                  lineHeight: '1.2',
+                  textAlign: 'center',
+                  color: 'var(--muted)',
+                  marginTop: '2px',
+                  width: '100%',
+                }}
+              >
+                {primaryTrait} {primaryDelta}
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
     </div>
   );
