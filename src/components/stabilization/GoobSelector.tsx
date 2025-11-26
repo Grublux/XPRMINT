@@ -468,74 +468,20 @@ const FakeTransactionModal: React.FC<{
 // Confetti Effect Component
 const ConfettiEffect: React.FC = () => {
   const confettiRef = useRef<HTMLDivElement>(null);
-  const styleSheetsRef = useRef<HTMLStyleElement[]>([]);
   
   useEffect(() => {
     if (!confettiRef.current) return;
     
     const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
     const confettiCount = 50;
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
     
     for (let i = 0; i < confettiCount; i++) {
       const confetti = document.createElement('div');
       confetti.className = styles.confettiPiece;
-      
-      // Start at bottom center, spread horizontally
-      const centerX = 50; // Center of screen
-      const spread = (Math.random() - 0.5) * 60; // Spread ±30% from center
-      confetti.style.left = `${centerX + spread}%`;
-      confetti.style.bottom = '0';
+      confetti.style.left = `${Math.random() * 100}%`;
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      // Random values for animation
-      const initialRotation = Math.random() * 360;
-      const upwardVelocity = (30 + Math.random() * 40) / 100; // 30-70% of viewport
-      const horizontalDrift = ((Math.random() - 0.5) * 40) / 100; // ±20% drift
-      const peakY = -upwardVelocity * viewportHeight;
-      const finalY = viewportHeight;
-      const peakX = horizontalDrift * viewportWidth;
-      const finalX = horizontalDrift * viewportWidth * 1.5;
-      const peakRotation = initialRotation + 360;
-      const totalRotation = initialRotation + 1080; // 3 full rotations
-      
-      // Create unique keyframe animation with realistic physics
-      const animationName = `confettiExplode${i}${Date.now()}`;
-      const styleSheet = document.createElement('style');
-      styleSheet.setAttribute('data-confetti', 'true');
-      // Use cubic-bezier for more realistic acceleration/deceleration
-      styleSheet.textContent = `
-        @keyframes ${animationName} {
-          0% {
-            transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
-            opacity: 1;
-          }
-          25% {
-            transform: translateY(${peakY * 0.3}px) translateX(${peakX * 0.3}px) rotate(${initialRotation + 90}deg);
-            opacity: 1;
-          }
-          40% {
-            transform: translateY(${peakY}px) translateX(${peakX}px) rotate(${peakRotation}deg);
-            opacity: 1;
-          }
-          60% {
-            transform: translateY(${peakY + finalY * 0.2}px) translateX(${peakX + (finalX - peakX) * 0.3}px) rotate(${peakRotation + 180}deg);
-            opacity: 0.9;
-          }
-          100% {
-            transform: translateY(${finalY}px) translateX(${finalX}px) rotate(${totalRotation}deg);
-            opacity: 0;
-          }
-        }
-      `;
-      document.head.appendChild(styleSheet);
-      styleSheetsRef.current.push(styleSheet);
-      
-      // Longer duration with ease-in-out for realistic drift
-      confetti.style.animation = `${animationName} 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-      confetti.style.animationDelay = `${Math.random() * 0.3}s`;
-      
+      confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
       confettiRef.current.appendChild(confetti);
     }
     
@@ -543,13 +489,6 @@ const ConfettiEffect: React.FC = () => {
       if (confettiRef.current) {
         confettiRef.current.innerHTML = '';
       }
-      // Clean up dynamically created styles
-      styleSheetsRef.current.forEach(style => {
-        if (style.parentNode) {
-          style.parentNode.removeChild(style);
-        }
-      });
-      styleSheetsRef.current = [];
     };
   }, []);
   

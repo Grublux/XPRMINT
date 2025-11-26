@@ -706,7 +706,18 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  bottom: 0;
-  border-radius: 2px;
+  top: -10px;
+  animation: confettiFall 2s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
