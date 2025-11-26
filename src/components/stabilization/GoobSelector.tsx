@@ -6,7 +6,6 @@ import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
-import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -221,9 +220,14 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     if (isSimulating && onAddSimulationItems) {
       // Call the callback to add items to inventory and get the actual items received
       const result = onAddSimulationItems(selectedGoobIds.length);
-      // Use items from callback if provided
+      // Use items from callback if provided (result should be array with quantity property)
       if (Array.isArray(result) && result.length > 0) {
-        setReceivedItems(result);
+        // Ensure all items have the required quantity property
+        const itemsWithQuantity = result.map(item => ({
+          ...item,
+          quantity: item.quantity ?? 1,
+        }));
+        setReceivedItems(itemsWithQuantity);
         setShowReceivedItemsModal(true);
       }
     } else {
