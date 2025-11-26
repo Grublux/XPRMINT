@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { StabilizationDashboard } from '../components/stabilization/StabilizationDashboard';
 import { useWhitelistStatus } from '../hooks/stabilizationV3';
@@ -7,7 +7,26 @@ import styles from './StabilizationPage.module.css';
 export default function StabilizationPage() {
   const { address } = useAccount();
   const { whitelistEnabled, isTester, isReadOnly, isContractOwner } = useWhitelistStatus();
-  const [isSimulationOn, setIsSimulationOn] = useState(false);
+  
+  // Initialize isSimulationOn from localStorage for persistence
+  const [isSimulationOn, setIsSimulationOn] = useState(() => {
+    try {
+      const stored = localStorage.getItem('isSimulationOn');
+      if (stored !== null) {
+        return stored === 'true';
+      }
+    } catch {}
+    return false;
+  });
+  
+  // Persist isSimulationOn to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('isSimulationOn', String(isSimulationOn));
+    } catch (error) {
+      console.error('Failed to save isSimulationOn to localStorage', error);
+    }
+  }, [isSimulationOn]);
 
   return (
     <div className={styles.pageContainer}>
