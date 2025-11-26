@@ -33,9 +33,14 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   onRestoreItem: externalOnRestoreItem,
   simulationItems = new Map(),
   setSimulationItems: externalSetSimulationItems,
+  isWhitelisted = false,
 }, ref) => {
   const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
+  
+  // For whitelisted wallets during early testing: only use simulation mode
+  // Don't load real items when whitelisted and not simulating
+  const shouldUseSimulation = isWhitelisted && !isSimulating;
   
   // In simulation mode, convert simulationItems Map to items array format
   const simulationItemsArray = React.useMemo(() => {
@@ -46,9 +51,9 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     }));
   }, [isSimulating, simulationItems]);
   
-  // In simulation mode, use simulation items, otherwise use wallet items
-  const items = isSimulating ? simulationItemsArray : walletItems;
-  const isLoading = isSimulating ? false : walletIsLoading;
+  // In simulation mode, use simulation items, otherwise use wallet items (unless whitelisted)
+  const items = isSimulating ? simulationItemsArray : (shouldUseSimulation ? [] : walletItems);
+  const isLoading = isSimulating ? false : (shouldUseSimulation ? false : walletIsLoading);
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');
   const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
