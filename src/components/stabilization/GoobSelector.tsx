@@ -66,12 +66,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }, [address, isSimulating]);
   
   // Initialize goobsInLab from localStorage for persistence
-  // Note: We can't use storageKey here because useMemo runs after useState initializer
-  // So we calculate it directly using the same logic
+  // Try ALL possible storage keys to find existing data
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
     try {
-      // Get isSimulating from localStorage to ensure we use the correct key
-      let isSim = isSimulating;
+      // Get isSimulating from localStorage
+      let isSim = false;
       try {
         const simStored = localStorage.getItem('isSimulationOn');
         if (simStored !== null) {
@@ -79,12 +78,37 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         }
       } catch {}
       
-      const mode = isSim ? 'simulation' : (address ? address.toLowerCase() : 'default');
-      const key = `goobs-in-lab-${mode}`;
-      const stored = localStorage.getItem(key);
+      // Try simulation key first
+      if (isSim) {
+        const key = 'goobs-in-lab-simulation';
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const ids = JSON.parse(stored) as string[];
+          console.log('[GoobsInLab] Initialized from localStorage (simulation):', ids);
+          return new Set(ids);
+        }
+      }
+      
+      // Try address-based key (get from localStorage if available)
+      try {
+        const addressStored = localStorage.getItem('lastConnectedAddress');
+        if (addressStored) {
+          const key = `goobs-in-lab-${addressStored.toLowerCase()}`;
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const ids = JSON.parse(stored) as string[];
+            console.log('[GoobsInLab] Initialized from localStorage (address):', ids);
+            return new Set(ids);
+          }
+        }
+      } catch {}
+      
+      // Try default key as fallback
+      const defaultKey = 'goobs-in-lab-default';
+      const stored = localStorage.getItem(defaultKey);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
-        console.log('[GoobsInLab] Initialized from localStorage:', key, ids);
+        console.log('[GoobsInLab] Initialized from localStorage (default):', ids);
         return new Set(ids);
       }
     } catch (error) {
@@ -92,6 +116,15 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     }
     return new Set();
   });
+  
+  // Save current address to localStorage for recovery
+  useEffect(() => {
+    if (address) {
+      try {
+        localStorage.setItem('lastConnectedAddress', address);
+      } catch {}
+    }
+  }, [address]);
   
   // Re-initialize from localStorage when address or simulation mode changes
   useEffect(() => {
@@ -103,15 +136,35 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         console.log('[GoobsInLab] Setting state from storage:', ids);
         setGoobsInLab(new Set(ids));
       } else {
-        // Don't clear existing state - preserve it when switching keys
-        // Only clear if the current state is empty
-        console.log('[GoobsInLab] No stored data for key:', storageKey, 'preserving current state');
+        // Don't clear - try to find data in other keys first
+        console.log('[GoobsInLab] No stored data for key:', storageKey);
+        
+        // Try to find data in alternative keys
+        const altKeys = [
+          'goobs-in-lab-simulation',
+          address ? `goobs-in-lab-${address.toLowerCase()}` : null,
+          'goobs-in-lab-default'
+        ].filter(Boolean) as string[];
+        
+        for (const key of altKeys) {
+          if (key === storageKey) continue;
+          const altStored = localStorage.getItem(key);
+          if (altStored) {
+            const ids = JSON.parse(altStored) as string[];
+            if (ids.length > 0) {
+              console.log('[GoobsInLab] Found data in alternative key:', key, ids);
+              setGoobsInLab(new Set(ids));
+              // Migrate to correct key
+              localStorage.setItem(storageKey, altStored);
+              break;
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('[GoobsInLab] Failed to load from localStorage', error);
-      // Don't clear on error - preserve current state
     }
-  }, [storageKey]);
+  }, [storageKey, address]);
   
   // Persist goobsInLab to localStorage whenever it changes
   useEffect(() => {
