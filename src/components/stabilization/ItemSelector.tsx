@@ -1,11 +1,12 @@
 // src/components/stabilization/ItemSelector.tsx
 
 import React, { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, usePublicClient } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
-import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
+import { ITEM_V3_ADDRESS, itemToken1155V3Abi } from '../../config/contracts/stabilizationV3';
 import styles from './ItemSelector.module.css';
 
 type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity' | 'Epic';
@@ -36,6 +37,8 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   isWhitelisted = false,
 }, ref) => {
   const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const queryClient = useQueryClient();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   
   // For whitelisted wallets during early testing: only use simulation mode
@@ -74,6 +77,68 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     });
     setItemBalances(balances);
   }, [items]);
+  
+  // Preload metadata for all items to ensure category counts are accurate
+  React.useEffect(() => {
+    if (!publicClient || items.length === 0) return;
+    
+    // Prefetch metadata for all items (React Query will cache it)
+    items.forEach(item => {
+      const queryKey = ['item-metadata', ITEM_V3_ADDRESS, item.id.toString()];
+      const cached = queryClient.getQueryData(queryKey);
+      
+      // Only prefetch if not already cached
+      if (!cached) {
+        queryClient.prefetchQuery({
+          queryKey,
+          queryFn: async () => {
+            try {
+              const tokenURI = await publicClient.readContract({
+                address: ITEM_V3_ADDRESS,
+                abi: itemToken1155V3Abi,
+                functionName: 'uri',
+                args: [BigInt(item.id)],
+              }) as string;
+
+              if (!tokenURI || tokenURI === '') return null;
+
+              let jsonString: string;
+              if (tokenURI.startsWith('data:application/json;base64,')) {
+                const base64 = tokenURI.replace('data:application/json;base64,', '');
+                const binaryString = atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                jsonString = new TextDecoder('utf-8').decode(bytes);
+              } else if (tokenURI.startsWith('data:application/json,')) {
+                jsonString = decodeURIComponent(tokenURI.replace('data:application/json,', ''));
+              } else if (tokenURI.startsWith('http://') || tokenURI.startsWith('https://')) {
+                const response = await fetch(tokenURI);
+                if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+                jsonString = await response.text();
+              } else {
+                jsonString = tokenURI;
+              }
+
+              const metadata = JSON.parse(jsonString);
+              
+              // Cache in localStorage too
+              try {
+                const key = `item-metadata-${ITEM_V3_ADDRESS}-${item.id}`;
+                window.localStorage.setItem(key, JSON.stringify(metadata));
+              } catch {}
+              
+              return metadata;
+            } catch (err) {
+              return null;
+            }
+          },
+          staleTime: 5 * 60 * 1000,
+        });
+      }
+    });
+  }, [items, publicClient, queryClient]);
   
   // Create restore callback
   const handleRestoreItem = React.useCallback((itemId: number) => {
@@ -186,48 +251,50 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       'All': 0,
     };
 
-    // Helper to get category from cached metadata
+    // Helper to get category from cached metadata (checks both localStorage and React Query cache)
     const getCategoryFromCachedMetadata = (itemId: number): FilterCategory | null => {
-      // Check if localStorage is available
-      if (typeof window === 'undefined') {
-        return null;
-      }
+      let metadata: any = null;
       
-      let localStorage: Storage | null = null;
+      // First, try React Query cache
       try {
-        localStorage = window.localStorage;
-        if (!localStorage) return null;
+        const queryKey = ['item-metadata', ITEM_V3_ADDRESS, itemId.toString()];
+        const cachedData = queryClient.getQueryData(queryKey);
+        if (cachedData) {
+          metadata = cachedData;
+        }
       } catch (e) {
-        // localStorage not available (private browsing, etc.)
-        return null;
+        // Query cache access failed, continue to localStorage
       }
       
-      try {
-        const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
-        let cached: string | null = null;
+      // If not in React Query cache, try localStorage
+      if (!metadata && typeof window !== 'undefined') {
+        let localStorage: Storage | null = null;
         try {
-          cached = localStorage.getItem(key);
+          localStorage = window.localStorage;
+          if (localStorage) {
+            const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
+            let cached: string | null = null;
+            try {
+              cached = localStorage.getItem(key);
+            } catch (e) {
+              // localStorage.getItem() can throw in some browsers
+            }
+            
+            if (cached && cached.trim() !== '') {
+              try {
+                metadata = JSON.parse(cached);
+              } catch (e) {
+                // Invalid JSON
+              }
+            }
+          }
         } catch (e) {
-          // localStorage.getItem() can throw in some browsers
-          return null;
+          // localStorage not available (private browsing, etc.)
         }
-        
-        if (!cached || cached.trim() === '') {
-          return null;
-        }
-        
-        let metadata: any;
-        try {
-          metadata = JSON.parse(cached);
-        } catch (e) {
-          // Invalid JSON
-          return null;
-        }
-        
-        if (!metadata || typeof metadata !== 'object' || !metadata.attributes || !Array.isArray(metadata.attributes)) {
-          return null;
-        }
-        
+      }
+      
+      // Extract category from metadata
+      if (metadata && typeof metadata === 'object' && metadata.attributes && Array.isArray(metadata.attributes)) {
         // First pass: check for Epic (highest priority)
         for (const attr of metadata.attributes) {
           if (attr && typeof attr === 'object' && attr.trait_type && attr.value !== undefined) {
@@ -250,11 +317,8 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
             }
           }
         }
-      } catch (error) {
-        // Silently fail - metadata not available or corrupted
-        // Don't log to avoid console spam
-        return null;
       }
+      
       return null;
     };
 
