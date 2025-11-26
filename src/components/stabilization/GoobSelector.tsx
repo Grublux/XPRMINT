@@ -500,19 +500,28 @@ const ConfettiEffect: React.FC = () => {
       const peakRotation = initialRotation + 360;
       const totalRotation = initialRotation + 1080; // 3 full rotations
       
-      // Create unique keyframe animation
+      // Create unique keyframe animation with realistic physics
       const animationName = `confettiExplode${i}${Date.now()}`;
       const styleSheet = document.createElement('style');
       styleSheet.setAttribute('data-confetti', 'true');
+      // Use cubic-bezier for more realistic acceleration/deceleration
       styleSheet.textContent = `
         @keyframes ${animationName} {
           0% {
             transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
             opacity: 1;
           }
+          25% {
+            transform: translateY(${peakY * 0.3}px) translateX(${peakX * 0.3}px) rotate(${initialRotation + 90}deg);
+            opacity: 1;
+          }
           40% {
             transform: translateY(${peakY}px) translateX(${peakX}px) rotate(${peakRotation}deg);
             opacity: 1;
+          }
+          60% {
+            transform: translateY(${peakY + finalY * 0.2}px) translateX(${peakX + (finalX - peakX) * 0.3}px) rotate(${peakRotation + 180}deg);
+            opacity: 0.9;
           }
           100% {
             transform: translateY(${finalY}px) translateX(${finalX}px) rotate(${totalRotation}deg);
@@ -523,7 +532,8 @@ const ConfettiEffect: React.FC = () => {
       document.head.appendChild(styleSheet);
       styleSheetsRef.current.push(styleSheet);
       
-      confetti.style.animation = `${animationName} 2.5s ease-out forwards`;
+      // Longer duration with ease-in-out for realistic drift
+      confetti.style.animation = `${animationName} 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
       confetti.style.animationDelay = `${Math.random() * 0.3}s`;
       
       confettiRef.current.appendChild(confetti);
