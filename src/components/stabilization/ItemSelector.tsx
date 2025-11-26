@@ -8,7 +8,7 @@ import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './ItemSelector.module.css';
 
-type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity';
+type FilterCategory = 'All' | 'Freq' | 'Temp' | 'pH' | 'Salinity' | 'Epic';
 
 type ItemSelectorProps = {
   creatureId?: bigint | number | null;
@@ -112,6 +112,10 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
           const metadata = JSON.parse(cached);
           if (metadata?.attributes) {
             for (const attr of metadata.attributes) {
+              if (attr.trait_type === 'Rarity') {
+                const value = String(attr.value).toLowerCase();
+                if (value === 'epic') return 'Epic';
+              }
               if (attr.trait_type === 'Primary Trait') {
                 const value = String(attr.value).toLowerCase();
                 if (value.includes('frequency')) return 'Freq';
@@ -143,7 +147,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     
     // If we have cached metadata and Freq has no items, find the first available category
     if (hasAnyCachedMetadata && !categoriesWithItems.has('Freq')) {
-      const categoryOrder: FilterCategory[] = ['Freq', 'Temp', 'pH', 'Salinity', 'All'];
+      const categoryOrder: FilterCategory[] = ['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'];
       for (const category of categoryOrder) {
         if (categoriesWithItems.has(category) || category === 'All') {
           setSelectedFilter(category);
@@ -218,7 +222,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       {/* Filter Buttons - hidden when item is expanded */}
       {!expandedItemId && (
         <div className={styles.filterContainer}>
-          {(['Freq', 'Temp', 'pH', 'Salinity', 'All'] as FilterCategory[]).map((category) => (
+          {(['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'] as FilterCategory[]).map((category) => (
             <button
               key={category}
               className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
