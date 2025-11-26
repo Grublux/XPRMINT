@@ -30,8 +30,8 @@ export default function StabilizationPage() {
             <span>
               <strong>
                 {isContractOwner 
-                  ? "Owner Access - Full gameplay enabled." 
-                  : "Whitelist Access granted, full gameplay enabled."}
+                  ? "Owner Access Granted" 
+                  : "Whitelist Access Granted"}
               </strong>
             </span>
           ) : (
