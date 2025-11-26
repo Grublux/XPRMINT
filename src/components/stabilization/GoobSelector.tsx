@@ -284,10 +284,47 @@ const ExpandedGoobView: React.FC<{
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   const imageUrl = metadata?.image_data || metadata?.image || null;
+  const [draggedItemId, setDraggedItemId] = useState<number | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [desktopTargetIndex, setDesktopTargetIndex] = useState<number | null>(null);
+  const lastDesktopTargetIndexRef = useRef<number | null>(null);
 
   const isInitialized = creatureState !== null && 
     !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
       creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
+  
+  // Get current index of dragged item
+  const getDraggedIndex = (): number | null => {
+    if (draggedItemId === null) return null;
+    const entries = Array.from(selectedItemsForGoob.entries());
+    const index = entries.findIndex(([id]) => id === draggedItemId);
+    return index >= 0 ? index : null;
+  };
+  
+  // Update highlight to show where dragged item currently is (after reordering)
+  useEffect(() => {
+    if (draggedItemId !== null) {
+      const entries = Array.from(selectedItemsForGoob.entries());
+      const index = entries.findIndex(([id]) => id === draggedItemId);
+      if (index >= 0) {
+        setHighlightedIndex(index);
+      }
+    } else {
+      setHighlightedIndex(null);
+    }
+  }, [selectedItemsForGoob, draggedItemId]);
+  
+  // Track target during drag (same as touch - no live reordering, just highlight)
+  // Note: The actual target tracking happens in SelectedItemDisplay's onDragOver handler
+  const handleDragOver = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+    
+    // Just track which item we're over - don't swap yet (same as touch behavior)
+    // The swap will happen in handleDragEnd in SelectedItemDisplay
+  };
 
   return (
     <div className={styles.expandedGoobContainer}>
@@ -413,34 +450,6 @@ const ExpandedGoobView: React.FC<{
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                   }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    if (!setSelectedItemsForGoob) return;
-                    
-                    const draggedItemId = e.dataTransfer.getData('text/plain');
-                    const draggedIndex = parseInt(e.dataTransfer.getData('application/index') || '-1', 10);
-                    
-                    if (!draggedItemId || draggedIndex === -1) return;
-                    
-                    const itemId = parseInt(draggedItemId, 10);
-                    const dropTarget = e.currentTarget;
-                    const children = Array.from(dropTarget.children);
-                    const dropIndex = children.findIndex(child => {
-                      const rect = child.getBoundingClientRect();
-                      return e.clientX >= rect.left && e.clientX <= rect.right &&
-                             e.clientY >= rect.top && e.clientY <= rect.bottom;
-                    });
-                    
-                    if (dropIndex !== -1 && dropIndex !== draggedIndex) {
-                      // Reorder items
-                      setSelectedItemsForGoob(prev => {
-                        const entries = Array.from(prev.entries());
-                        const [draggedEntry] = entries.splice(draggedIndex, 1);
-                        entries.splice(dropIndex, 0, draggedEntry);
-                        return new Map(entries);
-                      });
-                    }
-                  }}
                 >
                   {Array.from(selectedItemsForGoob.entries()).map(([itemId, count], index) => (
                     <SelectedItemDisplay 
@@ -448,8 +457,22 @@ const ExpandedGoobView: React.FC<{
                       itemId={itemId} 
                       count={count}
                       index={index}
+                      selectedItemsForGoob={selectedItemsForGoob}
                       setSelectedItemsForGoob={setSelectedItemsForGoob}
                       onRestoreItem={onRestoreItem}
+                      draggedItemId={draggedItemId}
+                      highlightedIndex={highlightedIndex}
+                      desktopTargetIndex={desktopTargetIndex}
+                      setDesktopTargetIndex={setDesktopTargetIndex}
+                      lastDesktopTargetIndexRef={lastDesktopTargetIndexRef}
+                      onDragStart={() => setDraggedItemId(itemId)}
+                      onDragEnd={() => {
+                        setDraggedItemId(null);
+                        setHighlightedIndex(null);
+                        setDesktopTargetIndex(null);
+                        lastDesktopTargetIndexRef.current = null;
+                      }}
+                      onDragOver={(e) => handleDragOver(e, index)}
                     />
                   ))}
                 </div>
@@ -642,21 +665,51 @@ const SelectedItemDisplay: React.FC<{
   itemId: number; 
   count: number;
   index: number;
+  selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
-}> = ({ itemId, count, index, setSelectedItemsForGoob, onRestoreItem }) => {
+  draggedItemId?: number | null;
+  highlightedIndex?: number | null;
+  desktopTargetIndex?: number | null;
+  setDesktopTargetIndex?: React.Dispatch<React.SetStateAction<number | null>>;
+  lastDesktopTargetIndexRef?: React.MutableRefObject<number | null>;
+  onDragStart?: (itemId: number) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (e: React.DragEvent, targetIndex: number) => void;
+}> = ({ itemId, count, index, selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, draggedItemId, highlightedIndex, desktopTargetIndex, setDesktopTargetIndex, lastDesktopTargetIndexRef, onDragStart, onDragEnd, onDragOver }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
   const [isDragging, setIsDragging] = useState(false);
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [touchTargetIndex, setTouchTargetIndex] = useState<number | null>(null);
+  const [isSwapping, setIsSwapping] = useState(false);
+  const isDraggingRef = useRef(false);
+  const initialTouchRef = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
   const itemRef = useRef<HTMLDivElement>(null);
+  const lastTargetIndexRef = useRef<number | null>(null);
+  
+  const isBeingDragged = draggedItemId === itemId;
+  const isHighlighted = highlightedIndex === index && draggedItemId !== null;
+  // For touch: highlight if this is the target item we're hovering over
+  const isTouchTarget = touchTargetIndex === index && draggedItemId !== null && draggedItemId !== itemId;
+  // For desktop: highlight if this is the target item we're hovering over
+  const isDesktopTarget = desktopTargetIndex === index && draggedItemId !== null && draggedItemId !== itemId;
   
   // Desktop drag handlers
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
+    isDraggingRef.current = true;
+    if (lastDesktopTargetIndexRef) {
+      lastDesktopTargetIndexRef.current = null;
+    }
+    if (setDesktopTargetIndex) {
+      setDesktopTargetIndex(null);
+    }
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', itemId.toString());
     e.dataTransfer.setData('application/index', index.toString());
+    if (onDragStart) {
+      onDragStart(itemId);
+    }
     if (e.dataTransfer.setDragImage && itemRef.current) {
       const dragImage = itemRef.current.cloneNode(true) as HTMLElement;
       dragImage.style.opacity = '0.5';
@@ -669,10 +722,51 @@ const SelectedItemDisplay: React.FC<{
   };
   
   const handleDragEnd = (e: React.DragEvent) => {
-    setIsDragging(false);
-    const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+    // Use the stored target index from onDragOver (highlighting confirms this is working)
+    const finalTargetIndex = lastDesktopTargetIndexRef?.current ?? null;
+    
+    // Perform the swap if we were over a valid target
+    if (finalTargetIndex !== null && setSelectedItemsForGoob && draggedItemId) {
+      // Disable transitions during swap to prevent flicker
+      setIsSwapping(true);
+      
+      setSelectedItemsForGoob(prev => {
+        const entries = Array.from(prev.entries());
+        const currentDraggedIndex = entries.findIndex(([id]) => id === draggedItemId);
+        
+        // Swap if we have valid indices and they're different
+        if (currentDraggedIndex !== -1 && finalTargetIndex !== null && currentDraggedIndex !== finalTargetIndex && finalTargetIndex < entries.length) {
+          // Direct swap: swap the dragged item with the item at the target position
+          const draggedEntry = entries[currentDraggedIndex];
+          const targetEntry = entries[finalTargetIndex];
+          
+          // Swap them
+          entries[currentDraggedIndex] = targetEntry;
+          entries[finalTargetIndex] = draggedEntry;
+          
+          return new Map(entries);
+        }
+        
+        return prev;
+      });
+      
+      // Reset visual state after swap completes
+      requestAnimationFrame(() => {
+        setIsDragging(false);
+        isDraggingRef.current = false;
+        // Re-enable transitions after a brief delay
+        setTimeout(() => {
+          setIsSwapping(false);
+        }, 50);
+      });
+    } else {
+      // No swap - reset immediately
+      setIsDragging(false);
+      isDraggingRef.current = false;
+    }
     
     // Check if dropped outside the selected items grid
+    const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
     const selectedItemsGrid = document.querySelector(`.${styles.selectedItemsGrid}`);
     if (!selectedItemsGrid || !selectedItemsGrid.contains(dropTarget)) {
       // Remove item from selected items
@@ -689,41 +783,157 @@ const SelectedItemDisplay: React.FC<{
         });
         onRestoreItem(itemId);
       }
+    }
+    
+    if (lastDesktopTargetIndexRef) {
+      lastDesktopTargetIndexRef.current = null;
+    }
+    if (setDesktopTargetIndex) {
+      setDesktopTargetIndex(null);
+    }
+    
+    if (onDragEnd) {
+      onDragEnd();
     }
   };
   
   // Touch handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-    setDragPosition({ x: touch.clientX, y: touch.clientY });
+    if (itemRef.current) {
+      const rect = itemRef.current.getBoundingClientRect();
+      // Store the initial touch position relative to the viewport
+      initialTouchRef.current = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        startX: touch.clientX,
+        startY: touch.clientY
+      };
+    }
     setIsDragging(true);
+    isDraggingRef.current = true;
+    lastTargetIndexRef.current = null;
+    setTouchTargetIndex(null);
+    if (onDragStart) {
+      onDragStart(itemId);
+    }
     e.preventDefault(); // Prevent scrolling while dragging
+    e.stopPropagation();
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current || !initialTouchRef.current || !itemRef.current) return;
     e.preventDefault(); // Prevent scrolling while dragging
+    e.stopPropagation();
     const touch = e.touches[0];
-    setDragPosition({ x: touch.clientX, y: touch.clientY });
     
-    if (itemRef.current) {
-      const rect = itemRef.current.getBoundingClientRect();
-      const offsetX = touch.clientX - dragPosition.x;
-      const offsetY = touch.clientY - dragPosition.y;
-      itemRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      itemRef.current.style.opacity = '0.5';
-      itemRef.current.style.zIndex = '1000';
+    // Calculate offset from initial touch position
+    const offsetX = touch.clientX - initialTouchRef.current.startX;
+    const offsetY = touch.clientY - initialTouchRef.current.startY;
+    
+    itemRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    itemRef.current.style.opacity = '0.5';
+    itemRef.current.style.zIndex = '1000';
+    itemRef.current.style.pointerEvents = 'none'; // Allow clicks to pass through to items below
+    
+    // Temporarily hide this item to detect what's underneath
+    const originalDisplay = itemRef.current.style.display;
+    const originalVisibility = itemRef.current.style.visibility;
+    itemRef.current.style.display = 'none';
+    itemRef.current.style.visibility = 'hidden';
+    
+    // Check if we're over another item for reordering
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Restore visibility
+    itemRef.current.style.display = originalDisplay;
+    itemRef.current.style.visibility = originalVisibility;
+    
+    // Just track which item we're over - don't swap yet
+    if (elementBelow && selectedItemsForGoob) {
+      const targetItem = elementBelow.closest(`[data-item-id]`) as HTMLElement;
+      if (targetItem && targetItem !== itemRef.current) {
+        const targetItemId = parseInt(targetItem.getAttribute('data-item-id') || '0', 10);
+        const entries = Array.from(selectedItemsForGoob.entries());
+        const targetIndex = entries.findIndex(([id]) => id === targetItemId);
+        
+        if (targetIndex !== -1) {
+          lastTargetIndexRef.current = targetIndex;
+          setTouchTargetIndex(targetIndex);
+        } else {
+          lastTargetIndexRef.current = null;
+          setTouchTargetIndex(null);
+        }
+      } else {
+        lastTargetIndexRef.current = null;
+        setTouchTargetIndex(null);
+      }
+    } else {
+      lastTargetIndexRef.current = null;
+      setTouchTargetIndex(null);
     }
   };
   
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
+    
+    // IMMEDIATELY reset visual state to prevent items sticking
+    if (itemRef.current) {
+      itemRef.current.style.pointerEvents = '';
+      itemRef.current.style.transform = '';
+      itemRef.current.style.opacity = '';
+      itemRef.current.style.zIndex = '';
+    }
+    
     setIsDragging(false);
+    isDraggingRef.current = false;
     
     const touch = e.changedTouches[0];
-    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
     
-    // Check if dropped outside the selected items grid
+    // Re-detect the target item at drop time to ensure we have the correct target
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    let finalTargetIndex: number | null = null;
+    
+    if (dropTarget && selectedItemsForGoob) {
+      const targetItem = dropTarget.closest(`[data-item-id]`) as HTMLElement;
+      if (targetItem && targetItem !== itemRef.current) {
+        const targetItemId = parseInt(targetItem.getAttribute('data-item-id') || '0', 10);
+        const entries = Array.from(selectedItemsForGoob.entries());
+        const detectedIndex = entries.findIndex(([id]) => id === targetItemId);
+        if (detectedIndex !== -1) {
+          finalTargetIndex = detectedIndex;
+        }
+      }
+    }
+    
+    // Fall back to stored target index if detection failed
+    if (finalTargetIndex === null) {
+      finalTargetIndex = lastTargetIndexRef.current;
+    }
+    
+    // Perform the swap if we were over a valid target
+    if (finalTargetIndex !== null && setSelectedItemsForGoob && draggedItemId) {
+      setSelectedItemsForGoob(prev => {
+        const entries = Array.from(prev.entries());
+        const currentDraggedIndex = entries.findIndex(([id]) => id === draggedItemId);
+        
+        if (currentDraggedIndex !== -1 && currentDraggedIndex !== finalTargetIndex && finalTargetIndex !== null && finalTargetIndex < entries.length) {
+          // Direct swap: swap the dragged item with the item at the target position
+          const draggedEntry = entries[currentDraggedIndex];
+          const targetEntry = entries[finalTargetIndex];
+          
+          // Swap them
+          entries[currentDraggedIndex] = targetEntry;
+          entries[finalTargetIndex] = draggedEntry;
+          
+          return new Map(entries);
+        }
+        
+        return prev;
+      });
+    }
+    
+    // Check if dropped outside the selected items grid (reuse dropTarget from above)
     const selectedItemsGrid = document.querySelector(`.${styles.selectedItemsGrid}`);
     if (!selectedItemsGrid || !selectedItemsGrid.contains(dropTarget)) {
       // Remove item from selected items
@@ -742,9 +952,12 @@ const SelectedItemDisplay: React.FC<{
       }
     }
     
-    if (itemRef.current) {
-      itemRef.current.style.transform = '';
-      itemRef.current.style.opacity = '';
+    initialTouchRef.current = null;
+    lastTargetIndexRef.current = null;
+    setTouchTargetIndex(null);
+    
+    if (onDragEnd) {
+      onDragEnd();
     }
   };
   
@@ -752,13 +965,33 @@ const SelectedItemDisplay: React.FC<{
     <div 
       ref={itemRef}
       draggable
+      data-item-id={itemId}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragOver={(e) => {
+        e.preventDefault();
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'move';
+        }
+        // Track this item as the target when drag is over it
+        if (draggedItemId !== null && draggedItemId !== itemId) {
+          if (lastDesktopTargetIndexRef) {
+            lastDesktopTargetIndexRef.current = index;
+          }
+          if (setDesktopTargetIndex) {
+            setDesktopTargetIndex(index);
+          }
+        }
+        // Also call parent's onDragOver if provided
+        if (onDragOver) {
+          onDragOver(e, index);
+        }
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-      background: 'transparent',
+      background: (isHighlighted || isTouchTarget || isDesktopTarget) ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
       cursor: isDragging ? 'grabbing' : 'grab',
       width: '132px',
       flexShrink: 0,
@@ -766,13 +999,14 @@ const SelectedItemDisplay: React.FC<{
       display: 'flex',
       flexDirection: 'column',
       borderRadius: '4px',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
+      border: (isHighlighted || isTouchTarget || isDesktopTarget) ? '2px dashed rgba(16, 185, 129, 0.8)' : isBeingDragged ? '2px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255, 255, 255, 0.2)',
       overflow: 'visible',
-      transition: 'all 0.2s',
+      transition: (isBeingDragged || isSwapping) ? 'none' : 'opacity 0.15s ease',
       margin: '0',
       padding: '0',
       boxSizing: 'border-box',
       position: 'relative',
+      opacity: isBeingDragged ? 0.5 : 1,
     }}>
       {/* Image Section */}
       <div style={{

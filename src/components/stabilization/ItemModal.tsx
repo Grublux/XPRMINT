@@ -22,6 +22,19 @@ export const ItemModal: React.FC<ItemModalProps> = ({ itemId, isOpen, onClose, c
   // Prefer full-size image (1024x1024) for modal
   const imageUrl = metadata?.image || metadata?.image_data || null;
 
+  // Fix known description issues (frontend workaround until metadata is updated on-chain)
+  const fixedDescription = useMemo(() => {
+    if (!metadata?.description) return metadata?.description;
+    let desc = metadata.description;
+    
+    // Fix Whisper-Jar Fragment description
+    if (metadata.name === 'The Whisper-Jar Fragment') {
+      desc = desc.replace('as if something is inside on the other side', 'as if something is on the other side');
+    }
+    
+    return desc;
+  }, [metadata?.description, metadata?.name]);
+
   // Parse attributes into structured format
   const itemAttributes = useMemo(() => {
     if (!metadata?.attributes) return null;
@@ -116,9 +129,9 @@ export const ItemModal: React.FC<ItemModalProps> = ({ itemId, isOpen, onClose, c
               )}
             </div>
 
-            {metadata?.description && (
+            {fixedDescription && (
               <div className={styles.description}>
-                {metadata.description}
+                {fixedDescription}
               </div>
             )}
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { StabilizationDashboard } from '../components/stabilization/StabilizationDashboard';
 import { useWhitelistStatus } from '../hooks/stabilizationV3';
@@ -6,9 +7,20 @@ import styles from './StabilizationPage.module.css';
 export default function StabilizationPage() {
   const { address } = useAccount();
   const { whitelistEnabled, isTester, isReadOnly, isOwner } = useWhitelistStatus();
+  const [isSimulationOn, setIsSimulationOn] = useState(false);
 
   return (
     <div className={styles.pageContainer}>
+      {isOwner && address && (
+        <div className={styles.simulationToggleContainer}>
+          <button
+            className={`${styles.simulationToggle} ${isSimulationOn ? styles.simulationToggleOn : ''}`}
+            onClick={() => setIsSimulationOn(!isSimulationOn)}
+          >
+            Simulation {isSimulationOn ? 'On' : 'Off'}
+          </button>
+        </div>
+      )}
       <div className={styles.titleContainer}>
         <h1 className={styles.title}>Dashboard</h1>
       </div>
@@ -31,6 +43,7 @@ export default function StabilizationPage() {
       )}
       <StabilizationDashboard
         isReadOnly={isReadOnly}
+        isSimulating={isSimulationOn}
       />
     </div>
   );

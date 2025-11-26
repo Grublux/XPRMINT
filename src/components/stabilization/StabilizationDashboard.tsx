@@ -5,7 +5,7 @@ import { useAccount, useConnect } from 'wagmi';
 
 import { GoobSelector } from './GoobSelector';
 import { TraitsPanel } from './TraitsPanel';
-import { ItemSelector, ItemSelectorRef } from './ItemSelector';
+import { ItemSelector, type ItemSelectorRef } from './ItemSelector';
 import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
 import styles from './StabilizationDashboard.module.css';
 

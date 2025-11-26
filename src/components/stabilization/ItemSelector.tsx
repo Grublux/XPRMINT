@@ -237,34 +237,8 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                   itemId={item.id} 
                   balance={balance}
                   onModalOpen={() => {
-                    if (creatureId) {
-                      // In Lab view: clicking item adds it to selected items (same as + button)
-                      // Check if we've already reached the 3-item limit
-                      const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
-                      if (currentTotal >= 3) {
-                        return; // Don't add if already at limit
-                      }
-                      
-                      setSelectedItemsForGoob(prev => {
-                        const next = new Map(prev);
-                        const currentCount = next.get(item.id) || 0;
-                        next.set(item.id, currentCount + 1);
-                        return next;
-                      });
-                      
-                      // Decrement balance
-                      setItemBalances(prev => {
-                        const next = new Map(prev);
-                        const currentBalance = next.get(item.id) ?? item.balance;
-                        if (currentBalance > 0n) {
-                          next.set(item.id, currentBalance - 1n);
-                        }
-                        return next;
-                      });
-                    } else {
-                      // Not in Lab view: just expand
-                      setExpandedItemId(item.id);
-                    }
+                    // Always expand the item when card is clicked (both Lab and non-Lab views)
+                    setExpandedItemId(item.id);
                   }}
                   filterCategory={selectedFilter}
                   creatureId={creatureId}
@@ -301,7 +275,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       )}
     </div>
   );
-};
+});
 
 // Separate component for item card with metadata
 const ItemCard: React.FC<{
@@ -412,13 +386,7 @@ const ItemCard: React.FC<{
       }}
       onClick={(e) => {
         e.stopPropagation();
-        // In Lab view, check if we're at the limit before allowing click
-        if (creatureId) {
-          const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
-          if (currentTotal >= 3) {
-            return; // Don't add if already at limit
-          }
-        }
+        // Always expand when card is clicked (plus button handles adding)
         onModalOpen();
       }}
       onMouseEnter={(e) => {

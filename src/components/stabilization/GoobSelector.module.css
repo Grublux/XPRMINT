@@ -402,7 +402,18 @@
 
 @media (max-width: 480px) {
   .selectedItemsGrid {
-    /* Flexbox already handles mobile well, no changes needed */
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-items: center;
+  }
+  
+  .selectedItemsGrid > * {
+    width: 100%;
+    max-width: 100%;
   }
 }
 

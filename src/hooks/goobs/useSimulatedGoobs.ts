@@ -1,5 +1,5 @@
 // src/hooks/goobs/useSimulatedGoobs.ts
-// Hook to fetch 5 random Goobs for simulation mode
+// Hook to fetch 6 random Goobs for simulation mode
 
 import { useQuery } from '@tanstack/react-query';
 import { usePublicClient } from 'wagmi';
@@ -26,11 +26,11 @@ export function useSimulatedGoobs() {
           return [];
         }
 
-        // Pick 5 random token IDs
+        // Pick 6 random token IDs
         const randomIds: bigint[] = [];
         const used = new Set<string>();
         
-        while (randomIds.length < 5 && randomIds.length < Number(totalSupply)) {
+        while (randomIds.length < 6 && randomIds.length < Number(totalSupply)) {
           // Generate random number between 0 and totalSupply - 1
           const randomIndex = Math.floor(Math.random() * Number(totalSupply));
           const tokenId = BigInt(randomIndex);

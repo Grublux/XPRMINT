@@ -41,7 +41,7 @@ export default function MovesTicker(){
       'TuneWizard',
       'ResonancePro'
     ];
-    
+
     // Generate 6 random players
     const randomPlayers: TopPlayer[] = [];
     const usedIndices = new Set<number>();
@@ -142,17 +142,17 @@ export default function MovesTicker(){
               <div 
                 key={`${set}-${player.rank}-${player.username}`}
                 className={`${styles.tickerItem} ${player.username === 'Me' ? styles.meRow : ''}`}
-              >
+          >
                 <span 
                   className={styles.rank} 
                   style={{ color: getRankColor(player.rank) }}
                 >
                   #{player.rank}
                 </span>
-                <span className={styles.username}>{player.username}</span>
+                  <span className={styles.username}>{player.username}</span>
                 <span className={styles.frequency}>{Math.round(player.frequency)} Hz</span>
                 <span className={styles.distance}>±{Math.round(player.distance)}</span>
-              </div>
+                </div>
             ))
           ))}
         </div>

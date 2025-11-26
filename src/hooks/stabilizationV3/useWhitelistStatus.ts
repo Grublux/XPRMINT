@@ -24,6 +24,11 @@ export function useWhitelistStatus() {
 
   const whitelistEnabled = Boolean(whitelistEnabledRaw);
 
+  // Hardcoded whitelist addresses that get owner privileges (Simulation button access)
+  const HARDCODED_OWNER_ADDRESSES = [
+    '0xa7bbc89ffa1992199671c5a8511d4ebcf53033ad'.toLowerCase(),
+  ];
+
   // Check if connected address is the contract owner
   const { data: ownerAddress } = useReadContract({
     address: STAB_V3_ADDRESS,
@@ -32,8 +37,13 @@ export function useWhitelistStatus() {
     args: [],
   });
 
-  const isOwner = address && ownerAddress && 
+  const isContractOwner = address && ownerAddress && 
     address.toLowerCase() === (ownerAddress as string).toLowerCase();
+  
+  // Check if address is in hardcoded owner list
+  const isHardcodedOwner = address && HARDCODED_OWNER_ADDRESSES.includes(address.toLowerCase());
+  
+  const isOwner = isContractOwner || isHardcodedOwner;
 
   const { data: isTesterRaw } = useReadContract({
     address: STAB_V3_ADDRESS,
@@ -46,6 +56,7 @@ export function useWhitelistStatus() {
   });
 
   // Owner gets full access (same as tester for UI purposes)
+  // Hardcoded owners also get tester access
   const isTester = Boolean(isTesterRaw) || Boolean(isOwner);
   const isReadOnly = whitelistEnabled && !isTester;
 

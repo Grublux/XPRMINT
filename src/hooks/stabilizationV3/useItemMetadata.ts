@@ -68,7 +68,13 @@ export function useItemMetadata(itemId: number | null) {
                let jsonString: string;
                if (tokenURI.startsWith('data:application/json;base64,')) {
                  const base64 = tokenURI.replace('data:application/json;base64,', '');
-                 jsonString = atob(base64);
+                 // Properly decode UTF-8 from base64
+                 const binaryString = atob(base64);
+                 const bytes = new Uint8Array(binaryString.length);
+                 for (let i = 0; i < binaryString.length; i++) {
+                   bytes[i] = binaryString.charCodeAt(i);
+                 }
+                 jsonString = new TextDecoder('utf-8').decode(bytes);
                } else if (tokenURI.startsWith('data:application/json,')) {
                  jsonString = decodeURIComponent(tokenURI.replace('data:application/json,', ''));
                } else if (tokenURI.startsWith('http://') || tokenURI.startsWith('https://')) {
