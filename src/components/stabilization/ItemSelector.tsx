@@ -507,9 +507,98 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                   creatureId={creatureId}
                   selectedItemsForGoob={selectedItemsForGoob}
                   onAddItem={(itemId) => {
-                    // Check if we've already reached the 3-item limit
+                    // Check if item is Epic
+                    let isEpic = false;
+                    try {
+                      const queryKey = ['item-metadata', ITEM_V3_ADDRESS, itemId.toString()];
+                      const cachedData = queryClient.getQueryData(queryKey);
+                      if (cachedData) {
+                        const metadata = cachedData as any;
+                        if (metadata?.attributes) {
+                          for (const attr of metadata.attributes) {
+                            if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                              isEpic = true;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      // Try localStorage
+                      try {
+                        const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
+                        const cached = localStorage.getItem(key);
+                        if (cached) {
+                          const metadata = JSON.parse(cached);
+                          if (metadata?.attributes) {
+                            for (const attr of metadata.attributes) {
+                              if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                                isEpic = true;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      } catch (e2) {
+                        // Ignore
+                      }
+                    }
+                    
+                    // Check if there are already items selected
                     const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
-                    if (currentTotal >= 3) {
+                    
+                    // Epic items can only be applied alone
+                    if (isEpic && currentTotal > 0) {
+                      return; // Don't add Epic if other items exist
+                    }
+                    
+                    // Non-Epic items can't be added if Epic exists
+                    if (!isEpic && currentTotal > 0) {
+                      // Check if any existing item is Epic
+                      let hasEpic = false;
+                      for (const [existingId] of selectedItemsForGoob.entries()) {
+                        try {
+                          const queryKey = ['item-metadata', ITEM_V3_ADDRESS, existingId.toString()];
+                          const cachedData = queryClient.getQueryData(queryKey);
+                          if (cachedData) {
+                            const metadata = cachedData as any;
+                            if (metadata?.attributes) {
+                              for (const attr of metadata.attributes) {
+                                if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                                  hasEpic = true;
+                                  break;
+                                }
+                              }
+                            }
+                          }
+                        } catch (e) {
+                          try {
+                            const key = `item-metadata-${ITEM_V3_ADDRESS}-${existingId}`;
+                            const cached = localStorage.getItem(key);
+                            if (cached) {
+                              const metadata = JSON.parse(cached);
+                              if (metadata?.attributes) {
+                                for (const attr of metadata.attributes) {
+                                  if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                                    hasEpic = true;
+                                    break;
+                                  }
+                                }
+                              }
+                            }
+                          } catch (e2) {
+                            // Ignore
+                          }
+                        }
+                        if (hasEpic) break;
+                      }
+                      if (hasEpic) {
+                        return; // Don't add non-Epic if Epic exists
+                      }
+                    }
+                    
+                    // Check if we've already reached the 3-item limit (for non-Epic)
+                    if (!isEpic && currentTotal >= 3) {
                       return; // Don't add if already at limit
                     }
                     
