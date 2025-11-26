@@ -35,7 +35,7 @@ interface GoobSelectorProps {
 type LabFilter = 'Waiting Room' | 'Lab';
 
 // Helper function to generate initialization values for a Goob
-function generateInitialization(goobId: bigint): {
+function generateInitialization(_goobId: bigint): {
   targetFreq: number;
   targetTemp: number;
   targetPH: number;
@@ -45,6 +45,11 @@ function generateInitialization(goobId: bigint): {
   currPH: number;
   currSal: number;
   vibes: number;
+  lockedFreq: boolean;
+  lockedTemp: boolean;
+  lockedPH: boolean;
+  lockedSal: boolean;
+  lockedCount: number;
 } {
   const TARGET_MIN = 20;
   const TARGET_MAX = 80;
