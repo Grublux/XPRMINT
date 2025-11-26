@@ -66,17 +66,20 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }, [address, isSimulating]);
   
   // Initialize goobsInLab from localStorage for persistence
+  // Use the storageKey directly in the initializer to avoid race conditions
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
     try {
-      // Use a default key for initial load, will be updated by useEffect
-      const mode = isSimulating ? 'simulation' : 'default';
+      const mode = isSimulating ? 'simulation' : (address ? address.toLowerCase() : 'default');
       const key = `goobs-in-lab-${mode}`;
       const stored = localStorage.getItem(key);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
+        console.log('[GoobsInLab] Initialized from localStorage:', key, ids);
         return new Set(ids);
       }
-    } catch {}
+    } catch (error) {
+      console.error('[GoobsInLab] Failed to initialize from localStorage', error);
+    }
     return new Set();
   });
   
@@ -84,17 +87,18 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   useEffect(() => {
     try {
       const stored = localStorage.getItem(storageKey);
+      console.log('[GoobsInLab] Loading from storageKey:', storageKey, 'stored:', stored);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
-        // Always set the state from storage, even if empty array
+        console.log('[GoobsInLab] Setting state from storage:', ids);
         setGoobsInLab(new Set(ids));
       } else {
-        // Only clear if we're switching to a new key and there's no stored data
-        // This prevents losing data when switching between simulation and real mode
-        setGoobsInLab(new Set());
+        // Don't clear existing state - preserve it when switching keys
+        // Only clear if the current state is empty
+        console.log('[GoobsInLab] No stored data for key:', storageKey, 'preserving current state');
       }
     } catch (error) {
-      console.error('Failed to load goobsInLab from localStorage', error);
+      console.error('[GoobsInLab] Failed to load from localStorage', error);
       // Don't clear on error - preserve current state
     }
   }, [storageKey]);
@@ -103,8 +107,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   useEffect(() => {
     try {
       const ids = Array.from(goobsInLab);
+      console.log('[GoobsInLab] Saving to localStorage:', storageKey, ids);
       localStorage.setItem(storageKey, JSON.stringify(ids));
-    } catch {}
+    } catch (error) {
+      console.error('[GoobsInLab] Failed to save to localStorage', error);
+    }
   }, [goobsInLab, storageKey]);
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
