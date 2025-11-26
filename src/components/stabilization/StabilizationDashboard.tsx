@@ -99,6 +99,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
                 quantity: number;
                 category?: string;
                 magnitude?: number;
+                rarity?: string;
               }> = [];
               
               for (let i = 0; i < count * 5; i++) {
@@ -113,12 +114,17 @@ export const StabilizationDashboard: React.FC<Props> = ({
                     const metadata = JSON.parse(cached);
                     let category: string | undefined;
                     let magnitude: number | undefined;
+                    let rarity: string | undefined;
                     
-                    // Extract category and magnitude from attributes
+                    // Extract category, magnitude, and rarity from attributes
                     if (metadata?.attributes && Array.isArray(metadata.attributes)) {
                       for (const attr of metadata.attributes) {
-                        if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
-                          category = 'Epic';
+                        if (attr.trait_type === 'Rarity') {
+                          const rarityValue = String(attr.value).trim();
+                          if (rarityValue.toLowerCase() === 'epic') {
+                            category = 'Epic';
+                          }
+                          rarity = rarityValue;
                         } else if (attr.trait_type === 'Primary Trait') {
                           const value = String(attr.value).toLowerCase().trim();
                           if (value.includes('frequency')) category = 'Freq';
@@ -139,6 +145,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
                       quantity: 1,
                       category,
                       magnitude,
+                      rarity,
                     });
                   } else {
                     itemsReceived.push({

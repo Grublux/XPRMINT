@@ -25,6 +25,7 @@ interface GoobSelectorProps {
     quantity: number;
     category?: string;
     magnitude?: number;
+    rarity?: string;
   }> | void;
   isWhitelisted?: boolean;
   onEnableSimulation?: () => void;
@@ -87,7 +88,9 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     quantity: number;
     category?: string;
     magnitude?: number;
+    rarity?: string;
   }>>([]);
+  const [sentGoobIds, setSentGoobIds] = useState<bigint[]>([]);
 
   // Count Goobs in each category (calculate before early returns for useEffect)
   const labCount = goobs.filter((g: { tokenId: bigint }) => {
@@ -226,6 +229,9 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     
     // In simulation mode, track received items and show modal
     if (isSimulating && onAddSimulationItems) {
+      // Store the Goob IDs that were sent
+      setSentGoobIds(selectedGoobIds);
+      
       // Call the callback to add items to inventory and get the actual items received
       const result = onAddSimulationItems(selectedGoobIds.length);
       // Use items from callback if provided (result should be array with quantity property)
@@ -239,6 +245,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           quantity: number;
           category?: string;
           magnitude?: number;
+          rarity?: string;
         }> = result.map(item => ({
           id: item.id,
           name: item.name,
@@ -247,6 +254,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           quantity: 'quantity' in item && typeof item.quantity === 'number' ? item.quantity : 1,
           category: 'category' in item ? item.category : undefined,
           magnitude: 'magnitude' in item ? item.magnitude : undefined,
+          rarity: 'rarity' in item ? item.rarity : undefined,
         }));
         setReceivedItems(itemsWithQuantity);
         setShowReceivedItemsModal(true);
@@ -373,6 +381,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       {showReceivedItemsModal && (
         <ReceivedItemsModal
           items={receivedItems}
+          sentGoobIds={sentGoobIds}
           onClose={() => setShowReceivedItemsModal(false)}
           onGoToLab={() => {
             setLabFilter('Lab');
@@ -396,10 +405,12 @@ const ReceivedItemsModal: React.FC<{
     quantity: number;
     category?: string;
     magnitude?: number;
+    rarity?: string;
   }>;
+  sentGoobIds: bigint[];
   onClose: () => void;
   onGoToLab: () => void;
-}> = ({ items, onClose, onGoToLab }) => {
+}> = ({ items, sentGoobIds, onClose, onGoToLab }) => {
   // Group items by ID to show quantities
   const groupedItems = React.useMemo(() => {
     const grouped = new Map<number, typeof items[0] & { quantity: number }>();
@@ -430,6 +441,11 @@ const ReceivedItemsModal: React.FC<{
         >
           ×
         </button>
+        {sentGoobIds.length > 0 && (
+          <div className={styles.modalGoobIds}>
+            Goob{sentGoobIds.length === 1 ? '' : 's'} {sentGoobIds.map(id => `#${id.toString()}`).join(', ')} sent to the lab
+          </div>
+        )}
         <h2 className={styles.modalTitle}>You received:</h2>
         <div className={styles.modalItemsList}>
           {groupedItems.map((item) => (
@@ -446,6 +462,9 @@ const ReceivedItemsModal: React.FC<{
               <div className={styles.modalItemInfo}>
                 <div className={styles.modalItemName}>{item.name}</div>
                 <div className={styles.modalItemDetails}>
+                  {item.rarity && (
+                    <span className={styles.modalItemRarity}>Rarity: {item.rarity}</span>
+                  )}
                   {item.category && (
                     <span className={styles.modalItemCategory}>
                       {item.category}

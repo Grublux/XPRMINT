@@ -498,6 +498,14 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.modalGoobIds {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
 .modalTitle {
   font-size: 20px;
   font-weight: 600;
@@ -561,10 +569,15 @@
 
 .modalItemDetails {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 4px;
   font-size: 12px;
   color: var(--muted);
+}
+
+.modalItemRarity {
+  font-weight: 500;
+  color: var(--text);
 }
 
 .modalItemCategory {
@@ -574,7 +587,8 @@
 .modalItemQuantity {
   color: rgb(16, 185, 129);
   font-weight: 600;
-  margin-left: auto;
+  margin-top: 4px;
+  align-self: flex-end;
 }
 
 .modalGoToLabButton {
