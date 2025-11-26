@@ -48,12 +48,39 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const isLoading = isSimulating ? simulatedIsLoading : (shouldUseSimulation ? false : walletIsLoading);
   const [expandedGoobId, setExpandedGoobId] = useState<bigint | null>(null);
   const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
-  const [goobsInLab, setGoobsInLab] = useState<Set<string>>(new Set());
+  
+  // Initialize goobsInLab from localStorage for persistence
+  const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('goobs-in-lab');
+      if (stored) {
+        const ids = JSON.parse(stored) as string[];
+        return new Set(ids);
+      }
+    } catch {}
+    return new Set();
+  });
+  
+  // Persist goobsInLab to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const ids = Array.from(goobsInLab);
+      localStorage.setItem('goobs-in-lab', JSON.stringify(ids));
+    } catch {}
+  }, [goobsInLab]);
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
   const [showReceivedItemsModal, setShowReceivedItemsModal] = useState(false);
-  const [receivedItems, setReceivedItems] = useState<Array<{ id: number; name: string }>>([]);
+  const [receivedItems, setReceivedItems] = useState<Array<{ 
+    id: number; 
+    name: string; 
+    image?: string; 
+    image_data?: string;
+    quantity: number;
+    category?: string;
+    magnitude?: number;
+  }>>([]);
 
   // Count Goobs in each category (calculate before early returns for useEffect)
   const labCount = goobs.filter((g: { tokenId: bigint }) => {
@@ -192,41 +219,13 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     
     // In simulation mode, track received items and show modal
     if (isSimulating && onAddSimulationItems) {
-      // Generate 5 random items per Goob and get their names
-      const itemsReceived: Array<{ id: number; name: string }> = [];
-      for (let i = 0; i < selectedGoobIds.length * 5; i++) {
-        const randomItemId = Math.floor(Math.random() * 64); // Items 0-63
-        // Get item name from localStorage cache
-        try {
-          const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${randomItemId}`);
-          if (cached) {
-            const metadata = JSON.parse(cached);
-            itemsReceived.push({
-              id: randomItemId,
-              name: metadata?.name || `Item #${randomItemId}`
-            });
-          } else {
-            itemsReceived.push({
-              id: randomItemId,
-              name: `Item #${randomItemId}`
-            });
-          }
-        } catch {
-          itemsReceived.push({
-            id: randomItemId,
-            name: `Item #${randomItemId}`
-          });
-        }
-      }
       // Call the callback to add items to inventory and get the actual items received
       const result = onAddSimulationItems(selectedGoobIds.length);
-      // Use items from callback if provided, otherwise use locally generated ones
+      // Use items from callback if provided
       if (Array.isArray(result) && result.length > 0) {
         setReceivedItems(result);
-      } else {
-        setReceivedItems(itemsReceived);
+        setShowReceivedItemsModal(true);
       }
-      setShowReceivedItemsModal(true);
     } else {
       // For real mode, we'd need to track items from the actual claim transaction
       // For now, show empty modal or skip
@@ -364,10 +363,32 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
 
 // Received Items Modal Component
 const ReceivedItemsModal: React.FC<{
-  items: Array<{ id: number; name: string }>;
+  items: Array<{ 
+    id: number; 
+    name: string; 
+    image?: string; 
+    image_data?: string;
+    quantity: number;
+    category?: string;
+    magnitude?: number;
+  }>;
   onClose: () => void;
   onGoToLab: () => void;
 }> = ({ items, onClose, onGoToLab }) => {
+  // Group items by ID to show quantities
+  const groupedItems = React.useMemo(() => {
+    const grouped = new Map<number, typeof items[0] & { quantity: number }>();
+    items.forEach(item => {
+      const existing = grouped.get(item.id);
+      if (existing) {
+        existing.quantity += item.quantity;
+      } else {
+        grouped.set(item.id, { ...item, quantity: item.quantity });
+      }
+    });
+    return Array.from(grouped.values());
+  }, [items]);
+
   return (
     <div 
       className={styles.modalOverlay}
@@ -386,9 +407,29 @@ const ReceivedItemsModal: React.FC<{
         </button>
         <h2 className={styles.modalTitle}>You received:</h2>
         <div className={styles.modalItemsList}>
-          {items.map((item, index) => (
-            <div key={`${item.id}-${index}`} className={styles.modalItem}>
-              {item.name}
+          {groupedItems.map((item) => (
+            <div key={item.id} className={styles.modalItem}>
+              <div className={styles.modalItemImage}>
+                <img 
+                  src={item.image || item.image_data || ''} 
+                  alt={item.name}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+              <div className={styles.modalItemInfo}>
+                <div className={styles.modalItemName}>{item.name}</div>
+                <div className={styles.modalItemDetails}>
+                  {item.category && (
+                    <span className={styles.modalItemCategory}>
+                      {item.category}
+                      {item.magnitude !== undefined && ` ${item.magnitude}`}
+                    </span>
+                  )}
+                  <span className={styles.modalItemQuantity}>+{item.quantity}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>

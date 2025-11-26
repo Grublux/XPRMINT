@@ -91,32 +91,67 @@ export const StabilizationDashboard: React.FC<Props> = ({
             onAddSimulationItems={(count) => {
               // Add 5 random items per Goob sent to lab in simulation mode
               const newItems = new Map(simulationItems);
-              const itemsReceived: Array<{ id: number; name: string }> = [];
+              const itemsReceived: Array<{ 
+                id: number; 
+                name: string; 
+                image?: string; 
+                image_data?: string;
+                quantity: number;
+                category?: string;
+                magnitude?: number;
+              }> = [];
               
               for (let i = 0; i < count * 5; i++) {
                 const randomItemId = Math.floor(Math.random() * 64); // Items 0-63
                 const currentBalance = newItems.get(randomItemId) || 0n;
                 newItems.set(randomItemId, currentBalance + 1n);
                 
-                // Get item name from localStorage cache
+                // Get item metadata from localStorage cache
                 try {
                   const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${randomItemId}`);
                   if (cached) {
                     const metadata = JSON.parse(cached);
+                    let category: string | undefined;
+                    let magnitude: number | undefined;
+                    
+                    // Extract category and magnitude from attributes
+                    if (metadata?.attributes && Array.isArray(metadata.attributes)) {
+                      for (const attr of metadata.attributes) {
+                        if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                          category = 'Epic';
+                        } else if (attr.trait_type === 'Primary Trait') {
+                          const value = String(attr.value).toLowerCase().trim();
+                          if (value.includes('frequency')) category = 'Freq';
+                          else if (value.includes('temperature')) category = 'Temp';
+                          else if (value.includes('ph') || value === 'ph') category = 'pH';
+                          else if (value.includes('salinity')) category = 'Salinity';
+                        } else if (attr.trait_type === 'Primary Delta Magnitude') {
+                          magnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+                        }
+                      }
+                    }
+                    
                     itemsReceived.push({
                       id: randomItemId,
-                      name: metadata?.name || `Item #${randomItemId}`
+                      name: metadata?.name || `Item #${randomItemId}`,
+                      image: metadata?.image,
+                      image_data: metadata?.image_data,
+                      quantity: 1,
+                      category,
+                      magnitude,
                     });
                   } else {
                     itemsReceived.push({
                       id: randomItemId,
-                      name: `Item #${randomItemId}`
+                      name: `Item #${randomItemId}`,
+                      quantity: 1,
                     });
                   }
                 } catch {
                   itemsReceived.push({
                     id: randomItemId,
-                    name: `Item #${randomItemId}`
+                    name: `Item #${randomItemId}`,
+                    quantity: 1,
                   });
                 }
               }
