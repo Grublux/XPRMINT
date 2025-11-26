@@ -1354,6 +1354,52 @@ const ExpandedGoobView: React.FC<{
                 </div>
               </div>
               <div className={styles.expandedTraitsRow}>
+                <span className={styles.expandedTraitRowLabel}>Change</span>
+                {(() => {
+                  if (!displayState) return null;
+                  const changeFreq = previewState.currFreq - displayState.currFreq;
+                  const changeTemp = previewState.currTemp - displayState.currTemp;
+                  const changePH = previewState.currPH - displayState.currPH;
+                  const changeSal = previewState.currSal - displayState.currSal;
+                  
+                  // Helper to determine if change moves towards target
+                  const isTowardsTarget = (change: number, current: number, target: number): boolean => {
+                    if (change === 0) return true;
+                    if (current > target) {
+                      return change < 0; // Negative change moves towards target
+                    } else if (current < target) {
+                      return change > 0; // Positive change moves towards target
+                    }
+                    return true; // Already at target
+                  };
+                  
+                  return (
+                    <>
+                      <div className={styles.expandedTraitCell}>
+                        <span style={{ color: isTowardsTarget(changeFreq, displayState.currFreq, displayState.targetFreq) ? '#10b981' : '#ef4444' }}>
+                          {changeFreq > 0 ? '+' : ''}{changeFreq}
+                        </span>
+                      </div>
+                      <div className={styles.expandedTraitCell}>
+                        <span style={{ color: isTowardsTarget(changeTemp, displayState.currTemp, displayState.targetTemp) ? '#10b981' : '#ef4444' }}>
+                          {changeTemp > 0 ? '+' : ''}{changeTemp}
+                        </span>
+                      </div>
+                      <div className={styles.expandedTraitCell}>
+                        <span style={{ color: isTowardsTarget(changePH, displayState.currPH, displayState.targetPH) ? '#10b981' : '#ef4444' }}>
+                          {changePH > 0 ? '+' : ''}{changePH}
+                        </span>
+                      </div>
+                      <div className={styles.expandedTraitCell}>
+                        <span style={{ color: isTowardsTarget(changeSal, displayState.currSal, displayState.targetSal) ? '#10b981' : '#ef4444' }}>
+                          {changeSal > 0 ? '+' : ''}{changeSal}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+              <div className={styles.expandedTraitsRow}>
                 <span className={styles.expandedTraitRowLabel}>Difference</span>
                 <div className={styles.expandedTraitCell}>
                   <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currFreq, previewState.targetFreq))}>
@@ -1417,6 +1463,7 @@ const ExpandedGoobView: React.FC<{
                         lastDesktopTargetIndexRef.current = null;
                       }}
                       onDragOver={handleDragOver}
+                      goobState={displayState}
                     />
                   ))}
                 </div>
@@ -1622,7 +1669,8 @@ const SelectedItemDisplay: React.FC<{
   onDragStart?: (itemId: number) => void;
   onDragEnd?: () => void;
   onDragOver?: (e: React.DragEvent, targetIndex: number) => void;
-}> = ({ itemId, count, index, selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, draggedItemId, highlightedIndex, desktopTargetIndex, setDesktopTargetIndex, lastDesktopTargetIndexRef, onDragStart, onDragEnd, onDragOver }) => {
+  goobState?: any; // Current Goob state to determine secondary effect direction
+}> = ({ itemId, count, index, selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, draggedItemId, highlightedIndex, desktopTargetIndex, setDesktopTargetIndex, lastDesktopTargetIndexRef, onDragStart, onDragEnd, onDragOver, goobState }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
   const [isDragging, setIsDragging] = useState(false);
@@ -2035,6 +2083,8 @@ const SelectedItemDisplay: React.FC<{
         {metadata?.attributes && (() => {
           let primaryTrait: string | null = null;
           let primaryDelta: number | null = null;
+          let secondaryTrait: string | null = null;
+          let secondaryDelta: number | null = null;
           
           for (const attr of metadata.attributes) {
             if (attr.trait_type === 'Primary Trait') {
@@ -2050,27 +2100,85 @@ const SelectedItemDisplay: React.FC<{
               }
             } else if (attr.trait_type === 'Primary Delta Magnitude') {
               primaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+            } else if (attr.trait_type === 'Secondary Trait') {
+              const value = String(attr.value).toLowerCase();
+              if (value.includes('frequency')) {
+                secondaryTrait = 'Freq';
+              } else if (value.includes('temperature')) {
+                secondaryTrait = 'Temp';
+              } else if (value.includes('ph') || value === 'ph') {
+                secondaryTrait = 'pH';
+              } else if (value.includes('salinity')) {
+                secondaryTrait = 'Salinity';
+              }
+            } else if (attr.trait_type === 'Secondary Delta Magnitude') {
+              secondaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
             }
           }
           
-          if (primaryTrait && primaryDelta !== null) {
-            return (
-              <div 
-                style={{ 
-                  fontSize: '15px',
-                  fontWeight: 300,
-                  lineHeight: '1.2',
-                  textAlign: 'center',
-                  color: 'var(--muted)',
-                  marginTop: '2px',
-                  width: '100%',
-                }}
-              >
-                {primaryTrait} {primaryDelta}
-              </div>
-            );
-          }
-          return null;
+          // Helper to determine if secondary effect moves towards target
+          const isSecondaryTowardsTarget = (trait: string, delta: number): boolean => {
+            if (!goobState) return true; // Default to green if no state
+            const getCurrent = (t: string) => {
+              if (t === 'Freq') return goobState.currFreq;
+              if (t === 'Temp') return goobState.currTemp;
+              if (t === 'pH') return goobState.currPH;
+              if (t === 'Salinity') return goobState.currSal;
+              return 0;
+            };
+            const getTarget = (t: string) => {
+              if (t === 'Freq') return goobState.targetFreq;
+              if (t === 'Temp') return goobState.targetTemp;
+              if (t === 'pH') return goobState.targetPH;
+              if (t === 'Salinity') return goobState.targetSal;
+              return 0;
+            };
+            const current = getCurrent(trait);
+            const target = getTarget(trait);
+            // If current > target, negative delta moves towards target
+            // If current < target, positive delta moves towards target
+            if (current > target) {
+              return delta < 0; // Negative delta moves towards target
+            } else if (current < target) {
+              return delta > 0; // Positive delta moves towards target
+            }
+            return true; // Already at target
+          };
+          
+          return (
+            <>
+              {primaryTrait && primaryDelta !== null && (
+                <div 
+                  style={{ 
+                    fontSize: '15px',
+                    fontWeight: 300,
+                    lineHeight: '1.2',
+                    textAlign: 'center',
+                    color: 'var(--muted)',
+                    marginTop: '2px',
+                    width: '100%',
+                  }}
+                >
+                  {primaryTrait} {primaryDelta}
+                </div>
+              )}
+              {secondaryTrait && secondaryDelta !== null && (
+                <div 
+                  style={{ 
+                    fontSize: '15px',
+                    fontWeight: 300,
+                    lineHeight: '1.2',
+                    textAlign: 'center',
+                    marginTop: '2px',
+                    width: '100%',
+                    color: isSecondaryTowardsTarget(secondaryTrait, secondaryDelta) ? '#10b981' : '#ef4444',
+                  }}
+                >
+                  {secondaryTrait} {secondaryDelta > 0 ? '+' : ''}{secondaryDelta}
+                </div>
+              )}
+            </>
+          );
         })()}
       </div>
     </div>
