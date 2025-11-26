@@ -34,6 +34,80 @@ interface GoobSelectorProps {
 
 type LabFilter = 'Waiting Room' | 'Lab';
 
+// Helper function to generate initialization values for a Goob
+function generateInitialization(goobId: bigint): {
+  targetFreq: number;
+  targetTemp: number;
+  targetPH: number;
+  targetSal: number;
+  currFreq: number;
+  currTemp: number;
+  currPH: number;
+  currSal: number;
+  vibes: number;
+} {
+  const TARGET_MIN = 20;
+  const TARGET_MAX = 80;
+  const LOCK_PCT = 0.05; // 5%
+  const OFFSET_MAX_PCT = 0.30; // 30%
+  
+  // Generate random targets
+  const targetFreq = Math.floor(Math.random() * (TARGET_MAX - TARGET_MIN + 1)) + TARGET_MIN;
+  const targetTemp = Math.floor(Math.random() * (TARGET_MAX - TARGET_MIN + 1)) + TARGET_MIN;
+  const targetPH = Math.floor(Math.random() * (TARGET_MAX - TARGET_MIN + 1)) + TARGET_MIN;
+  const targetSal = Math.floor(Math.random() * (TARGET_MAX - TARGET_MIN + 1)) + TARGET_MIN;
+  
+  // Generate initial current values with 5-30% offset from target
+  const generateCurrent = (target: number): number => {
+    // Random offset between -30% and +30%
+    let offsetFactor = (Math.random() * 2 - 1) * OFFSET_MAX_PCT;
+    
+    // Clamp to at least 5% away (never start in lock band)
+    if (Math.abs(offsetFactor) < LOCK_PCT) {
+      offsetFactor = offsetFactor >= 0 ? LOCK_PCT : -LOCK_PCT;
+    }
+    
+    const raw = target * (1 + offsetFactor);
+    // Clamp to reasonable range (0-100)
+    return Math.max(0, Math.min(100, Math.round(raw)));
+  };
+  
+  return {
+    targetFreq,
+    targetTemp,
+    targetPH,
+    targetSal,
+    currFreq: generateCurrent(targetFreq),
+    currTemp: generateCurrent(targetTemp),
+    currPH: generateCurrent(targetPH),
+    currSal: generateCurrent(targetSal),
+    vibes: 9, // Always start at 9
+  };
+}
+
+// Helper to get/set simulated creature state from localStorage
+function getSimulatedCreatureState(goobId: bigint): any | null {
+  try {
+    const key = `simulated-creature-state-${goobId.toString()}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (err) {
+    console.error('[SimulatedCreatureState] Failed to load:', err);
+  }
+  return null;
+}
+
+function setSimulatedCreatureState(goobId: bigint, state: any): void {
+  try {
+    const key = `simulated-creature-state-${goobId.toString()}`;
+    localStorage.setItem(key, JSON.stringify(state));
+  } catch (err) {
+    console.error('[SimulatedCreatureState] Failed to save:', err);
+  }
+}
+
 export const GoobSelector: React.FC<GoobSelectorProps> = ({ 
   selectedId, 
   onChange,
@@ -407,6 +481,19 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     
     // After 1 second delay, process transaction and show confetti
     setTimeout(() => {
+      // Initialize simulated creature state for each Goob sent to lab
+      if (isSimulating) {
+        selectedGoobIds.forEach(goobId => {
+          const existing = getSimulatedCreatureState(goobId);
+          if (!existing) {
+            // Only initialize if not already initialized
+            const initState = generateInitialization(goobId);
+            setSimulatedCreatureState(goobId, initState);
+            console.log('[SimulatedCreatureState] Initialized Goob:', goobId.toString(), initState);
+          }
+        });
+      }
+      
       // Move selected Goobs to "In Lab" and clear selection
       setGoobsInLab(prev => {
         const next = new Set(prev);
@@ -553,6 +640,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           selectedItemsForGoob={selectedItemsForGoob}
           setSelectedItemsForGoob={setSelectedItemsForGoob}
           onRestoreItem={onRestoreItem}
+          isSimulating={isSimulating}
         />
       ) : (
         <div className={styles.goobGrid}>
@@ -794,7 +882,8 @@ const ExpandedGoobView: React.FC<{
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
-}> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem }) => {
+  isSimulating?: boolean;
+}> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem, isSimulating = false }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   const imageUrl = metadata?.image_data || metadata?.image || null;
@@ -802,10 +891,21 @@ const ExpandedGoobView: React.FC<{
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [desktopTargetIndex, setDesktopTargetIndex] = useState<number | null>(null);
   const lastDesktopTargetIndexRef = useRef<number | null>(null);
-
-  const isInitialized = creatureState !== null && 
-    !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
-      creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
+  
+  // Get simulated state if in simulation mode
+  const simulatedState = React.useMemo(() => {
+    if (isSimulating) {
+      return getSimulatedCreatureState(tokenId);
+    }
+    return null;
+  }, [isSimulating, tokenId]);
+  
+  // Use simulated state if available, otherwise use on-chain state
+  const displayState = simulatedState || creatureState;
+  
+  const isInitialized = displayState !== null && 
+    !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
+      displayState.targetTemp === 0 && displayState.targetFreq === 0);
   
   // Update highlight to show where dragged item currently is (after reordering)
   useEffect(() => {
@@ -847,7 +947,7 @@ const ExpandedGoobView: React.FC<{
         ) : imageUrl ? (
           <div className={styles.expandedImageWrapper}>
             <div className={styles.expandedVibesReadout}>
-              Vibes: {isInitialized && creatureState ? creatureState.vibes : '—'}
+              Vibes: {isInitialized && displayState ? displayState.vibes : '—'}
             </div>
             <img
               src={imageUrl}
@@ -865,40 +965,40 @@ const ExpandedGoobView: React.FC<{
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>Current</span>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
+              {isInitialized && displayState ? (
                 <>
-                  {creatureState.currFreq}
-                  {creatureState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
+                  {displayState.currFreq}
+                  {displayState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
                 </>
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
+              {isInitialized && displayState ? (
                 <>
-                  {creatureState.currTemp}
-                  {creatureState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
+                  {displayState.currTemp}
+                  {displayState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
                 </>
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
+              {isInitialized && displayState ? (
                 <>
-                  {creatureState.currPH}
-                  {creatureState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
+                  {displayState.currPH}
+                  {displayState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
                 </>
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
+              {isInitialized && displayState ? (
                 <>
-                  {creatureState.currSal}
-                  {creatureState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
+                  {displayState.currSal}
+                  {displayState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
                 </>
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
@@ -908,29 +1008,29 @@ const ExpandedGoobView: React.FC<{
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>Target</span>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
-                creatureState.targetFreq
+              {isInitialized && displayState ? (
+                displayState.targetFreq
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
-                creatureState.targetTemp
+              {isInitialized && displayState ? (
+                displayState.targetTemp
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
-                creatureState.targetPH
+              {isInitialized && displayState ? (
+                displayState.targetPH
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
             <div className={styles.expandedTraitCell}>
-              {isInitialized && creatureState ? (
-                creatureState.targetSal
+              {isInitialized && displayState ? (
+                displayState.targetSal
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
