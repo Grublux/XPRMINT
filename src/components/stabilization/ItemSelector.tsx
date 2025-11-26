@@ -391,13 +391,18 @@ const ItemCard: React.FC<{
   // For thumbnails, prefer HTTP image URLs (faster, more reliable), fallback to image_data
   const thumbnailUrl = metadata?.image || metadata?.image_data || null;
 
-  // Check if item matches the selected filter (only checks Primary Trait)
+  // Check if item matches the selected filter (checks Primary Trait or Rarity for Epic)
   const matchesFilter = React.useMemo(() => {
     if (filterCategory === 'All') return true;
     if (!metadata?.attributes) return true; // Show while loading
     
     for (const attr of metadata.attributes) {
-      if (attr.trait_type === 'Primary Trait') {
+      if (filterCategory === 'Epic') {
+        if (attr.trait_type === 'Rarity') {
+          const value = String(attr.value).toLowerCase();
+          if (value === 'epic') return true;
+        }
+      } else if (attr.trait_type === 'Primary Trait') {
         const value = String(attr.value).toLowerCase();
         if (filterCategory === 'Freq' && value.includes('frequency')) return true;
         if (filterCategory === 'Temp' && value.includes('temperature')) return true;
