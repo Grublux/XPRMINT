@@ -707,26 +707,6 @@
   width: 10px;
   height: 10px;
   bottom: 0;
-  --initial-rotation: 0deg;
-  --upward-velocity: 50%;
-  --horizontal-drift: 0%;
-  animation: confettiExplode 2.5s ease-out forwards;
-}
-
-@keyframes confettiExplode {
-  0% {
-    transform: translateY(0) translateX(0) rotate(var(--initial-rotation));
-    opacity: 1;
-  }
-  40% {
-    /* Peak of upward explosion */
-    transform: translateY(calc(-1 * var(--upward-velocity))) translateX(var(--horizontal-drift)) rotate(calc(var(--initial-rotation) + 360deg));
-    opacity: 1;
-  }
-  100% {
-    /* Fall back down and drift */
-    transform: translateY(100vh) translateX(calc(var(--horizontal-drift) * 1.5)) rotate(calc(var(--initial-rotation) + 1080deg));
-    opacity: 0;
-  }
+  border-radius: 2px;
 }
 
