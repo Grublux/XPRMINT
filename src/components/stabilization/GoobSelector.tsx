@@ -1,6 +1,7 @@
 // src/components/stabilization/GoobSelector.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useAccount } from 'wagmi';
 import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
 import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
@@ -44,6 +45,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   isWhitelisted = false,
   onEnableSimulation,
 }) => {
+  const { address } = useAccount();
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
   
@@ -57,10 +59,19 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [expandedGoobId, setExpandedGoobId] = useState<bigint | null>(null);
   const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
   
+  // Get localStorage key scoped to address and simulation mode
+  const storageKey = React.useMemo(() => {
+    const mode = isSimulating ? 'simulation' : (address ? address.toLowerCase() : 'default');
+    return `goobs-in-lab-${mode}`;
+  }, [address, isSimulating]);
+  
   // Initialize goobsInLab from localStorage for persistence
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
     try {
-      const stored = localStorage.getItem('goobs-in-lab');
+      // Use a default key for initial load, will be updated by useEffect
+      const mode = isSimulating ? 'simulation' : 'default';
+      const key = `goobs-in-lab-${mode}`;
+      const stored = localStorage.getItem(key);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
         return new Set(ids);
@@ -69,13 +80,31 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     return new Set();
   });
   
+  // Re-initialize from localStorage when address or simulation mode changes
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const ids = JSON.parse(stored) as string[];
+        if (ids.length > 0) {
+          setGoobsInLab(new Set(ids));
+        }
+        // Don't clear if stored is empty - might be initializing
+      }
+      // Don't clear existing state if no stored value - preserve current state
+    } catch (error) {
+      console.error('Failed to load goobsInLab from localStorage', error);
+      // Don't clear on error - preserve current state
+    }
+  }, [storageKey]);
+  
   // Persist goobsInLab to localStorage whenever it changes
   useEffect(() => {
     try {
       const ids = Array.from(goobsInLab);
-      localStorage.setItem('goobs-in-lab', JSON.stringify(ids));
+      localStorage.setItem(storageKey, JSON.stringify(ids));
     } catch {}
-  }, [goobsInLab]);
+  }, [goobsInLab, storageKey]);
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
