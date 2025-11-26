@@ -106,10 +106,6 @@
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
-.filterButtonPulse:hover {
-  animation: pulseGlowGreen 2s ease-in-out infinite;
-}
-
 @keyframes pulseGlow {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
@@ -118,17 +114,6 @@
   50% {
     box-shadow: 0 0 8px 4px rgba(255, 255, 255, 0.6);
     border-color: rgba(255, 255, 255, 0.8);
-  }
-}
-
-@keyframes pulseGlowGreen {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-    border-color: rgba(16, 185, 129, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 8px 4px rgba(16, 185, 129, 0.6);
-    border-color: rgba(16, 185, 129, 0.8);
   }
 }
 
