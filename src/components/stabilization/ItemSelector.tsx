@@ -573,7 +573,7 @@ const ItemCard: React.FC<{
             return (
               <div 
                 style={{ 
-                  fontSize: '10px',
+                  fontSize: '15px',
                   fontWeight: 300,
                   lineHeight: '1.2',
                   textAlign: 'center',
@@ -582,7 +582,7 @@ const ItemCard: React.FC<{
                   width: '100%',
                 }}
               >
-                {primaryTrait} {primaryDelta > 0 ? '+' : ''}{primaryDelta}
+                {primaryTrait} {primaryDelta}
               </div>
             );
           }
