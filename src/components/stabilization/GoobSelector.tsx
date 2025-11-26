@@ -983,6 +983,23 @@ const ExpandedGoobView: React.FC<{
       lockedSal: displayState.lockedSal || false,
     };
     
+    // Helper functions to get original state (before any items applied)
+    const getOriginalCurrent = (trait: string) => {
+      if (trait === 'Freq') return displayState.currFreq;
+      if (trait === 'Temp') return displayState.currTemp;
+      if (trait === 'pH') return displayState.currPH;
+      if (trait === 'Salinity') return displayState.currSal;
+      return 0;
+    };
+    
+    const getOriginalTarget = (trait: string) => {
+      if (trait === 'Freq') return displayState.targetFreq;
+      if (trait === 'Temp') return displayState.targetTemp;
+      if (trait === 'pH') return displayState.targetPH;
+      if (trait === 'Salinity') return displayState.targetSal;
+      return 0;
+    };
+    
     // Apply each item in order
     const itemEntries = Array.from(selectedItemsForGoob.entries());
     for (const [itemId, count] of itemEntries) {
@@ -1019,6 +1036,14 @@ const ExpandedGoobView: React.FC<{
             // Store as absolute value - sign will be determined by primary delta direction
             secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
           }
+        }
+        
+        // Calculate primary direction based on ORIGINAL state (before any items applied)
+        let primaryDirection = 1;
+        if (primaryTrait) {
+          const originalCurrent = getOriginalCurrent(primaryTrait);
+          const originalTarget = getOriginalTarget(primaryTrait);
+          primaryDirection = originalCurrent > originalTarget ? -1 : 1;
         }
         
         // Apply item effects
@@ -1112,12 +1137,9 @@ const ExpandedGoobView: React.FC<{
             else if (trait === 'Salinity') preview.currSal = clamped;
           };
           
-          // Apply primary delta (toward target)
-          let primaryDirection = 1;
+          // Apply primary delta (toward target) - direction based on original state
           if (!getLocked(primaryTrait)) {
             const current = getCurrent(primaryTrait);
-            const target = getTarget(primaryTrait);
-            primaryDirection = current > target ? -1 : 1;
             const delta = primaryDirection * primaryDeltaMagnitude;
             setCurrent(primaryTrait, current + delta);
           }
