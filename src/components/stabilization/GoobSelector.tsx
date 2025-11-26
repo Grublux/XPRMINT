@@ -1194,14 +1194,6 @@ const ExpandedGoobView: React.FC<{
             return 0;
           };
           
-          const getTarget = (trait: string) => {
-            if (trait === 'Freq') return preview.targetFreq;
-            if (trait === 'Temp') return preview.targetTemp;
-            if (trait === 'pH') return preview.targetPH;
-            if (trait === 'Salinity') return preview.targetSal;
-            return 0;
-          };
-          
           const getLocked = (trait: string) => {
             if (trait === 'Freq') return preview.lockedFreq;
             if (trait === 'Temp') return preview.lockedTemp;
@@ -1770,7 +1762,7 @@ const SelectedItemDisplay: React.FC<{
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
   goobState?: any; // Current Goob state to determine secondary effect direction
-}> = ({ itemId, count, selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, goobState }) => {
+}> = ({ itemId, count, selectedItemsForGoob: _selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, goobState }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
   
