@@ -15,6 +15,8 @@ interface GoobSelectorProps {
   isReadOnly?: boolean;
   isSimulating?: boolean;
   selectedItemsForGoob?: Map<number, number>;
+  setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+  onRestoreItem?: (itemId: number) => void;
 }
 
 type LabFilter = 'Waiting Room' | 'Lab';
@@ -24,6 +26,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   onChange,
   isSimulating = false,
   selectedItemsForGoob = new Map(),
+  setSelectedItemsForGoob,
+  onRestoreItem,
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
@@ -236,6 +240,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           tokenId={expandedGoobId}
           onClose={() => setExpandedGoobId(null)}
           selectedItemsForGoob={selectedItemsForGoob}
+          setSelectedItemsForGoob={setSelectedItemsForGoob}
+          onRestoreItem={onRestoreItem}
         />
       ) : (
         <div className={styles.goobGrid}>
@@ -272,7 +278,9 @@ const ExpandedGoobView: React.FC<{
   tokenId: bigint;
   onClose: () => void;
   selectedItemsForGoob?: Map<number, number>;
-}> = ({ tokenId, onClose, selectedItemsForGoob = new Map() }) => {
+  setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+  onRestoreItem?: (itemId: number) => void;
+}> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   const imageUrl = metadata?.image_data || metadata?.image || null;
@@ -399,9 +407,50 @@ const ExpandedGoobView: React.FC<{
                 <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
                   Drag Items in order to preview effects
                 </div>
-                <div className={styles.selectedItemsGrid}>
-                  {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
-                    <SelectedItemDisplay key={itemId} itemId={itemId} count={count} />
+                <div 
+                  className={styles.selectedItemsGrid}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (!setSelectedItemsForGoob) return;
+                    
+                    const draggedItemId = e.dataTransfer.getData('text/plain');
+                    const draggedIndex = parseInt(e.dataTransfer.getData('application/index') || '-1', 10);
+                    
+                    if (!draggedItemId || draggedIndex === -1) return;
+                    
+                    const itemId = parseInt(draggedItemId, 10);
+                    const dropTarget = e.currentTarget;
+                    const children = Array.from(dropTarget.children);
+                    const dropIndex = children.findIndex(child => {
+                      const rect = child.getBoundingClientRect();
+                      return e.clientX >= rect.left && e.clientX <= rect.right &&
+                             e.clientY >= rect.top && e.clientY <= rect.bottom;
+                    });
+                    
+                    if (dropIndex !== -1 && dropIndex !== draggedIndex) {
+                      // Reorder items
+                      setSelectedItemsForGoob(prev => {
+                        const entries = Array.from(prev.entries());
+                        const [draggedEntry] = entries.splice(draggedIndex, 1);
+                        entries.splice(dropIndex, 0, draggedEntry);
+                        return new Map(entries);
+                      });
+                    }
+                  }}
+                >
+                  {Array.from(selectedItemsForGoob.entries()).map(([itemId, count], index) => (
+                    <SelectedItemDisplay 
+                      key={itemId} 
+                      itemId={itemId} 
+                      count={count}
+                      index={index}
+                      setSelectedItemsForGoob={setSelectedItemsForGoob}
+                      onRestoreItem={onRestoreItem}
+                    />
                   ))}
                 </div>
               </div>
@@ -589,14 +638,128 @@ const GoobCard: React.FC<{
 };
 
 // Component to display a selected item in the "Choose items below" area
-const SelectedItemDisplay: React.FC<{ itemId: number; count: number }> = ({ itemId, count }) => {
+const SelectedItemDisplay: React.FC<{ 
+  itemId: number; 
+  count: number;
+  index: number;
+  setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+  onRestoreItem?: (itemId: number) => void;
+}> = ({ itemId, count, index, setSelectedItemsForGoob, onRestoreItem }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const itemRef = useRef<HTMLDivElement>(null);
+  
+  // Desktop drag handlers
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', itemId.toString());
+    e.dataTransfer.setData('application/index', index.toString());
+    if (e.dataTransfer.setDragImage && itemRef.current) {
+      const dragImage = itemRef.current.cloneNode(true) as HTMLElement;
+      dragImage.style.opacity = '0.5';
+      dragImage.style.position = 'absolute';
+      dragImage.style.top = '-1000px';
+      document.body.appendChild(dragImage);
+      e.dataTransfer.setDragImage(dragImage, e.clientX - itemRef.current.getBoundingClientRect().left, e.clientY - itemRef.current.getBoundingClientRect().top);
+      setTimeout(() => document.body.removeChild(dragImage), 0);
+    }
+  };
+  
+  const handleDragEnd = (e: React.DragEvent) => {
+    setIsDragging(false);
+    const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+    
+    // Check if dropped outside the selected items grid
+    const selectedItemsGrid = document.querySelector(`.${styles.selectedItemsGrid}`);
+    if (!selectedItemsGrid || !selectedItemsGrid.contains(dropTarget)) {
+      // Remove item from selected items
+      if (setSelectedItemsForGoob && onRestoreItem) {
+        setSelectedItemsForGoob(prev => {
+          const next = new Map(prev);
+          const currentCount = next.get(itemId) || 0;
+          if (currentCount > 1) {
+            next.set(itemId, currentCount - 1);
+          } else {
+            next.delete(itemId);
+          }
+          return next;
+        });
+        onRestoreItem(itemId);
+      }
+    }
+  };
+  
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setDragPosition({ x: touch.clientX, y: touch.clientY });
+    setIsDragging(true);
+    e.preventDefault(); // Prevent scrolling while dragging
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+    const touch = e.touches[0];
+    setDragPosition({ x: touch.clientX, y: touch.clientY });
+    
+    if (itemRef.current) {
+      const rect = itemRef.current.getBoundingClientRect();
+      const offsetX = touch.clientX - dragPosition.x;
+      const offsetY = touch.clientY - dragPosition.y;
+      itemRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      itemRef.current.style.opacity = '0.5';
+      itemRef.current.style.zIndex = '1000';
+    }
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Check if dropped outside the selected items grid
+    const selectedItemsGrid = document.querySelector(`.${styles.selectedItemsGrid}`);
+    if (!selectedItemsGrid || !selectedItemsGrid.contains(dropTarget)) {
+      // Remove item from selected items
+      if (setSelectedItemsForGoob && onRestoreItem) {
+        setSelectedItemsForGoob(prev => {
+          const next = new Map(prev);
+          const currentCount = next.get(itemId) || 0;
+          if (currentCount > 1) {
+            next.set(itemId, currentCount - 1);
+          } else {
+            next.delete(itemId);
+          }
+          return next;
+        });
+        onRestoreItem(itemId);
+      }
+    }
+    
+    if (itemRef.current) {
+      itemRef.current.style.transform = '';
+      itemRef.current.style.opacity = '';
+    }
+  };
   
   return (
-    <div style={{
+    <div 
+      ref={itemRef}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
       background: 'transparent',
-      cursor: 'default',
+      cursor: isDragging ? 'grabbing' : 'grab',
       width: '132px',
       flexShrink: 0,
       minHeight: '132px',

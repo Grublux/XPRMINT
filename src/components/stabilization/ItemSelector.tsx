@@ -1,6 +1,6 @@
 // src/components/stabilization/ItemSelector.tsx
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { useAccount } from 'wagmi';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
@@ -15,14 +15,20 @@ type ItemSelectorProps = {
   isSimulating?: boolean;
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+  onRestoreItem?: (itemId: number) => void;
 };
 
-export const ItemSelector: React.FC<ItemSelectorProps> = ({ 
+export type ItemSelectorRef = {
+  restoreItem: (itemId: number) => void;
+};
+
+export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   creatureId, 
   isSimulating = false,
   selectedItemsForGoob: externalSelectedItems,
   setSelectedItemsForGoob: externalSetSelectedItems,
-}) => {
+  onRestoreItem: externalOnRestoreItem,
+}, ref) => {
   const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   
@@ -49,6 +55,27 @@ export const ItemSelector: React.FC<ItemSelectorProps> = ({
     });
     setItemBalances(balances);
   }, [items]);
+  
+  // Create restore callback
+  const handleRestoreItem = React.useCallback((itemId: number) => {
+    // Increment balance when item is restored
+    setItemBalances(prev => {
+      const next = new Map(prev);
+      const currentBalance = next.get(itemId) ?? 0n;
+      next.set(itemId, currentBalance + 1n);
+      return next;
+    });
+    
+    // Call external callback if provided
+    if (externalOnRestoreItem) {
+      externalOnRestoreItem(itemId);
+    }
+  }, [externalOnRestoreItem]);
+  
+  // Expose restore function via ref
+  useImperativeHandle(ref, () => ({
+    restoreItem: handleRestoreItem,
+  }));
   
   // Auto-select first available category if Freq has no items
   React.useEffect(() => {

@@ -1,11 +1,11 @@
 // src/components/stabilization/StabilizationDashboard.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 
 import { GoobSelector } from './GoobSelector';
 import { TraitsPanel } from './TraitsPanel';
-import { ItemSelector } from './ItemSelector';
+import { ItemSelector, ItemSelectorRef } from './ItemSelector';
 import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
 import styles from './StabilizationDashboard.module.css';
 
@@ -30,8 +30,15 @@ export const StabilizationDashboard: React.FC<Props> = ({
   const { connect, connectors } = useConnect();
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
   const [selectedItemsForGoob, setSelectedItemsForGoob] = useState<Map<number, number>>(new Map());
+  const itemSelectorRef = useRef<ItemSelectorRef>(null);
   
   const { sp, isLoading: spLoading } = useWalletSP();
+  
+  const handleRestoreItem = (itemId: number) => {
+    if (itemSelectorRef.current) {
+      itemSelectorRef.current.restoreItem(itemId);
+    }
+  };
 
   const handleConnect = () => {
     const connector = connectors[0];
@@ -73,6 +80,8 @@ export const StabilizationDashboard: React.FC<Props> = ({
             isReadOnly={isReadOnly}
             isSimulating={isSimulating}
             selectedItemsForGoob={selectedItemsForGoob}
+            setSelectedItemsForGoob={setSelectedItemsForGoob}
+            onRestoreItem={handleRestoreItem}
           />
         </div>
         <div className={styles.traitsSection}>
@@ -86,6 +95,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
         </div>
         <div className={styles.itemInventoryContainer}>
           <ItemSelector 
+            ref={itemSelectorRef}
             creatureId={selectedGoobId} 
             isSimulating={isSimulating}
             selectedItemsForGoob={selectedItemsForGoob}
