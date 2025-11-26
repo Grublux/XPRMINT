@@ -681,21 +681,24 @@ const ExpandedItemView: React.FC<{
                 />
               )}
               {/* Quantity readout in bottom right of image */}
-              <div 
-                style={{ 
-                  position: 'absolute',
-                  bottom: '4px',
-                  right: '4px',
-                  fontSize: '10px',
-                  color: 'rgb(110, 231, 183)',
-                  fontWeight: 300,
-                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                  padding: '2px 4px',
-                  borderRadius: '2px',
-                }}
-              >
-                x{balance.toString()}
-              </div>
+              {imageUrl && (
+                <div 
+                  style={{ 
+                    position: 'absolute',
+                    bottom: '4px',
+                    right: '4px',
+                    fontSize: '20px',
+                    color: 'rgb(110, 231, 183)',
+                    fontWeight: 300,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    padding: '4px 8px',
+                    borderRadius: '2px',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  x{balance.toString()}
+                </div>
+              )}
             </div>
             
             <div className={styles.expandedItemTitle}>
