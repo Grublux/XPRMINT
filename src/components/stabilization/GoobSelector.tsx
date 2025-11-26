@@ -82,6 +82,11 @@ function generateInitialization(goobId: bigint): {
     currPH: generateCurrent(targetPH),
     currSal: generateCurrent(targetSal),
     vibes: 9, // Always start at 9
+    lockedFreq: false,
+    lockedTemp: false,
+    lockedPH: false,
+    lockedSal: false,
+    lockedCount: 0,
   };
 }
 
@@ -180,6 +185,17 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         if (addressStored) {
           localStorage.removeItem(`goobs-in-lab-${addressStored.toLowerCase()}`);
         }
+        
+        // Clear all simulated creature states
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('simulated-creature-state-')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        console.log('[GoobsInLab] Cleared simulated creature states:', keysToRemove.length);
       } catch (error) {
         console.error('[GoobsInLab] Failed to clear on reload', error);
       }
@@ -490,6 +506,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
             const initState = generateInitialization(goobId);
             setSimulatedCreatureState(goobId, initState);
             console.log('[SimulatedCreatureState] Initialized Goob:', goobId.toString(), initState);
+          } else {
+            console.log('[SimulatedCreatureState] Goob already initialized:', goobId.toString());
           }
         });
       }
