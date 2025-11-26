@@ -86,12 +86,13 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
-        if (ids.length > 0) {
-          setGoobsInLab(new Set(ids));
-        }
-        // Don't clear if stored is empty - might be initializing
+        // Always set the state from storage, even if empty array
+        setGoobsInLab(new Set(ids));
+      } else {
+        // Only clear if we're switching to a new key and there's no stored data
+        // This prevents losing data when switching between simulation and real mode
+        setGoobsInLab(new Set());
       }
-      // Don't clear existing state if no stored value - preserve current state
     } catch (error) {
       console.error('Failed to load goobsInLab from localStorage', error);
       // Don't clear on error - preserve current state
