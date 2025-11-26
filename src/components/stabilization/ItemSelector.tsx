@@ -712,6 +712,18 @@ const ItemCard: React.FC<{
     return false;
   }, [metadata, filterCategory]);
 
+  // Check if item is Epic (must be before early return)
+  const isEpic = React.useMemo(() => {
+    if (!metadata?.attributes) return false;
+    for (const attr of metadata.attributes) {
+      if (attr.trait_type === 'Rarity') {
+        const value = String(attr.value).toLowerCase().trim();
+        if (value === 'epic') return true;
+      }
+    }
+    return false;
+  }, [metadata?.attributes]);
+
   // Don't render if it doesn't match the filter
   if (!matchesFilter) return null;
 
@@ -730,18 +742,6 @@ const ItemCard: React.FC<{
   const showPlusButton = Boolean(creatureId); // Only show in Lab view when Goob is selected
   const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
   const isAtLimit = currentTotal >= 3;
-  
-  // Check if item is Epic
-  const isEpic = React.useMemo(() => {
-    if (!metadata?.attributes) return false;
-    for (const attr of metadata.attributes) {
-      if (attr.trait_type === 'Rarity') {
-        const value = String(attr.value).toLowerCase().trim();
-        if (value === 'epic') return true;
-      }
-    }
-    return false;
-  }, [metadata?.attributes]);
 
   return (
     <div
