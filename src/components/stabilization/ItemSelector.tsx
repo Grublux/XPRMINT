@@ -16,6 +16,7 @@ type ItemSelectorProps = {
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
+  simulationItems?: Map<number, bigint>; // itemId -> balance for simulation mode
 };
 
 export type ItemSelectorRef = {
@@ -28,12 +29,22 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   selectedItemsForGoob: externalSelectedItems,
   setSelectedItemsForGoob: externalSetSelectedItems,
   onRestoreItem: externalOnRestoreItem,
+  simulationItems = new Map(),
 }, ref) => {
   const { address } = useAccount();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
   
-  // In simulation mode, show empty inventory
-  const items = isSimulating ? [] : walletItems;
+  // In simulation mode, convert simulationItems Map to items array format
+  const simulationItemsArray = React.useMemo(() => {
+    if (!isSimulating) return [];
+    return Array.from(simulationItems.entries()).map(([id, balance]) => ({
+      id,
+      balance,
+    }));
+  }, [isSimulating, simulationItems]);
+  
+  // In simulation mode, use simulation items, otherwise use wallet items
+  const items = isSimulating ? simulationItemsArray : walletItems;
   const isLoading = isSimulating ? false : walletIsLoading;
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('Freq');

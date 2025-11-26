@@ -17,6 +17,7 @@ interface GoobSelectorProps {
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
+  onAddSimulationItems?: (goobCount: number) => void;
 }
 
 type LabFilter = 'Waiting Room' | 'Lab';
@@ -28,6 +29,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   selectedItemsForGoob = new Map(),
   setSelectedItemsForGoob,
   onRestoreItem,
+  onAddSimulationItems,
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
@@ -157,6 +159,12 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       goobsSelectedForBatch.forEach(id => next.add(id));
       return next;
     });
+    
+    // In simulation mode, add 5 random items per Goob sent to lab
+    if (isSimulating && onAddSimulationItems) {
+      onAddSimulationItems(selectedGoobIds.length);
+    }
+    
     setGoobsSelectedForBatch(new Set());
   };
 

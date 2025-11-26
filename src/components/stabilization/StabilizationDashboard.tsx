@@ -30,6 +30,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
   const { connect, connectors } = useConnect();
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
   const [selectedItemsForGoob, setSelectedItemsForGoob] = useState<Map<number, number>>(new Map());
+  const [simulationItems, setSimulationItems] = useState<Map<number, bigint>>(new Map()); // itemId -> balance
   const itemSelectorRef = useRef<ItemSelectorRef>(null);
   
   const { sp, isLoading: spLoading } = useWalletSP();
@@ -82,6 +83,16 @@ export const StabilizationDashboard: React.FC<Props> = ({
             selectedItemsForGoob={selectedItemsForGoob}
             setSelectedItemsForGoob={setSelectedItemsForGoob}
             onRestoreItem={handleRestoreItem}
+            onAddSimulationItems={(count) => {
+              // Add 5 random items per Goob sent to lab in simulation mode
+              const newItems = new Map(simulationItems);
+              for (let i = 0; i < count * 5; i++) {
+                const randomItemId = Math.floor(Math.random() * 64); // Items 0-63
+                const currentBalance = newItems.get(randomItemId) || 0n;
+                newItems.set(randomItemId, currentBalance + 1n);
+              }
+              setSimulationItems(newItems);
+            }}
           />
         </div>
         <div className={styles.traitsSection}>
@@ -100,6 +111,7 @@ export const StabilizationDashboard: React.FC<Props> = ({
             isSimulating={isSimulating}
             selectedItemsForGoob={selectedItemsForGoob}
             setSelectedItemsForGoob={setSelectedItemsForGoob}
+            simulationItems={simulationItems}
           />
         </div>
         <div className={styles.spSection}>
