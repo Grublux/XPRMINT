@@ -65,9 +65,39 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     return `goobs-in-lab-${mode}`;
   }, [address, isSimulating]);
   
+  // Check if this is a page reload (not a tab switch)
+  // Use sessionStorage to track if we're in the same tab session
+  const isPageReload = React.useMemo(() => {
+    const sessionFlag = sessionStorage.getItem('goobs-lab-session');
+    if (!sessionFlag) {
+      // Fresh page load - clear data
+      sessionStorage.setItem('goobs-lab-session', 'active');
+      return true;
+    }
+    return false;
+  }, []);
+
   // Initialize goobsInLab from localStorage for persistence
-  // Try ALL possible storage keys to find existing data
+  // Clear on page reload, persist on tab switches
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
+    // If this is a page reload, clear everything
+    if (isPageReload) {
+      console.log('[GoobsInLab] Page reload detected - clearing lab');
+      try {
+        // Clear all possible storage keys
+        localStorage.removeItem('goobs-in-lab-simulation');
+        localStorage.removeItem('goobs-in-lab-default');
+        const addressStored = localStorage.getItem('lastConnectedAddress');
+        if (addressStored) {
+          localStorage.removeItem(`goobs-in-lab-${addressStored.toLowerCase()}`);
+        }
+      } catch (error) {
+        console.error('[GoobsInLab] Failed to clear on reload', error);
+      }
+      return new Set();
+    }
+
+    // Tab switch - try to load from localStorage
     try {
       // Get isSimulating from localStorage
       let isSim = false;

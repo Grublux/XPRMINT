@@ -35,7 +35,25 @@ export const StabilizationDashboard: React.FC<Props> = ({
   const { connect, connectors } = useConnect();
   const [selectedGoobId, setSelectedGoobId] = useState<bigint | null>(null);
   const [selectedItemsForGoob, setSelectedItemsForGoob] = useState<Map<number, number>>(new Map());
-  const [simulationItems, setSimulationItems] = useState<Map<number, bigint>>(new Map()); // itemId -> balance
+  
+  // Check if this is a page reload - clear simulation items on reload
+  const isPageReload = React.useMemo(() => {
+    const sessionFlag = sessionStorage.getItem('simulation-items-session');
+    if (!sessionFlag) {
+      sessionStorage.setItem('simulation-items-session', 'active');
+      return true;
+    }
+    return false;
+  }, []);
+  
+  const [simulationItems, setSimulationItems] = useState<Map<number, bigint>>(() => {
+    // Clear on page reload
+    if (isPageReload) {
+      console.log('[SimulationItems] Page reload detected - clearing items');
+      return new Map();
+    }
+    return new Map(); // Items don't persist across tab switches either
+  });
   const itemSelectorRef = useRef<ItemSelectorRef>(null);
   
   const { sp, isLoading: spLoading } = useWalletSP();

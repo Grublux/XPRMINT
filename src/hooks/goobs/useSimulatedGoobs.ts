@@ -1,6 +1,7 @@
 // src/hooks/goobs/useSimulatedGoobs.ts
 // Hook to fetch 6 random Goobs for simulation mode
 
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { usePublicClient } from 'wagmi';
 import { GOOBS_ADDRESS, goobsAbi } from '../../config/contracts/goobs';
@@ -10,24 +11,43 @@ const STORAGE_KEY = 'simulated-goobs';
 export function useSimulatedGoobs() {
   const publicClient = usePublicClient();
 
+  // Check if this is a page reload
+  const isPageReload = React.useMemo(() => {
+    const sessionFlag = sessionStorage.getItem('simulated-goobs-session');
+    if (!sessionFlag) {
+      sessionStorage.setItem('simulated-goobs-session', 'active');
+      // Clear localStorage on reload
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        console.log('[useSimulatedGoobs] Page reload detected - clearing simulated Goobs');
+      } catch (err) {
+        console.error('[useSimulatedGoobs] Failed to clear on reload:', err);
+      }
+      return true;
+    }
+    return false;
+  }, []);
+
   const query = useQuery({
     queryKey: ['simulated-goobs'],
     enabled: Boolean(publicClient), // Only run when publicClient is available
     queryFn: async (): Promise<Array<{ tokenId: bigint }>> => {
       if (!publicClient) return [];
 
-      // Try to load from localStorage first
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const ids = JSON.parse(stored) as string[];
-          if (ids.length > 0) {
-            console.log('[useSimulatedGoobs] Loading from localStorage:', ids);
-            return ids.map(id => ({ tokenId: BigInt(id) }));
+      // Only load from localStorage if NOT a page reload (tab switch)
+      if (!isPageReload) {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const ids = JSON.parse(stored) as string[];
+            if (ids.length > 0) {
+              console.log('[useSimulatedGoobs] Loading from localStorage:', ids);
+              return ids.map(id => ({ tokenId: BigInt(id) }));
+            }
           }
+        } catch (err) {
+          console.error('[useSimulatedGoobs] Failed to load from localStorage:', err);
         }
-      } catch (err) {
-        console.error('[useSimulatedGoobs] Failed to load from localStorage:', err);
       }
 
       // Generate new random Goobs if not in localStorage
