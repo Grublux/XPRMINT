@@ -188,27 +188,38 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
 
     // Helper to get category from cached metadata
     const getCategoryFromCachedMetadata = (itemId: number): FilterCategory | null => {
+      // Check if localStorage is available
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return null;
+      }
+      
       try {
-        const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${itemId}`);
-        if (cached) {
+        const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
+        const cached = window.localStorage.getItem(key);
+        if (cached && cached.trim() !== '') {
           const metadata = JSON.parse(cached);
-          if (metadata?.attributes) {
+          if (metadata && typeof metadata === 'object' && metadata.attributes && Array.isArray(metadata.attributes)) {
             for (const attr of metadata.attributes) {
-              if (attr.trait_type === 'Rarity') {
-                const value = String(attr.value).toLowerCase();
-                if (value === 'epic') return 'Epic';
-              }
-              if (attr.trait_type === 'Primary Trait') {
-                const value = String(attr.value).toLowerCase();
-                if (value.includes('frequency')) return 'Freq';
-                if (value.includes('temperature')) return 'Temp';
-                if (value.includes('ph') || value === 'ph') return 'pH';
-                if (value.includes('salinity')) return 'Salinity';
+              if (attr && attr.trait_type && attr.value !== undefined) {
+                if (attr.trait_type === 'Rarity') {
+                  const value = String(attr.value).toLowerCase().trim();
+                  if (value === 'epic') return 'Epic';
+                }
+                if (attr.trait_type === 'Primary Trait') {
+                  const value = String(attr.value).toLowerCase().trim();
+                  if (value.includes('frequency')) return 'Freq';
+                  if (value.includes('temperature')) return 'Temp';
+                  if (value.includes('ph') || value === 'ph') return 'pH';
+                  if (value.includes('salinity')) return 'Salinity';
+                }
               }
             }
           }
         }
-      } catch {}
+      } catch (error) {
+        // Silently fail - metadata not available or corrupted
+        console.debug('Failed to get category from cached metadata for item', itemId, error);
+      }
       return null;
     };
 
