@@ -7,6 +7,8 @@ import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
+import { useQueryClient } from '@tanstack/react-query';
+import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -929,6 +931,209 @@ const ExpandedGoobView: React.FC<{
   const isInitialized = displayState !== null && 
     !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
       displayState.targetTemp === 0 && displayState.targetFreq === 0);
+  
+  const queryClient = useQueryClient();
+  
+  // Helper to get item metadata from cache
+  const getItemMetadata = React.useCallback((itemId: number): any => {
+    // Try React Query cache first
+    try {
+      const queryKey = ['item-metadata', ITEM_V3_ADDRESS, itemId.toString()];
+      const cachedData = queryClient.getQueryData(queryKey);
+      if (cachedData) {
+        return cachedData;
+      }
+    } catch (e) {
+      // Query cache access failed
+    }
+    
+    // Try localStorage
+    try {
+      const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      // localStorage access failed
+    }
+    
+    return null;
+  }, [queryClient]);
+  
+  // Calculate preview state by applying items
+  const previewState = React.useMemo(() => {
+    if (!isInitialized || !displayState || selectedItemsForGoob.size === 0) {
+      return null;
+    }
+    
+    // Start with current state
+    let preview = {
+      currFreq: displayState.currFreq,
+      currTemp: displayState.currTemp,
+      currPH: displayState.currPH,
+      currSal: displayState.currSal,
+      targetFreq: displayState.targetFreq,
+      targetTemp: displayState.targetTemp,
+      targetPH: displayState.targetPH,
+      targetSal: displayState.targetSal,
+      lockedFreq: displayState.lockedFreq || false,
+      lockedTemp: displayState.lockedTemp || false,
+      lockedPH: displayState.lockedPH || false,
+      lockedSal: displayState.lockedSal || false,
+    };
+    
+    // Apply each item in order
+    const itemEntries = Array.from(selectedItemsForGoob.entries());
+    for (const [itemId, count] of itemEntries) {
+      // Apply item count times
+      for (let i = 0; i < count; i++) {
+        const metadata = getItemMetadata(itemId);
+        if (!metadata?.attributes) continue;
+        
+        // Parse item attributes
+        let rarity: string | null = null;
+        let primaryTrait: string | null = null;
+        let primaryDeltaMagnitude: number | null = null;
+        let secondaryTrait: string | null = null;
+        let secondaryDeltaMagnitude: number | null = null;
+        
+        for (const attr of metadata.attributes) {
+          if (attr.trait_type === 'Rarity') {
+            rarity = String(attr.value).trim();
+          } else if (attr.trait_type === 'Primary Trait') {
+            const value = String(attr.value).toLowerCase().trim();
+            if (value.includes('frequency')) primaryTrait = 'Freq';
+            else if (value.includes('temperature')) primaryTrait = 'Temp';
+            else if (value.includes('ph') || value === 'ph') primaryTrait = 'pH';
+            else if (value.includes('salinity')) primaryTrait = 'Salinity';
+          } else if (attr.trait_type === 'Primary Delta Magnitude') {
+            primaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+          } else if (attr.trait_type === 'Secondary Trait') {
+            const value = String(attr.value).toLowerCase().trim();
+            if (value.includes('frequency')) secondaryTrait = 'Freq';
+            else if (value.includes('temperature')) secondaryTrait = 'Temp';
+            else if (value.includes('ph') || value === 'ph') secondaryTrait = 'pH';
+            else if (value.includes('salinity')) secondaryTrait = 'Salinity';
+          } else if (attr.trait_type === 'Secondary Delta Magnitude') {
+            secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+          }
+        }
+        
+        // Apply item effects
+        if (rarity?.toLowerCase() === 'epic') {
+          // Epic logic: find worst trait, pull it closer, push others away
+          const traits = [
+            { name: 'Freq', current: preview.currFreq, target: preview.targetFreq, locked: preview.lockedFreq },
+            { name: 'Temp', current: preview.currTemp, target: preview.targetTemp, locked: preview.lockedTemp },
+            { name: 'pH', current: preview.currPH, target: preview.targetPH, locked: preview.lockedPH },
+            { name: 'Salinity', current: preview.currSal, target: preview.targetSal, locked: preview.lockedSal },
+          ];
+          
+          // Find worst trait (largest percent error)
+          let worstTrait = null;
+          let worstError = -1;
+          for (const trait of traits) {
+            if (trait.locked) continue;
+            const error = trait.target === 0 ? Math.abs(trait.current) : Math.abs((trait.current - trait.target) / trait.target);
+            if (error > worstError) {
+              worstError = error;
+              worstTrait = trait;
+            }
+          }
+          
+          if (worstTrait) {
+            // Pull worst trait closer (halve error or move to 2*5% = 10%)
+            const error = worstTrait.current - worstTrait.target;
+            const LOCK_PCT = 0.05;
+            let newError: number;
+            if (worstTrait.target === 0) {
+              newError = error * 0.5;
+            } else {
+              const distPct = Math.abs(error) / Math.abs(worstTrait.target);
+              if (distPct > 2 * LOCK_PCT) {
+                newError = (2 * LOCK_PCT) * Math.abs(worstTrait.target) * (error >= 0 ? 1 : -1);
+              } else {
+                newError = error * 0.5;
+              }
+            }
+            
+            const newCurrent = worstTrait.target + newError;
+            if (worstTrait.name === 'Freq') preview.currFreq = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (worstTrait.name === 'Temp') preview.currTemp = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (worstTrait.name === 'pH') preview.currPH = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (worstTrait.name === 'Salinity') preview.currSal = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            
+            // Push other unlocked traits 10% further away
+            for (const trait of traits) {
+              if (trait.locked || trait === worstTrait) continue;
+              const error = trait.current - trait.target;
+              const newError = error * 1.1; // 10% further
+              const newCurrent = trait.target + newError;
+              if (trait.name === 'Freq') preview.currFreq = Math.max(0, Math.min(100, Math.round(newCurrent)));
+              else if (trait.name === 'Temp') preview.currTemp = Math.max(0, Math.min(100, Math.round(newCurrent)));
+              else if (trait.name === 'pH') preview.currPH = Math.max(0, Math.min(100, Math.round(newCurrent)));
+              else if (trait.name === 'Salinity') preview.currSal = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            }
+          }
+        } else if (primaryTrait && primaryDeltaMagnitude !== null) {
+          // Linear item: apply primary and secondary deltas
+          // Primary delta moves toward target
+          const getCurrent = (trait: string) => {
+            if (trait === 'Freq') return preview.currFreq;
+            if (trait === 'Temp') return preview.currTemp;
+            if (trait === 'pH') return preview.currPH;
+            if (trait === 'Salinity') return preview.currSal;
+            return 0;
+          };
+          
+          const getTarget = (trait: string) => {
+            if (trait === 'Freq') return preview.targetFreq;
+            if (trait === 'Temp') return preview.targetTemp;
+            if (trait === 'pH') return preview.targetPH;
+            if (trait === 'Salinity') return preview.targetSal;
+            return 0;
+          };
+          
+          const getLocked = (trait: string) => {
+            if (trait === 'Freq') return preview.lockedFreq;
+            if (trait === 'Temp') return preview.lockedTemp;
+            if (trait === 'pH') return preview.lockedPH;
+            if (trait === 'Salinity') return preview.lockedSal;
+            return false;
+          };
+          
+          const setCurrent = (trait: string, value: number) => {
+            const clamped = Math.max(0, Math.min(100, Math.round(value)));
+            if (trait === 'Freq') preview.currFreq = clamped;
+            else if (trait === 'Temp') preview.currTemp = clamped;
+            else if (trait === 'pH') preview.currPH = clamped;
+            else if (trait === 'Salinity') preview.currSal = clamped;
+          };
+          
+          // Apply primary delta (toward target)
+          if (!getLocked(primaryTrait)) {
+            const current = getCurrent(primaryTrait);
+            const target = getTarget(primaryTrait);
+            const direction = current > target ? -1 : 1;
+            const delta = direction * primaryDeltaMagnitude;
+            setCurrent(primaryTrait, current + delta);
+          }
+          
+          // Apply secondary delta (if exists)
+          if (secondaryTrait && secondaryDeltaMagnitude !== null && !getLocked(secondaryTrait)) {
+            const current = getCurrent(secondaryTrait);
+            const target = getTarget(secondaryTrait);
+            const direction = current > target ? -1 : 1;
+            const delta = direction * secondaryDeltaMagnitude;
+            setCurrent(secondaryTrait, current + delta);
+          }
+        }
+      }
+    }
+    
+    return preview;
+  }, [isInitialized, displayState, selectedItemsForGoob, getItemMetadata]);
   
   // Helper to calculate percentage difference
   const calculatePercentDifference = (current: number, target: number): number => {
