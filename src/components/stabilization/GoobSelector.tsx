@@ -126,18 +126,28 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     }
   }, [address]);
   
-  // Re-initialize from localStorage when address or simulation mode changes
+  // Track previous storage key to detect changes
+  const prevStorageKeyRef = useRef<string>(storageKey);
+  
+  // Re-initialize from localStorage ONLY when storageKey actually changes
   useEffect(() => {
+    // Only run if storageKey actually changed (not on initial mount)
+    if (prevStorageKeyRef.current === storageKey) {
+      return;
+    }
+    
+    prevStorageKeyRef.current = storageKey;
+    
     try {
       const stored = localStorage.getItem(storageKey);
-      console.log('[GoobsInLab] Loading from storageKey:', storageKey, 'stored:', stored);
+      console.log('[GoobsInLab] Storage key changed, loading:', storageKey, 'stored:', stored);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
         console.log('[GoobsInLab] Setting state from storage:', ids);
         setGoobsInLab(new Set(ids));
       } else {
         // Don't clear - try to find data in other keys first
-        console.log('[GoobsInLab] No stored data for key:', storageKey);
+        console.log('[GoobsInLab] No stored data for key:', storageKey, 'searching alternatives...');
         
         // Try to find data in alternative keys
         const altKeys = [
