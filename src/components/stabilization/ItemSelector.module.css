@@ -3,8 +3,26 @@
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   padding: 0 4px;
+}
+
+.categoryCounters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.categoryCount {
+  padding: 2px 12px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: center;
+  min-width: 40px;
 }
 
 .filterButton {
@@ -50,12 +68,23 @@
 @media (max-width: 480px) {
   .filterContainer {
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
   }
   
   .filterButton {
     padding: 5px 10px;
     font-size: 11px;
+  }
+  
+  .categoryCounters {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .categoryCount {
+    padding: 2px 10px;
+    font-size: 10px;
+    min-width: 35px;
   }
   
   .itemGrid {
