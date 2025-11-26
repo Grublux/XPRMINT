@@ -564,8 +564,8 @@ const ItemCard: React.FC<{
               } else if (value.includes('salinity')) {
                 primaryTrait = 'Salinity';
               }
-            } else if (attr.trait_type === 'Primary Delta') {
-              primaryDelta = typeof attr.value === 'number' ? attr.value : parseFloat(String(attr.value));
+            } else if (attr.trait_type === 'Primary Delta Magnitude') {
+              primaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
             }
           }
           
