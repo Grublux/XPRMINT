@@ -1148,7 +1148,6 @@ const ExpandedGoobView: React.FC<{
       // Store the current position of the Goob Item Area before expansion
       const goobItemAreaElement = goobItemAreaRef.current;
       const rectBefore = goobItemAreaElement.getBoundingClientRect();
-      const scrollYBefore = window.scrollY;
       
       // Use requestAnimationFrame to wait for DOM update, then adjust scroll
       requestAnimationFrame(() => {
