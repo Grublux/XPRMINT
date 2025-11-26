@@ -1121,7 +1121,7 @@ const ExpandedGoobView: React.FC<{
         
         // Apply item effects
         if (rarity?.toLowerCase() === 'epic') {
-          // Epic logic: find worst trait, pull it closer, push others away
+          // Epic logic: use selected trait (or worst trait if not selected), pull it closer, push others away
           const traits = [
             { name: 'Freq', current: preview.currFreq, target: preview.targetFreq, locked: preview.lockedFreq },
             { name: 'Temp', current: preview.currTemp, target: preview.targetTemp, locked: preview.lockedTemp },
@@ -1129,43 +1129,51 @@ const ExpandedGoobView: React.FC<{
             { name: 'Salinity', current: preview.currSal, target: preview.targetSal, locked: preview.lockedSal },
           ];
           
-          // Find worst trait (largest percent error)
-          let worstTrait = null;
-          let worstError = -1;
-          for (const trait of traits) {
-            if (trait.locked) continue;
-            const error = trait.target === 0 ? Math.abs(trait.current) : Math.abs((trait.current - trait.target) / trait.target);
-            if (error > worstError) {
-              worstError = error;
-              worstTrait = trait;
+          // Use selected Epic trait, or find worst trait if not selected
+          let targetTrait = null;
+          if (selectedEpicTrait) {
+            // Use the selected trait
+            targetTrait = traits.find(t => t.name === selectedEpicTrait && !t.locked);
+          }
+          
+          // If no valid selected trait, find worst trait (largest percent error)
+          if (!targetTrait) {
+            let worstError = -1;
+            for (const trait of traits) {
+              if (trait.locked) continue;
+              const error = trait.target === 0 ? Math.abs(trait.current) : Math.abs((trait.current - trait.target) / trait.target);
+              if (error > worstError) {
+                worstError = error;
+                targetTrait = trait;
+              }
             }
           }
           
-          if (worstTrait) {
-            // Pull worst trait closer (halve error or move to 2*5% = 10%)
-            const error = worstTrait.current - worstTrait.target;
+          if (targetTrait) {
+            // Pull target trait closer (halve error or move to 2*5% = 10%)
+            const error = targetTrait.current - targetTrait.target;
             const LOCK_PCT = 0.05;
             let newError: number;
-            if (worstTrait.target === 0) {
+            if (targetTrait.target === 0) {
               newError = error * 0.5;
             } else {
-              const distPct = Math.abs(error) / Math.abs(worstTrait.target);
+              const distPct = Math.abs(error) / Math.abs(targetTrait.target);
               if (distPct > 2 * LOCK_PCT) {
-                newError = (2 * LOCK_PCT) * Math.abs(worstTrait.target) * (error >= 0 ? 1 : -1);
+                newError = (2 * LOCK_PCT) * Math.abs(targetTrait.target) * (error >= 0 ? 1 : -1);
               } else {
                 newError = error * 0.5;
               }
             }
             
-            const newCurrent = worstTrait.target + newError;
-            if (worstTrait.name === 'Freq') preview.currFreq = Math.max(0, Math.min(100, Math.round(newCurrent)));
-            else if (worstTrait.name === 'Temp') preview.currTemp = Math.max(0, Math.min(100, Math.round(newCurrent)));
-            else if (worstTrait.name === 'pH') preview.currPH = Math.max(0, Math.min(100, Math.round(newCurrent)));
-            else if (worstTrait.name === 'Salinity') preview.currSal = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            const newCurrent = targetTrait.target + newError;
+            if (targetTrait.name === 'Freq') preview.currFreq = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (targetTrait.name === 'Temp') preview.currTemp = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (targetTrait.name === 'pH') preview.currPH = Math.max(0, Math.min(100, Math.round(newCurrent)));
+            else if (targetTrait.name === 'Salinity') preview.currSal = Math.max(0, Math.min(100, Math.round(newCurrent)));
             
             // Push other unlocked traits 10% further away
             for (const trait of traits) {
-              if (trait.locked || trait === worstTrait) continue;
+              if (trait.locked || trait === targetTrait) continue;
               const error = trait.current - trait.target;
               const newError = error * 1.1; // 10% further
               const newCurrent = trait.target + newError;
@@ -1228,7 +1236,7 @@ const ExpandedGoobView: React.FC<{
     }
     
     return preview;
-  }, [isInitialized, displayState, selectedItemsForGoob, getItemMetadata]);
+  }, [isInitialized, displayState, selectedItemsForGoob, getItemMetadata, selectedEpicTrait]);
   
   // Helper to calculate percentage difference
   const calculatePercentDifference = (current: number, target: number): number => {
