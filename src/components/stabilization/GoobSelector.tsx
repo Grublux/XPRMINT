@@ -969,8 +969,6 @@ const ExpandedGoobView: React.FC<{
     !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
       displayState.targetTemp === 0 && displayState.targetFreq === 0);
   
-  const queryClient = useQueryClient();
-  
   // Helper to get item metadata from cache
   const getItemMetadata = React.useCallback((itemId: number): any => {
     // Try React Query cache first
