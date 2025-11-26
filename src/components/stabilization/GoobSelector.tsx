@@ -914,6 +914,17 @@ const ExpandedGoobView: React.FC<{
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
+  // Get simulated state if in simulation mode
+  const simulatedState = React.useMemo(() => {
+    if (isSimulating) {
+      return getSimulatedCreatureState(tokenId);
+    }
+    return null;
+  }, [isSimulating, tokenId]);
+  
+  // Use simulated state if available, otherwise use on-chain state
+  const displayState = simulatedState || creatureState;
+  
   // Check if any selected item is Epic and get the Epic item ID
   const epicItemInfo = React.useMemo(() => {
     if (!selectedItemsForGoob || selectedItemsForGoob.size === 0) return { hasEpic: false, itemId: null };
@@ -991,17 +1002,6 @@ const ExpandedGoobView: React.FC<{
       setSelectedEpicTrait(null);
     }
   }, [worstTraitForEpic, hasEpicItem, selectedEpicTrait]);
-  
-  // Get simulated state if in simulation mode
-  const simulatedState = React.useMemo(() => {
-    if (isSimulating) {
-      return getSimulatedCreatureState(tokenId);
-    }
-    return null;
-  }, [isSimulating, tokenId]);
-  
-  // Use simulated state if available, otherwise use on-chain state
-  const displayState = simulatedState || creatureState;
   
   const isInitialized = displayState !== null && 
     !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
