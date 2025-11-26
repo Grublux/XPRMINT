@@ -2082,9 +2082,9 @@ const SelectedItemDisplay: React.FC<{
         {/* Trait and magnitude display */}
         {metadata?.attributes && (() => {
           let primaryTrait: string | null = null;
-          let primaryDelta: number | null = null;
+          let primaryDeltaMagnitude: number | null = null;
           let secondaryTrait: string | null = null;
-          let secondaryDelta: number | null = null;
+          let secondaryDeltaMagnitude: number | null = null;
           
           for (const attr of metadata.attributes) {
             if (attr.trait_type === 'Primary Trait') {
@@ -2099,7 +2099,7 @@ const SelectedItemDisplay: React.FC<{
                 primaryTrait = 'Salinity';
               }
             } else if (attr.trait_type === 'Primary Delta Magnitude') {
-              primaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+              primaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
             } else if (attr.trait_type === 'Secondary Trait') {
               const value = String(attr.value).toLowerCase();
               if (value.includes('frequency')) {
@@ -2112,13 +2112,39 @@ const SelectedItemDisplay: React.FC<{
                 secondaryTrait = 'Salinity';
               }
             } else if (attr.trait_type === 'Secondary Delta Magnitude') {
-              secondaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+              secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
             }
           }
           
-          // Helper to determine if secondary effect moves towards target
-          const isSecondaryTowardsTarget = (trait: string, delta: number): boolean => {
-            if (!goobState || delta === 0) return true; // Default to green if no state or no change
+          // Calculate primary direction based on current Goob state
+          let primaryDirection = 1;
+          if (primaryTrait && goobState) {
+            const getCurrent = (t: string) => {
+              if (t === 'Freq') return goobState.currFreq;
+              if (t === 'Temp') return goobState.currTemp;
+              if (t === 'pH') return goobState.currPH;
+              if (t === 'Salinity') return goobState.currSal;
+              return 0;
+            };
+            const getTarget = (t: string) => {
+              if (t === 'Freq') return goobState.targetFreq;
+              if (t === 'Temp') return goobState.targetTemp;
+              if (t === 'pH') return goobState.targetPH;
+              if (t === 'Salinity') return goobState.targetSal;
+              return 0;
+            };
+            const current = getCurrent(primaryTrait);
+            const target = getTarget(primaryTrait);
+            primaryDirection = current > target ? -1 : 1;
+          }
+          
+          // Calculate actual deltas with correct signs
+          const primaryDelta = primaryDeltaMagnitude !== null ? primaryDirection * primaryDeltaMagnitude : null;
+          const secondaryDelta = secondaryDeltaMagnitude !== null ? primaryDirection * secondaryDeltaMagnitude : null;
+          
+          // Helper to determine if effect moves towards target (always true for primary, check for secondary)
+          const isTowardsTarget = (trait: string, delta: number): boolean => {
+            if (!goobState || delta === 0) return true;
             const getCurrent = (t: string) => {
               if (t === 'Freq') return goobState.currFreq;
               if (t === 'Temp') return goobState.currTemp;
@@ -2135,12 +2161,9 @@ const SelectedItemDisplay: React.FC<{
             };
             const current = getCurrent(trait);
             const target = getTarget(trait);
-            // Calculate new value after applying delta
             const newValue = current + delta;
-            // Calculate distance from target before and after
             const distanceBefore = Math.abs(current - target);
             const distanceAfter = Math.abs(newValue - target);
-            // If distance decreases, we're moving towards target
             return distanceAfter < distanceBefore;
           };
           
@@ -2153,12 +2176,12 @@ const SelectedItemDisplay: React.FC<{
                     fontWeight: 300,
                     lineHeight: '1.2',
                     textAlign: 'center',
-                    color: 'var(--muted)',
                     marginTop: '2px',
                     width: '100%',
+                    color: '#10b981', // Primary always moves towards target (green)
                   }}
                 >
-                  {primaryTrait} {primaryDelta}
+                  {primaryTrait} {primaryDelta > 0 ? '+' : ''}{primaryDelta}
                 </div>
               )}
               {secondaryTrait && secondaryDelta !== null && (
@@ -2170,7 +2193,7 @@ const SelectedItemDisplay: React.FC<{
                     textAlign: 'center',
                     marginTop: '2px',
                     width: '100%',
-                    color: isSecondaryTowardsTarget(secondaryTrait, secondaryDelta) ? '#10b981' : '#ef4444',
+                    color: isTowardsTarget(secondaryTrait, secondaryDelta) ? '#10b981' : '#ef4444',
                   }}
                 >
                   {secondaryTrait} {secondaryDelta > 0 ? '+' : ''}{secondaryDelta}
