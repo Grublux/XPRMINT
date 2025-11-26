@@ -189,45 +189,71 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     // Helper to get category from cached metadata
     const getCategoryFromCachedMetadata = (itemId: number): FilterCategory | null => {
       // Check if localStorage is available
-      if (typeof window === 'undefined' || !window.localStorage) {
+      if (typeof window === 'undefined') {
+        return null;
+      }
+      
+      let localStorage: Storage | null = null;
+      try {
+        localStorage = window.localStorage;
+        if (!localStorage) return null;
+      } catch (e) {
+        // localStorage not available (private browsing, etc.)
         return null;
       }
       
       try {
         const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
-        const cached = window.localStorage.getItem(key);
-        if (cached && cached.trim() !== '') {
-          const metadata = JSON.parse(cached);
-          if (metadata && typeof metadata === 'object' && metadata.attributes && Array.isArray(metadata.attributes)) {
-            let primaryTraitCategory: FilterCategory | null = null;
-            
-            // First pass: check for Epic (highest priority)
-            for (const attr of metadata.attributes) {
-              if (attr && attr.trait_type && attr.value !== undefined) {
-                if (attr.trait_type === 'Rarity') {
-                  const value = String(attr.value).toLowerCase().trim();
-                  if (value === 'epic') return 'Epic';
-                }
-              }
+        let cached: string | null = null;
+        try {
+          cached = localStorage.getItem(key);
+        } catch (e) {
+          // localStorage.getItem() can throw in some browsers
+          return null;
+        }
+        
+        if (!cached || cached.trim() === '') {
+          return null;
+        }
+        
+        let metadata: any;
+        try {
+          metadata = JSON.parse(cached);
+        } catch (e) {
+          // Invalid JSON
+          return null;
+        }
+        
+        if (!metadata || typeof metadata !== 'object' || !metadata.attributes || !Array.isArray(metadata.attributes)) {
+          return null;
+        }
+        
+        // First pass: check for Epic (highest priority)
+        for (const attr of metadata.attributes) {
+          if (attr && typeof attr === 'object' && attr.trait_type && attr.value !== undefined) {
+            if (attr.trait_type === 'Rarity') {
+              const value = String(attr.value).toLowerCase().trim();
+              if (value === 'epic') return 'Epic';
             }
-            
-            // Second pass: check for Primary Trait (if not Epic)
-            for (const attr of metadata.attributes) {
-              if (attr && attr.trait_type && attr.value !== undefined) {
-                if (attr.trait_type === 'Primary Trait') {
-                  const value = String(attr.value).toLowerCase().trim();
-                  if (value.includes('frequency')) return 'Freq';
-                  if (value.includes('temperature')) return 'Temp';
-                  if (value.includes('ph') || value === 'ph') return 'pH';
-                  if (value.includes('salinity')) return 'Salinity';
-                }
-              }
+          }
+        }
+        
+        // Second pass: check for Primary Trait (if not Epic)
+        for (const attr of metadata.attributes) {
+          if (attr && typeof attr === 'object' && attr.trait_type && attr.value !== undefined) {
+            if (attr.trait_type === 'Primary Trait') {
+              const value = String(attr.value).toLowerCase().trim();
+              if (value.includes('frequency')) return 'Freq';
+              if (value.includes('temperature')) return 'Temp';
+              if (value.includes('ph') || value === 'ph') return 'pH';
+              if (value.includes('salinity')) return 'Salinity';
             }
           }
         }
       } catch (error) {
         // Silently fail - metadata not available or corrupted
-        console.debug('Failed to get category from cached metadata for item', itemId, error);
+        // Don't log to avoid console spam
+        return null;
       }
       return null;
     };
