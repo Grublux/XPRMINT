@@ -1553,7 +1553,10 @@ const ExpandedGoobView: React.FC<{
                     Choose up to 3 items below to apply to Goob
                   </div>
                 )}
-                <div className={styles.selectedItemsGrid}>
+                <div 
+                  className={styles.selectedItemsGrid}
+                  style={hasEpicItem ? { justifyContent: 'center' } : undefined}
+                >
                   {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
                     <SelectedItemDisplay 
                       key={itemId} 
