@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { usePublicClient } from 'wagmi';
 import { GOOBS_ADDRESS, goobsAbi } from '../../config/contracts/goobs';
 
+const STORAGE_KEY = 'simulated-goobs';
+
 export function useSimulatedGoobs() {
   const publicClient = usePublicClient();
 
@@ -14,6 +16,21 @@ export function useSimulatedGoobs() {
     queryFn: async (): Promise<Array<{ tokenId: bigint }>> => {
       if (!publicClient) return [];
 
+      // Try to load from localStorage first
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const ids = JSON.parse(stored) as string[];
+          if (ids.length > 0) {
+            console.log('[useSimulatedGoobs] Loading from localStorage:', ids);
+            return ids.map(id => ({ tokenId: BigInt(id) }));
+          }
+        }
+      } catch (err) {
+        console.error('[useSimulatedGoobs] Failed to load from localStorage:', err);
+      }
+
+      // Generate new random Goobs if not in localStorage
       try {
         // Get total supply
         const totalSupply = await publicClient.readContract({
@@ -42,12 +59,25 @@ export function useSimulatedGoobs() {
           }
         }
 
-        return randomIds.map(tokenId => ({ tokenId }));
+        const goobs = randomIds.map(tokenId => ({ tokenId }));
+        
+        // Persist to localStorage
+        try {
+          const ids = goobs.map(g => g.tokenId.toString());
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+          console.log('[useSimulatedGoobs] Generated and saved new simulated Goobs:', ids);
+        } catch (err) {
+          console.error('[useSimulatedGoobs] Failed to save to localStorage:', err);
+        }
+
+        return goobs;
       } catch (err) {
         console.error('[useSimulatedGoobs] Failed to fetch random Goobs:', err);
         return [];
       }
     },
+    staleTime: Infinity, // Never consider the data stale
+    gcTime: Infinity, // Never garbage collect
   });
 
   return {
