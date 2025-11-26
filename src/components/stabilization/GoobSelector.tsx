@@ -914,9 +914,9 @@ const ExpandedGoobView: React.FC<{
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
-  // Check if any selected item is Epic
-  const hasEpicItem = React.useMemo(() => {
-    if (!selectedItemsForGoob || selectedItemsForGoob.size === 0) return false;
+  // Check if any selected item is Epic and get the Epic item ID
+  const epicItemInfo = React.useMemo(() => {
+    if (!selectedItemsForGoob || selectedItemsForGoob.size === 0) return { hasEpic: false, itemId: null };
     for (const [itemId] of selectedItemsForGoob.entries()) {
       try {
         const queryKey = ['item-metadata', ITEM_V3_ADDRESS, itemId.toString()];
@@ -926,7 +926,7 @@ const ExpandedGoobView: React.FC<{
           if (metadata?.attributes) {
             for (const attr of metadata.attributes) {
               if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
-                return true;
+                return { hasEpic: true, itemId };
               }
             }
           }
@@ -941,7 +941,7 @@ const ExpandedGoobView: React.FC<{
             if (metadata?.attributes) {
               for (const attr of metadata.attributes) {
                 if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
-                  return true;
+                  return { hasEpic: true, itemId };
                 }
               }
             }
@@ -951,8 +951,46 @@ const ExpandedGoobView: React.FC<{
         }
       }
     }
-    return false;
+    return { hasEpic: false, itemId: null };
   }, [selectedItemsForGoob, queryClient]);
+  
+  const hasEpicItem = epicItemInfo.hasEpic;
+  
+  // Calculate worst trait for Epic item (based on original state)
+  const worstTraitForEpic = React.useMemo(() => {
+    if (!hasEpicItem || !displayState) return null;
+    const traits = [
+      { name: 'Freq', current: displayState.currFreq, target: displayState.targetFreq, locked: displayState.lockedFreq || false },
+      { name: 'Temp', current: displayState.currTemp, target: displayState.targetTemp, locked: displayState.lockedTemp || false },
+      { name: 'pH', current: displayState.currPH, target: displayState.targetPH, locked: displayState.lockedPH || false },
+      { name: 'Salinity', current: displayState.currSal, target: displayState.targetSal, locked: displayState.lockedSal || false },
+    ];
+    
+    let worstTrait = null;
+    let worstError = -1;
+    for (const trait of traits) {
+      if (trait.locked) continue;
+      const error = trait.target === 0 ? Math.abs(trait.current) : Math.abs((trait.current - trait.target) / trait.target);
+      if (error > worstError) {
+        worstError = error;
+        worstTrait = trait.name;
+      }
+    }
+    return worstTrait;
+  }, [hasEpicItem, displayState]);
+  
+  // State for Epic trait selection (defaults to worst trait)
+  const [selectedEpicTrait, setSelectedEpicTrait] = React.useState<'Freq' | 'Temp' | 'pH' | 'Salinity' | null>(null);
+  
+  // Update selectedEpicTrait when worstTraitForEpic changes
+  React.useEffect(() => {
+    if (worstTraitForEpic && (!selectedEpicTrait || !hasEpicItem)) {
+      setSelectedEpicTrait(worstTraitForEpic as 'Freq' | 'Temp' | 'pH' | 'Salinity');
+    }
+    if (!hasEpicItem) {
+      setSelectedEpicTrait(null);
+    }
+  }, [worstTraitForEpic, hasEpicItem, selectedEpicTrait]);
   
   // Get simulated state if in simulation mode
   const simulatedState = React.useMemo(() => {
@@ -1464,9 +1502,49 @@ const ExpandedGoobView: React.FC<{
           <div className={styles.expandedItemsInstruction}>
             {selectedItemsForGoob.size > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
-                  {hasEpicItem ? 'Epic items can only be applied alone' : 'Choose up to 3 items below to apply to Goob'}
-                </div>
+                {hasEpicItem ? (
+                  <>
+                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
+                      Epic item automatically selected {worstTraitForEpic}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
+                      select different attribute if desired
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      {(['Freq', 'Temp', 'pH', 'Salinity'] as const).map((trait) => {
+                        const isLocked = trait === 'Freq' ? (displayState?.lockedFreq || false) :
+                                         trait === 'Temp' ? (displayState?.lockedTemp || false) :
+                                         trait === 'pH' ? (displayState?.lockedPH || false) :
+                                         (displayState?.lockedSal || false);
+                        const isSelected = selectedEpicTrait === trait;
+                        return (
+                          <button
+                            key={trait}
+                            onClick={() => !isLocked && setSelectedEpicTrait(trait)}
+                            disabled={isLocked}
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              fontWeight: isSelected ? 600 : 400,
+                              color: isLocked ? 'rgba(128, 128, 128, 0.5)' : (isSelected ? 'rgb(110, 231, 183)' : 'var(--muted)'),
+                              backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+                              border: isSelected ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '4px',
+                              cursor: isLocked ? 'not-allowed' : 'pointer',
+                              opacity: isLocked ? 0.5 : 1,
+                            }}
+                          >
+                            {trait}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px', textAlign: 'center' }}>
+                    Choose up to 3 items below to apply to Goob
+                  </div>
+                )}
                 <div className={styles.selectedItemsGrid}>
                   {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
                     <SelectedItemDisplay 
@@ -1480,6 +1558,11 @@ const ExpandedGoobView: React.FC<{
                     />
                   ))}
                 </div>
+                {hasEpicItem && (
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px', textAlign: 'center' }}>
+                    Epic items can only be applied alone
+                  </div>
+                )}
               </div>
             ) : (
               <div>Choose up to 3 items below to apply to Goob</div>
