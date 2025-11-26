@@ -44,6 +44,8 @@ export default function StabilizationPage() {
       <StabilizationDashboard
         isReadOnly={isReadOnly}
         isSimulating={isSimulationOn}
+        isWhitelisted={isTester}
+        onEnableSimulation={() => setIsSimulationOn(true)}
       />
     </div>
   );

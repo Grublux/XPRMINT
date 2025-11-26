@@ -12,11 +12,15 @@ import styles from './StabilizationDashboard.module.css';
 type Props = {
   isReadOnly?: boolean;
   isSimulating?: boolean;
+  isWhitelisted?: boolean;
+  onEnableSimulation?: () => void;
 };
 
 export const StabilizationDashboard: React.FC<Props> = ({
   isReadOnly: isReadOnlyProp,
   isSimulating: isSimulatingProp = false,
+  isWhitelisted = false,
+  onEnableSimulation,
 }) => {
   const isReadOnly = Boolean(isReadOnlyProp);
   const isSimulating = Boolean(isSimulatingProp);
@@ -93,6 +97,8 @@ export const StabilizationDashboard: React.FC<Props> = ({
               }
               setSimulationItems(newItems);
             }}
+            isWhitelisted={isWhitelisted}
+            onEnableSimulation={onEnableSimulation}
           />
         </div>
         <div className={styles.traitsSection}>

@@ -18,6 +18,8 @@ interface GoobSelectorProps {
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
   onAddSimulationItems?: (goobCount: number) => void;
+  isWhitelisted?: boolean;
+  onEnableSimulation?: () => void;
 }
 
 type LabFilter = 'Waiting Room' | 'Lab';
@@ -30,13 +32,19 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   setSelectedItemsForGoob,
   onRestoreItem,
   onAddSimulationItems,
+  isWhitelisted = false,
+  onEnableSimulation,
 }) => {
   const { goobs: walletGoobs, isLoading: walletIsLoading, isError, error, progress } = useUserGoobs();
   const { goobs: simulatedGoobs, isLoading: simulatedIsLoading } = useSimulatedGoobs();
   
-  // Use simulated Goobs when simulation is on, otherwise use wallet Goobs
-  const goobs = isSimulating ? simulatedGoobs : walletGoobs;
-  const isLoading = isSimulating ? simulatedIsLoading : walletIsLoading;
+  // For whitelisted wallets during early testing: only use simulation mode
+  // Don't load real Goobs/items when whitelisted and not simulating
+  const shouldUseSimulation = isWhitelisted && !isSimulating;
+  
+  // Use simulated Goobs when simulation is on, otherwise use wallet Goobs (unless whitelisted)
+  const goobs = isSimulating ? simulatedGoobs : (shouldUseSimulation ? [] : walletGoobs);
+  const isLoading = isSimulating ? simulatedIsLoading : (shouldUseSimulation ? false : walletIsLoading);
   const [expandedGoobId, setExpandedGoobId] = useState<bigint | null>(null);
   const [labFilter, setLabFilter] = useState<LabFilter>('Waiting Room');
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(new Set());
@@ -77,6 +85,25 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     return (
       <div className="text-sm text-red-400">
         Unable to load Goobs: {error?.message || 'Unknown error'}. Check console for details.
+      </div>
+    );
+  }
+
+  // Show "Web3 disabled" message for whitelisted wallets when not simulating
+  if (shouldUseSimulation) {
+    return (
+      <div className={styles.noGoobsContainer}>
+        <div className={styles.noGoobsTitle}>Web3 disabled</div>
+        <button
+          onClick={() => {
+            if (onEnableSimulation) {
+              onEnableSimulation();
+            }
+          }}
+          className={styles.simulateButton}
+        >
+          Click to simulate
+        </button>
       </div>
     );
   }
