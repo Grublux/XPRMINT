@@ -1284,7 +1284,38 @@ const ExpandedGoobView: React.FC<{
             <div className={styles.expandedTraitHeader}>Salinity</div>
           </div>
           <div className={styles.expandedTraitsRow}>
-            <span className={styles.expandedTraitRowLabel}>Current</span>
+            <span className={styles.expandedTraitRowLabel}>Target</span>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetFreq
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetTemp
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetPH
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetSal
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+          </div>
+          <div className={styles.expandedTraitsRow}>
+            <span className={styles.expandedTraitRowLabel}>State</span>
             <div className={styles.expandedTraitCell}>
               {isInitialized && displayState ? (
                 <>
@@ -1327,38 +1358,7 @@ const ExpandedGoobView: React.FC<{
             </div>
           </div>
           <div className={styles.expandedTraitsRow}>
-            <span className={styles.expandedTraitRowLabel}>Target</span>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetFreq
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetTemp
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetPH
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetSal
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-          </div>
-          <div className={styles.expandedTraitsRow}>
-            <span className={styles.expandedTraitRowLabel}>Difference</span>
+            <span className={styles.expandedTraitRowLabel}>Error</span>
             <div className={styles.expandedTraitCell}>
               {isInitialized && displayState ? (
                 <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currFreq, displayState.targetFreq))}>
@@ -1414,7 +1414,7 @@ const ExpandedGoobView: React.FC<{
                 <div className={styles.expandedTraitHeader}>Salinity</div>
               </div>
               <div className={styles.expandedTraitsRow}>
-                <span className={styles.expandedTraitRowLabel}>Current</span>
+                <span className={styles.expandedTraitRowLabel}>New State</span>
                 <div className={styles.expandedTraitCell}>
                   {previewState.currFreq}
                   {previewState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
@@ -1441,36 +1441,38 @@ const ExpandedGoobView: React.FC<{
                   const changePH = previewState.currPH - displayState.currPH;
                   const changeSal = previewState.currSal - displayState.currSal;
                   
-                  // Helper to determine if change moves towards target
-                  const isTowardsTarget = (change: number, current: number, target: number): boolean => {
-                    if (change === 0) return true;
-                    if (current > target) {
-                      return change < 0; // Negative change moves towards target
-                    } else if (current < target) {
-                      return change > 0; // Positive change moves towards target
-                    }
-                    return true; // Already at target
+                  // Helper to determine if change actually moves closer to target
+                  // Checks if the new state is closer to target than the current state
+                  const isCloserToTarget = (change: number, current: number, target: number): boolean => {
+                    if (change === 0) return true; // No change
+                    
+                    const currentDistance = Math.abs(current - target);
+                    const newState = current + change;
+                    const newDistance = Math.abs(newState - target);
+                    
+                    // Green if new state is closer to target (or same distance)
+                    return newDistance <= currentDistance;
                   };
                   
                   return (
                     <>
                       <div className={styles.expandedTraitCell}>
-                        <span style={{ color: isTowardsTarget(changeFreq, displayState.currFreq, displayState.targetFreq) ? '#10b981' : '#ef4444' }}>
+                        <span style={{ color: isCloserToTarget(changeFreq, displayState.currFreq, displayState.targetFreq) ? '#10b981' : '#ef4444' }}>
                           {changeFreq > 0 ? '+' : ''}{changeFreq}
                         </span>
                       </div>
                       <div className={styles.expandedTraitCell}>
-                        <span style={{ color: isTowardsTarget(changeTemp, displayState.currTemp, displayState.targetTemp) ? '#10b981' : '#ef4444' }}>
+                        <span style={{ color: isCloserToTarget(changeTemp, displayState.currTemp, displayState.targetTemp) ? '#10b981' : '#ef4444' }}>
                           {changeTemp > 0 ? '+' : ''}{changeTemp}
                         </span>
                       </div>
                       <div className={styles.expandedTraitCell}>
-                        <span style={{ color: isTowardsTarget(changePH, displayState.currPH, displayState.targetPH) ? '#10b981' : '#ef4444' }}>
+                        <span style={{ color: isCloserToTarget(changePH, displayState.currPH, displayState.targetPH) ? '#10b981' : '#ef4444' }}>
                           {changePH > 0 ? '+' : ''}{changePH}
                         </span>
                       </div>
                       <div className={styles.expandedTraitCell}>
-                        <span style={{ color: isTowardsTarget(changeSal, displayState.currSal, displayState.targetSal) ? '#10b981' : '#ef4444' }}>
+                        <span style={{ color: isCloserToTarget(changeSal, displayState.currSal, displayState.targetSal) ? '#10b981' : '#ef4444' }}>
                           {changeSal > 0 ? '+' : ''}{changeSal}
                         </span>
                       </div>
@@ -1479,7 +1481,7 @@ const ExpandedGoobView: React.FC<{
                 })()}
               </div>
               <div className={styles.expandedTraitsRow}>
-                <span className={styles.expandedTraitRowLabel}>Difference</span>
+                <span className={styles.expandedTraitRowLabel}>New Error</span>
                 <div className={styles.expandedTraitCell}>
                   <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currFreq, previewState.targetFreq))}>
                     {calculatePercentDifference(previewState.currFreq, previewState.targetFreq).toFixed(1)}%
@@ -2016,6 +2018,31 @@ const SelectedItemDisplay: React.FC<{
             </>
           );
         })()}
+        {/* Remove Button */}
+        <button
+          onClick={handleRemove}
+          style={{
+            marginTop: '6px',
+            padding: '4px 8px',
+            fontSize: '11px',
+            fontWeight: 500,
+            color: '#ef4444',
+            backgroundColor: 'transparent',
+            border: '1px solid #ef4444',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            width: '100%',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          Remove
+        </button>
       </div>
     </div>
   );
