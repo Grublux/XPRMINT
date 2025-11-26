@@ -1323,6 +1323,63 @@ const ExpandedGoobView: React.FC<{
           <div className={styles.expandedLoading}>No image available</div>
         )}
         
+        {/* Preview Table - shown when items are selected */}
+        {imageUrl && !isLoading && selectedItemsForGoob.size > 0 && previewState && (
+          <div className={styles.previewTableContainer}>
+            <div className={styles.previewTableTitle}>Preview</div>
+            <div className={styles.previewTable}>
+              <div className={styles.expandedTraitsHeader}>
+                <div className={styles.expandedTraitHeader}>Freq</div>
+                <div className={styles.expandedTraitHeader}>Temp</div>
+                <div className={styles.expandedTraitHeader}>pH</div>
+                <div className={styles.expandedTraitHeader}>Salinity</div>
+              </div>
+              <div className={styles.expandedTraitsRow}>
+                <span className={styles.expandedTraitRowLabel}>Current</span>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currFreq}
+                  {previewState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currTemp}
+                  {previewState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currPH}
+                  {previewState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currSal}
+                  {previewState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+              </div>
+              <div className={styles.expandedTraitsRow}>
+                <span className={styles.expandedTraitRowLabel}>Difference</span>
+                <div className={styles.expandedTraitCell}>
+                  <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currFreq, previewState.targetFreq))}>
+                    {calculatePercentDifference(previewState.currFreq, previewState.targetFreq).toFixed(1)}%
+                  </span>
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currTemp, previewState.targetTemp))}>
+                    {calculatePercentDifference(previewState.currTemp, previewState.targetTemp).toFixed(1)}%
+                  </span>
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currPH, previewState.targetPH))}>
+                    {calculatePercentDifference(previewState.currPH, previewState.targetPH).toFixed(1)}%
+                  </span>
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  <span className={getDifferenceColorClass(calculatePercentDifference(previewState.currSal, previewState.targetSal))}>
+                    {calculatePercentDifference(previewState.currSal, previewState.targetSal).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Items instruction container */}
         {imageUrl && !isLoading && (
           <div className={styles.expandedItemsInstruction}>
