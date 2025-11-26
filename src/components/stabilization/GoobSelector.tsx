@@ -66,18 +66,25 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }, [address, isSimulating]);
   
   // Initialize goobsInLab from localStorage for persistence
-  // Calculate the initial storage key using the same logic as storageKey useMemo
-  const initialStorageKey = React.useMemo(() => {
-    const mode = isSimulating ? 'simulation' : (address ? address.toLowerCase() : 'default');
-    return `goobs-in-lab-${mode}`;
-  }, [address, isSimulating]);
-  
+  // Note: We can't use storageKey here because useMemo runs after useState initializer
+  // So we calculate it directly using the same logic
   const [goobsInLab, setGoobsInLab] = useState<Set<string>>(() => {
     try {
-      const stored = localStorage.getItem(initialStorageKey);
+      // Get isSimulating from localStorage to ensure we use the correct key
+      let isSim = isSimulating;
+      try {
+        const simStored = localStorage.getItem('isSimulationOn');
+        if (simStored !== null) {
+          isSim = simStored === 'true';
+        }
+      } catch {}
+      
+      const mode = isSim ? 'simulation' : (address ? address.toLowerCase() : 'default');
+      const key = `goobs-in-lab-${mode}`;
+      const stored = localStorage.getItem(key);
       if (stored) {
         const ids = JSON.parse(stored) as string[];
-        console.log('[GoobsInLab] Initialized from localStorage:', initialStorageKey, ids);
+        console.log('[GoobsInLab] Initialized from localStorage:', key, ids);
         return new Set(ids);
       }
     } catch (error) {
