@@ -7,6 +7,7 @@ import { GoobSelector } from './GoobSelector';
 import { TraitsPanel } from './TraitsPanel';
 import { ItemSelector, type ItemSelectorRef } from './ItemSelector';
 import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
+import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './StabilizationDashboard.module.css';
 
 type Props = {
@@ -90,12 +91,38 @@ export const StabilizationDashboard: React.FC<Props> = ({
             onAddSimulationItems={(count) => {
               // Add 5 random items per Goob sent to lab in simulation mode
               const newItems = new Map(simulationItems);
+              const itemsReceived: Array<{ id: number; name: string }> = [];
+              
               for (let i = 0; i < count * 5; i++) {
                 const randomItemId = Math.floor(Math.random() * 64); // Items 0-63
                 const currentBalance = newItems.get(randomItemId) || 0n;
                 newItems.set(randomItemId, currentBalance + 1n);
+                
+                // Get item name from localStorage cache
+                try {
+                  const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${randomItemId}`);
+                  if (cached) {
+                    const metadata = JSON.parse(cached);
+                    itemsReceived.push({
+                      id: randomItemId,
+                      name: metadata?.name || `Item #${randomItemId}`
+                    });
+                  } else {
+                    itemsReceived.push({
+                      id: randomItemId,
+                      name: `Item #${randomItemId}`
+                    });
+                  }
+                } catch {
+                  itemsReceived.push({
+                    id: randomItemId,
+                    name: `Item #${randomItemId}`
+                  });
+                }
               }
+              
               setSimulationItems(newItems);
+              return itemsReceived;
             }}
             isWhitelisted={isWhitelisted}
             onEnableSimulation={onEnableSimulation}

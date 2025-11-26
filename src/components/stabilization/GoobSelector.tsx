@@ -6,6 +6,7 @@ import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
+import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -17,7 +18,7 @@ interface GoobSelectorProps {
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
-  onAddSimulationItems?: (goobCount: number) => void;
+  onAddSimulationItems?: (goobCount: number) => Array<{ id: number; name: string }> | void;
   isWhitelisted?: boolean;
   onEnableSimulation?: () => void;
 }
@@ -51,6 +52,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [goobsSelectedForBatch, setGoobsSelectedForBatch] = useState<Set<string>>(new Set());
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
+  const [showReceivedItemsModal, setShowReceivedItemsModal] = useState(false);
+  const [receivedItems, setReceivedItems] = useState<Array<{ id: number; name: string }>>([]);
 
   // Count Goobs in each category (calculate before early returns for useEffect)
   const labCount = goobs.filter((g: { tokenId: bigint }) => {
@@ -187,9 +190,46 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       return next;
     });
     
-    // In simulation mode, add 5 random items per Goob sent to lab
+    // In simulation mode, track received items and show modal
     if (isSimulating && onAddSimulationItems) {
-      onAddSimulationItems(selectedGoobIds.length);
+      // Generate 5 random items per Goob and get their names
+      const itemsReceived: Array<{ id: number; name: string }> = [];
+      for (let i = 0; i < selectedGoobIds.length * 5; i++) {
+        const randomItemId = Math.floor(Math.random() * 64); // Items 0-63
+        // Get item name from localStorage cache
+        try {
+          const cached = localStorage.getItem(`item-metadata-${ITEM_V3_ADDRESS}-${randomItemId}`);
+          if (cached) {
+            const metadata = JSON.parse(cached);
+            itemsReceived.push({
+              id: randomItemId,
+              name: metadata?.name || `Item #${randomItemId}`
+            });
+          } else {
+            itemsReceived.push({
+              id: randomItemId,
+              name: `Item #${randomItemId}`
+            });
+          }
+        } catch {
+          itemsReceived.push({
+            id: randomItemId,
+            name: `Item #${randomItemId}`
+          });
+        }
+      }
+      // Call the callback to add items to inventory and get the actual items received
+      const result = onAddSimulationItems(selectedGoobIds.length);
+      // Use items from callback if provided, otherwise use locally generated ones
+      if (Array.isArray(result) && result.length > 0) {
+        setReceivedItems(result);
+      } else {
+        setReceivedItems(itemsReceived);
+      }
+      setShowReceivedItemsModal(true);
+    } else {
+      // For real mode, we'd need to track items from the actual claim transaction
+      // For now, show empty modal or skip
     }
     
     setGoobsSelectedForBatch(new Set());
@@ -304,6 +344,61 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           })}
         </div>
       )}
+      
+      {/* Received Items Modal */}
+      {showReceivedItemsModal && (
+        <ReceivedItemsModal
+          items={receivedItems}
+          onClose={() => setShowReceivedItemsModal(false)}
+          onGoToLab={() => {
+            setLabFilter('Lab');
+            setShowReceivedItemsModal(false);
+            setExpandedGoobId(null);
+            onChange(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Received Items Modal Component
+const ReceivedItemsModal: React.FC<{
+  items: Array<{ id: number; name: string }>;
+  onClose: () => void;
+  onGoToLab: () => void;
+}> = ({ items, onClose, onGoToLab }) => {
+  return (
+    <div 
+      className={styles.modalOverlay}
+      onClick={onClose}
+    >
+      <div 
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className={styles.modalCloseButton}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <h2 className={styles.modalTitle}>You received:</h2>
+        <div className={styles.modalItemsList}>
+          {items.map((item, index) => (
+            <div key={`${item.id}-${index}`} className={styles.modalItem}>
+              {item.name}
+            </div>
+          ))}
+        </div>
+        <button 
+          className={styles.modalGoToLabButton}
+          onClick={onGoToLab}
+        >
+          Go to Lab
+        </button>
+      </div>
     </div>
   );
 };
