@@ -365,7 +365,16 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       // Move selected Goobs to "In Lab" and clear selection
       setGoobsInLab(prev => {
         const next = new Set(prev);
-        selectedGoobIds.forEach(id => next.add(id.toString()));
+        selectedGoobIds.forEach(id => {
+          const idStr = id.toString();
+          if (!next.has(idStr)) {
+            next.add(idStr);
+            console.log('[GoobsInLab] Adding Goob to lab:', idStr);
+          } else {
+            console.warn('[GoobsInLab] Goob already in lab, skipping:', idStr);
+          }
+        });
+        console.log('[GoobsInLab] Total Goobs in lab after add:', Array.from(next));
         return next;
       });
       
@@ -994,10 +1003,12 @@ const GoobCard: React.FC<{
       onTouchEnd={(e) => {
         if (!isSelected && !isSelectedForBatch) {
           setTimeout(() => {
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            e.currentTarget.style.backgroundColor = 'transparent';
+            if (e.currentTarget) {
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
           }, 150);
-        } else if (isSelectedForBatch) {
+        } else if (isSelectedForBatch && e.currentTarget) {
           // Maintain green border for batch-selected Goobs
           e.currentTarget.style.borderColor = 'rgb(16, 185, 129)';
         }
