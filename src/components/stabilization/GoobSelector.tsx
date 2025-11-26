@@ -17,7 +17,15 @@ interface GoobSelectorProps {
   selectedItemsForGoob?: Map<number, number>;
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
-  onAddSimulationItems?: (goobCount: number) => Array<{ id: number; name: string }> | void;
+  onAddSimulationItems?: (goobCount: number) => Array<{
+    id: number;
+    name: string;
+    image?: string;
+    image_data?: string;
+    quantity: number;
+    category?: string;
+    magnitude?: number;
+  }> | void;
   isWhitelisted?: boolean;
   onEnableSimulation?: () => void;
 }
@@ -222,10 +230,23 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       const result = onAddSimulationItems(selectedGoobIds.length);
       // Use items from callback if provided (result should be array with quantity property)
       if (Array.isArray(result) && result.length > 0) {
-        // Ensure all items have the required quantity property
-        const itemsWithQuantity = result.map(item => ({
-          ...item,
-          quantity: item.quantity ?? 1,
+        // Ensure all items have the required properties with correct types
+        const itemsWithQuantity: Array<{
+          id: number;
+          name: string;
+          image?: string;
+          image_data?: string;
+          quantity: number;
+          category?: string;
+          magnitude?: number;
+        }> = result.map(item => ({
+          id: item.id,
+          name: item.name,
+          image: 'image' in item ? item.image : undefined,
+          image_data: 'image_data' in item ? item.image_data : undefined,
+          quantity: 'quantity' in item && typeof item.quantity === 'number' ? item.quantity : 1,
+          category: 'category' in item ? item.category : undefined,
+          magnitude: 'magnitude' in item ? item.magnitude : undefined,
         }));
         setReceivedItems(itemsWithQuantity);
         setShowReceivedItemsModal(true);
