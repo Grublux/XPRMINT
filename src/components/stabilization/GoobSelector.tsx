@@ -478,10 +478,19 @@ const ConfettiEffect: React.FC = () => {
     for (let i = 0; i < confettiCount; i++) {
       const confetti = document.createElement('div');
       confetti.className = styles.confettiPiece;
-      confetti.style.left = `${Math.random() * 100}%`;
+      // Start at bottom center, spread horizontally
+      const centerX = 50; // Center of screen
+      const spread = (Math.random() - 0.5) * 60; // Spread ±30% from center
+      confetti.style.left = `${centerX + spread}%`;
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+      // Random delay for staggered explosion
+      confetti.style.animationDelay = `${Math.random() * 0.3}s`;
+      // Random initial rotation
+      confetti.style.setProperty('--initial-rotation', `${Math.random() * 360}deg`);
+      // Random upward velocity (affects how high it goes)
+      confetti.style.setProperty('--upward-velocity', `${30 + Math.random() * 40}%`);
+      // Random horizontal drift
+      confetti.style.setProperty('--horizontal-drift', `${(Math.random() - 0.5) * 40}%`);
       confettiRef.current.appendChild(confetti);
     }
     

@@ -706,17 +706,26 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  top: -10px;
-  animation: confettiFall 2s ease-out forwards;
+  bottom: 0;
+  --initial-rotation: 0deg;
+  --upward-velocity: 50%;
+  --horizontal-drift: 0%;
+  animation: confettiExplode 2.5s ease-out forwards;
 }
 
-@keyframes confettiFall {
+@keyframes confettiExplode {
   0% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) translateX(0) rotate(var(--initial-rotation));
+    opacity: 1;
+  }
+  40% {
+    /* Peak of upward explosion */
+    transform: translateY(calc(-1 * var(--upward-velocity))) translateX(var(--horizontal-drift)) rotate(calc(var(--initial-rotation) + 360deg));
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) rotate(720deg);
+    /* Fall back down and drift */
+    transform: translateY(100vh) translateX(calc(var(--horizontal-drift) * 1.5)) rotate(calc(var(--initial-rotation) + 1080deg));
     opacity: 0;
   }
 }
