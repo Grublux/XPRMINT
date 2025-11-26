@@ -18,6 +18,7 @@ type ItemSelectorProps = {
   onRestoreItem?: (itemId: number) => void;
   simulationItems?: Map<number, bigint>; // itemId -> balance for simulation mode
   setSimulationItems?: React.Dispatch<React.SetStateAction<Map<number, bigint>>>; // Update simulation items
+  isWhitelisted?: boolean;
 };
 
 export type ItemSelectorRef = {
