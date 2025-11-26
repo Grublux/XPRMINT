@@ -80,6 +80,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   const [hasNewLabActivity, setHasNewLabActivity] = useState(false);
   const previousLabCountRef = useRef<number>(0);
   const [showFakeTransactionModal, setShowFakeTransactionModal] = useState(false);
+  const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [showReceivedItemsModal, setShowReceivedItemsModal] = useState(false);
   const [receivedItems, setReceivedItems] = useState<Array<{ 
     id: number; 
@@ -216,55 +218,65 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     
     console.log('[Batch Send] Fake transaction signed, sending to lab:', selectedGoobIds.map(id => id.toString()));
     
-    // Move selected Goobs to "In Lab" and clear selection
-    setGoobsInLab(prev => {
-      const next = new Set(prev);
-      selectedGoobIds.forEach(id => next.add(id.toString()));
-      return next;
-    });
-    
-    // Close fake transaction modal
+    // Close fake transaction modal and show loading
     setShowFakeTransactionModal(false);
+    setIsProcessingTransaction(true);
     
-    // In simulation mode, track received items and show received items modal
-    if (isSimulating && onAddSimulationItems) {
-      // Store the Goob IDs that were sent
-      setSentGoobIds(selectedGoobIds);
+    // After 1 second delay, process transaction and show confetti
+    setTimeout(() => {
+      // Move selected Goobs to "In Lab" and clear selection
+      setGoobsInLab(prev => {
+        const next = new Set(prev);
+        selectedGoobIds.forEach(id => next.add(id.toString()));
+        return next;
+      });
       
-      // Call the callback to add items to inventory and get the actual items received
-      const result = onAddSimulationItems(selectedGoobIds.length);
-      // Use items from callback if provided (result should be array with quantity property)
-      if (Array.isArray(result) && result.length > 0) {
-        // Ensure all items have the required properties with correct types
-        const itemsWithQuantity: Array<{
-          id: number;
-          name: string;
-          image?: string;
-          image_data?: string;
-          quantity: number;
-          category?: string;
-          magnitude?: number;
-          rarity?: string;
-        }> = result.map(item => ({
-          id: item.id,
-          name: item.name,
-          image: 'image' in item ? item.image : undefined,
-          image_data: 'image_data' in item ? item.image_data : undefined,
-          quantity: 'quantity' in item && typeof item.quantity === 'number' ? item.quantity : 1,
-          category: 'category' in item ? item.category : undefined,
-          magnitude: 'magnitude' in item ? item.magnitude : undefined,
-          rarity: 'rarity' in item ? item.rarity : undefined,
-        }));
-        setReceivedItems(itemsWithQuantity);
-        setShowReceivedItemsModal(true);
+      // Show confetti effect
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000); // Hide confetti after 2 seconds
+      
+      // In simulation mode, track received items and show received items modal
+      if (isSimulating && onAddSimulationItems) {
+        // Store the Goob IDs that were sent
+        setSentGoobIds(selectedGoobIds);
+        
+        // Call the callback to add items to inventory and get the actual items received
+        const result = onAddSimulationItems(selectedGoobIds.length);
+        // Use items from callback if provided (result should be array with quantity property)
+        if (Array.isArray(result) && result.length > 0) {
+          // Ensure all items have the required properties with correct types
+          const itemsWithQuantity: Array<{
+            id: number;
+            name: string;
+            image?: string;
+            image_data?: string;
+            quantity: number;
+            category?: string;
+            magnitude?: number;
+            rarity?: string;
+          }> = result.map(item => ({
+            id: item.id,
+            name: item.name,
+            image: 'image' in item ? item.image : undefined,
+            image_data: 'image_data' in item ? item.image_data : undefined,
+            quantity: 'quantity' in item && typeof item.quantity === 'number' ? item.quantity : 1,
+            category: 'category' in item ? item.category : undefined,
+            magnitude: 'magnitude' in item ? item.magnitude : undefined,
+            rarity: 'rarity' in item ? item.rarity : undefined,
+          }));
+          setReceivedItems(itemsWithQuantity);
+          setIsProcessingTransaction(false);
+          setShowReceivedItemsModal(true);
+        } else {
+          setIsProcessingTransaction(false);
+        }
+      } else {
+        setIsProcessingTransaction(false);
       }
-    } else {
-      // For real mode, we'd need to track items from the actual claim transaction
-      // For now, show empty modal or skip
-    }
-    
-    setGoobsSelectedForBatch(new Set());
-    setPendingGoobIds([]);
+      
+      setGoobsSelectedForBatch(new Set());
+      setPendingGoobIds([]);
+    }, 1000);
   };
 
   return (
@@ -377,17 +389,15 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         </div>
       )}
       
-      {/* Fake Transaction Modal */}
-      {showFakeTransactionModal && (
-        <FakeTransactionModal
-          goobCount={pendingGoobIds.length}
-          onSign={handleFakeTransactionSign}
-          onClose={() => {
-            setShowFakeTransactionModal(false);
-            setPendingGoobIds([]);
-          }}
-        />
+      {/* Processing Transaction Loading */}
+      {isProcessingTransaction && (
+        <div className={styles.processingOverlay}>
+          <div className={styles.spinner}></div>
+        </div>
       )}
+      
+      {/* Confetti Effect */}
+      {showConfetti && <ConfettiEffect />}
       
       {/* Fake Transaction Modal */}
       {showFakeTransactionModal && (
@@ -427,7 +437,7 @@ const FakeTransactionModal: React.FC<{
 }> = ({ goobCount, onSign, onClose }) => {
   return (
     <div 
-      className={styles.modalOverlay}
+      className={styles.fakeTransactionOverlay}
       onClick={onClose}
     >
       <div 
@@ -453,6 +463,36 @@ const FakeTransactionModal: React.FC<{
       </div>
     </div>
   );
+};
+
+// Confetti Effect Component
+const ConfettiEffect: React.FC = () => {
+  const confettiRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!confettiRef.current) return;
+    
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+    const confettiCount = 50;
+    
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = styles.confettiPiece;
+      confetti.style.left = `${Math.random() * 100}%`;
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+      confettiRef.current.appendChild(confetti);
+    }
+    
+    return () => {
+      if (confettiRef.current) {
+        confettiRef.current.innerHTML = '';
+      }
+    };
+  }, []);
+  
+  return <div ref={confettiRef} className={styles.confettiContainer} />;
 };
 
 // Received Items Modal Component
