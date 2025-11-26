@@ -730,6 +730,18 @@ const ItemCard: React.FC<{
   const showPlusButton = Boolean(creatureId); // Only show in Lab view when Goob is selected
   const currentTotal = selectedItemsForGoob ? Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0) : 0;
   const isAtLimit = currentTotal >= 3;
+  
+  // Check if item is Epic
+  const isEpic = React.useMemo(() => {
+    if (!metadata?.attributes) return false;
+    for (const attr of metadata.attributes) {
+      if (attr.trait_type === 'Rarity') {
+        const value = String(attr.value).toLowerCase().trim();
+        if (value === 'epic') return true;
+      }
+    }
+    return false;
+  }, [metadata?.attributes]);
 
   return (
     <div
@@ -745,7 +757,7 @@ const ItemCard: React.FC<{
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '4px',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
+        border: isEpic ? '2px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.2)',
         overflow: 'visible',
         transition: 'all 0.2s',
         margin: '0',
@@ -1019,8 +1031,16 @@ const ExpandedItemView: React.FC<{
       : 'rgb(220, 38, 38)';
   };
 
+  // Check if item is Epic
+  const isEpic = itemAttributes?.rarity?.toLowerCase().trim() === 'epic';
+  
   return (
-    <div className={styles.expandedItemContainer}>
+    <div 
+      className={styles.expandedItemContainer}
+      style={{
+        border: isEpic ? '2px solid #fbbf24' : undefined,
+      }}
+    >
       <button
         className={styles.expandedCloseButton}
         onClick={onClose}

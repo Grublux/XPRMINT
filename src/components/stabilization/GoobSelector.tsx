@@ -1694,6 +1694,18 @@ const SelectedItemDisplay: React.FC<{
     }
   };
   
+  // Check if item is Epic
+  const isEpic = React.useMemo(() => {
+    if (!metadata?.attributes) return false;
+    for (const attr of metadata.attributes) {
+      if (attr.trait_type === 'Rarity') {
+        const value = String(attr.value).toLowerCase().trim();
+        if (value === 'epic') return true;
+      }
+    }
+    return false;
+  }, [metadata?.attributes]);
+  
   return (
     <div 
       style={{
@@ -1703,7 +1715,7 @@ const SelectedItemDisplay: React.FC<{
       display: 'flex',
       flexDirection: 'column',
       borderRadius: '4px',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
+      border: isEpic ? '2px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.2)',
       overflow: 'visible',
       margin: '0',
       padding: '0',
