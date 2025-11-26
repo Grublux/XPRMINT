@@ -457,7 +457,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--background);
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -466,7 +466,7 @@
 }
 
 .modalContent {
-  background: var(--background);
+  background: #0a0a0a;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 24px;
