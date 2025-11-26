@@ -925,6 +925,20 @@ const ExpandedGoobView: React.FC<{
     !(displayState.targetSal === 0 && displayState.targetPH === 0 && 
       displayState.targetTemp === 0 && displayState.targetFreq === 0);
   
+  // Helper to calculate percentage difference
+  const calculatePercentDifference = (current: number, target: number): number => {
+    if (target === 0) return 0;
+    return Math.abs((current - target) / target) * 100;
+  };
+  
+  // Helper to get color class based on percentage difference
+  const getDifferenceColorClass = (percentDiff: number): string => {
+    if (percentDiff < 5) return styles.differenceGreen;
+    if (percentDiff < 10) return styles.differenceYellow;
+    if (percentDiff < 25) return styles.differenceOrange;
+    return styles.differenceRed;
+  };
+  
   // Update highlight to show where dragged item currently is (after reordering)
   useEffect(() => {
     if (draggedItemId !== null) {
@@ -1049,6 +1063,45 @@ const ExpandedGoobView: React.FC<{
             <div className={styles.expandedTraitCell}>
               {isInitialized && displayState ? (
                 displayState.targetSal
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+          </div>
+          <div className={styles.expandedTraitsRow}>
+            <span className={styles.expandedTraitRowLabel}>Difference</span>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currFreq, displayState.targetFreq))}>
+                  {calculatePercentDifference(displayState.currFreq, displayState.targetFreq).toFixed(1)}%
+                </span>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currTemp, displayState.targetTemp))}>
+                  {calculatePercentDifference(displayState.currTemp, displayState.targetTemp).toFixed(1)}%
+                </span>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currPH, displayState.targetPH))}>
+                  {calculatePercentDifference(displayState.currPH, displayState.targetPH).toFixed(1)}%
+                </span>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currSal, displayState.targetSal))}>
+                  {calculatePercentDifference(displayState.currSal, displayState.targetSal).toFixed(1)}%
+                </span>
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}

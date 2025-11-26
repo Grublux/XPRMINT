@@ -379,6 +379,26 @@
   font-size: 14px;
 }
 
+.differenceRed {
+  color: #ef4444; /* Red */
+  font-weight: 600;
+}
+
+.differenceOrange {
+  color: #f59e0b; /* Orange */
+  font-weight: 600;
+}
+
+.differenceYellow {
+  color: #eab308; /* Yellow */
+  font-weight: 600;
+}
+
+.differenceGreen {
+  color: #10b981; /* Green */
+  font-weight: 600;
+}
+
 .lockedBadge {
   font-size: 10px;
   color: rgb(16, 185, 129);
