@@ -66,15 +66,30 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }, [address, isSimulating]);
   
   // Check if this is a page reload (not a tab switch)
-  // Use sessionStorage to track if we're in the same tab session
+  // Use Navigation Timing API to detect reloads
   const isPageReload = React.useMemo(() => {
-    const sessionFlag = sessionStorage.getItem('goobs-lab-session');
-    if (!sessionFlag) {
-      // Fresh page load - clear data
-      sessionStorage.setItem('goobs-lab-session', 'active');
-      return true;
+    if (typeof window === 'undefined') return false;
+    
+    try {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries.length > 0) {
+        const navType = navEntries[0].type;
+        // 'reload' means page was reloaded, 'navigate' means fresh navigation
+        // We want to clear on both reload and fresh navigation
+        return navType === 'reload' || navType === 'navigate';
+      }
+      
+      // Fallback for older browsers
+      const perfNav = (performance as any).navigation;
+      if (perfNav) {
+        return perfNav.type === 1; // TYPE_RELOAD
+      }
+    } catch (err) {
+      console.error('[GoobsInLab] Failed to detect navigation type:', err);
     }
-    return false;
+    
+    // Default to treating as reload to be safe
+    return true;
   }, []);
 
   // Initialize goobsInLab from localStorage for persistence

@@ -38,12 +38,24 @@ export const StabilizationDashboard: React.FC<Props> = ({
   
   // Check if this is a page reload - clear simulation items on reload
   const isPageReload = React.useMemo(() => {
-    const sessionFlag = sessionStorage.getItem('simulation-items-session');
-    if (!sessionFlag) {
-      sessionStorage.setItem('simulation-items-session', 'active');
-      return true;
+    if (typeof window === 'undefined') return false;
+    
+    try {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries.length > 0) {
+        const navType = navEntries[0].type;
+        return navType === 'reload' || navType === 'navigate';
+      }
+      
+      const perfNav = (performance as any).navigation;
+      if (perfNav) {
+        return perfNav.type === 1;
+      }
+    } catch (err) {
+      console.error('[SimulationItems] Failed to detect navigation type:', err);
     }
-    return false;
+    
+    return true;
   }, []);
   
   const [simulationItems, setSimulationItems] = useState<Map<number, bigint>>(() => {

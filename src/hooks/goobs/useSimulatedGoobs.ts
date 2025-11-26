@@ -13,18 +13,38 @@ export function useSimulatedGoobs() {
 
   // Check if this is a page reload
   const isPageReload = React.useMemo(() => {
-    const sessionFlag = sessionStorage.getItem('simulated-goobs-session');
-    if (!sessionFlag) {
-      sessionStorage.setItem('simulated-goobs-session', 'active');
-      // Clear localStorage on reload
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-        console.log('[useSimulatedGoobs] Page reload detected - clearing simulated Goobs');
-      } catch (err) {
-        console.error('[useSimulatedGoobs] Failed to clear on reload:', err);
+    if (typeof window === 'undefined') return false;
+    
+    try {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries.length > 0) {
+        const navType = navEntries[0].type;
+        if (navType === 'reload' || navType === 'navigate') {
+          // Clear localStorage on reload
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+            console.log('[useSimulatedGoobs] Page reload detected - clearing simulated Goobs');
+          } catch (err) {
+            console.error('[useSimulatedGoobs] Failed to clear on reload:', err);
+          }
+          return true;
+        }
       }
-      return true;
+      
+      const perfNav = (performance as any).navigation;
+      if (perfNav && perfNav.type === 1) {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          console.log('[useSimulatedGoobs] Page reload detected - clearing simulated Goobs');
+        } catch (err) {
+          console.error('[useSimulatedGoobs] Failed to clear on reload:', err);
+        }
+        return true;
+      }
+    } catch (err) {
+      console.error('[useSimulatedGoobs] Failed to detect navigation type:', err);
     }
+    
     return false;
   }, []);
 
