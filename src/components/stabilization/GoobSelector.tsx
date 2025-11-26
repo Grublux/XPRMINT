@@ -293,14 +293,6 @@ const ExpandedGoobView: React.FC<{
     !(creatureState.targetSal === 0 && creatureState.targetPH === 0 && 
       creatureState.targetTemp === 0 && creatureState.targetFreq === 0);
   
-  // Get current index of dragged item
-  const getDraggedIndex = (): number | null => {
-    if (draggedItemId === null) return null;
-    const entries = Array.from(selectedItemsForGoob.entries());
-    const index = entries.findIndex(([id]) => id === draggedItemId);
-    return index >= 0 ? index : null;
-  };
-  
   // Update highlight to show where dragged item currently is (after reordering)
   useEffect(() => {
     if (draggedItemId !== null) {
@@ -316,7 +308,7 @@ const ExpandedGoobView: React.FC<{
   
   // Track target during drag (same as touch - no live reordering, just highlight)
   // Note: The actual target tracking happens in SelectedItemDisplay's onDragOver handler
-  const handleDragOver = (e: React.DragEvent, targetIndex: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer) {
       e.dataTransfer.dropEffect = 'move';
@@ -472,7 +464,7 @@ const ExpandedGoobView: React.FC<{
                         setDesktopTargetIndex(null);
                         lastDesktopTargetIndexRef.current = null;
                       }}
-                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragOver={handleDragOver}
                     />
                   ))}
                 </div>
