@@ -285,7 +285,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                 onClick={() => setSelectedFilter(category)}
               >
                 <div>{category}</div>
-                <div className={styles.filterButtonQty}>{categoryCounts[category] || 0}</div>
+                <div className={styles.filterButtonQty}>x{categoryCounts[category] || 0}</div>
               </button>
             ))}
           </div>
