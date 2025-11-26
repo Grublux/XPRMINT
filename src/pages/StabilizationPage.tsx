@@ -6,12 +6,12 @@ import styles from './StabilizationPage.module.css';
 
 export default function StabilizationPage() {
   const { address } = useAccount();
-  const { whitelistEnabled, isTester, isReadOnly, isOwner } = useWhitelistStatus();
+  const { whitelistEnabled, isTester, isReadOnly, isContractOwner } = useWhitelistStatus();
   const [isSimulationOn, setIsSimulationOn] = useState(false);
 
   return (
     <div className={styles.pageContainer}>
-      {isOwner && address && (
+      {isTester && address && (
         <div className={styles.simulationToggleContainer}>
           <button
             className={`${styles.simulationToggle} ${isSimulationOn ? styles.simulationToggleOn : ''}`}
@@ -29,7 +29,7 @@ export default function StabilizationPage() {
           {isTester ? (
             <span>
               <strong>
-                {isOwner 
+                {isContractOwner 
                   ? "Owner Access - Full gameplay enabled." 
                   : "Whitelist Access granted, full gameplay enabled."}
               </strong>

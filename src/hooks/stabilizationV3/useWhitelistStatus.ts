@@ -65,6 +65,7 @@ export function useWhitelistStatus() {
     isTester,
     isReadOnly,
     isOwner: Boolean(isOwner),
+    isContractOwner: Boolean(isContractOwner), // Only the deployer wallet
   };
 }
 
