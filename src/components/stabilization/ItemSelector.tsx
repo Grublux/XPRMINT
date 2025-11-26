@@ -199,12 +199,21 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
         if (cached && cached.trim() !== '') {
           const metadata = JSON.parse(cached);
           if (metadata && typeof metadata === 'object' && metadata.attributes && Array.isArray(metadata.attributes)) {
+            let primaryTraitCategory: FilterCategory | null = null;
+            
+            // First pass: check for Epic (highest priority)
             for (const attr of metadata.attributes) {
               if (attr && attr.trait_type && attr.value !== undefined) {
                 if (attr.trait_type === 'Rarity') {
                   const value = String(attr.value).toLowerCase().trim();
                   if (value === 'epic') return 'Epic';
                 }
+              }
+            }
+            
+            // Second pass: check for Primary Trait (if not Epic)
+            for (const attr of metadata.attributes) {
+              if (attr && attr.trait_type && attr.value !== undefined) {
                 if (attr.trait_type === 'Primary Trait') {
                   const value = String(attr.value).toLowerCase().trim();
                   if (value.includes('frequency')) return 'Freq';
@@ -226,11 +235,14 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     items.forEach(item => {
       const balance = itemBalances.get(item.id) ?? item.balance;
       if (balance > 0n) {
+        const balanceNum = Number(balance);
         const category = getCategoryFromCachedMetadata(item.id);
         if (category) {
-          counts[category] = (counts[category] || 0) + Number(balance);
+          // Add balance to the specific category
+          counts[category] = (counts[category] || 0) + balanceNum;
         }
-        counts['All'] = (counts['All'] || 0) + Number(balance);
+        // Always add to 'All' regardless of category detection
+        counts['All'] = (counts['All'] || 0) + balanceNum;
       }
     });
 
