@@ -175,55 +175,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     setHasInitializedFilter(true);
   }, [items, itemBalances, isLoading, hasInitializedFilter]);
   
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-2 items-center text-center w-full">
-        <div className="text-sm text-muted-foreground">Loading items...</div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="text-sm text-red-400 text-center">
-        Unable to load items. Check console for details.
-      </div>
-    );
-  }
-
-
-  if (!items.length) {
-    if (address) {
-      // Connected wallet with no items
-      return (
-        <div className={styles.noItemsContainer}>
-          <div className={styles.noItemsMessage}>
-            You have no items, Choose a Goob to claim a starter pack or head to{' '}
-            <a 
-              href="https://magiceden.us/collections/apechain/ITEMS"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.magicEdenLink}
-            >
-              Magic Eden
-            </a>
-            {' '}to buy on secondary
-          </div>
-        </div>
-      );
-    }
-    // Not connected - show generic message
-    return (
-      <div className="flex flex-col gap-2 items-center text-center w-full">
-        <div className="text-sm text-muted-foreground">
-          You have no items. Select Goobs above to claim starter packs.
-        </div>
-      </div>
-    );
-  }
-
-  // Calculate item counts per category
+  // Calculate item counts per category (must be before early returns)
   const categoryCounts = React.useMemo(() => {
     const counts: Record<FilterCategory, number> = {
       'Freq': 0,
@@ -273,6 +225,53 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
 
     return counts;
   }, [items, itemBalances]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-2 items-center text-center w-full">
+        <div className="text-sm text-muted-foreground">Loading items...</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-sm text-red-400 text-center">
+        Unable to load items. Check console for details.
+      </div>
+    );
+  }
+
+
+  if (!items.length) {
+    if (address) {
+      // Connected wallet with no items
+      return (
+        <div className={styles.noItemsContainer}>
+          <div className={styles.noItemsMessage}>
+            You have no items, Choose a Goob to claim a starter pack or head to{' '}
+            <a 
+              href="https://magiceden.us/collections/apechain/ITEMS"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.magicEdenLink}
+            >
+              Magic Eden
+            </a>
+            {' '}to buy on secondary
+          </div>
+        </div>
+      );
+    }
+    // Not connected - show generic message
+    return (
+      <div className="flex flex-col gap-2 items-center text-center w-full">
+        <div className="text-sm text-muted-foreground">
+          You have no items. Select Goobs above to claim starter packs.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingTop: '20px', width: '100%' }}>
