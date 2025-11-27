@@ -2123,10 +2123,44 @@ const ExpandedGoobView: React.FC<{
             {/* Traits Table - positioned at bottom of image */}
             <div className={styles.expandedTraitsTable}>
           <div className={styles.expandedTraitsHeader}>
-            <div className={styles.expandedTraitHeader}>Freq</div>
-            <div className={styles.expandedTraitHeader}>Temp</div>
-            <div className={styles.expandedTraitHeader}>pH</div>
-            <div className={styles.expandedTraitHeader}>Salinity</div>
+            {(() => {
+              // Check which traits are eligible for locking (error < 5% and not locked)
+              const isEligibleForLock = (traitName: string): boolean => {
+                if (!isInitialized || !displayState) return false;
+                let current: number, target: number, isLocked: boolean;
+                if (traitName === 'Freq') {
+                  current = displayState.currFreq;
+                  target = displayState.targetFreq;
+                  isLocked = displayState.lockedFreq || false;
+                } else if (traitName === 'Temp') {
+                  current = displayState.currTemp;
+                  target = displayState.targetTemp;
+                  isLocked = displayState.lockedTemp || false;
+                } else if (traitName === 'pH') {
+                  current = displayState.currPH;
+                  target = displayState.targetPH;
+                  isLocked = displayState.lockedPH || false;
+                } else if (traitName === 'Salinity') {
+                  current = displayState.currSal;
+                  target = displayState.targetSal;
+                  isLocked = displayState.lockedSal || false;
+                } else {
+                  return false;
+                }
+                if (isLocked) return false;
+                const error = calculatePercentDifference(current, target);
+                return error < 5;
+              };
+              
+              return (
+                <>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Freq') ? styles.expandedTraitHeaderPulse : ''}`}>Freq</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Temp') ? styles.expandedTraitHeaderPulse : ''}`}>Temp</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('pH') ? styles.expandedTraitHeaderPulse : ''}`}>pH</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Salinity') ? styles.expandedTraitHeaderPulse : ''}`}>Salinity</div>
+                </>
+              );
+            })()}
           </div>
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>State</span>

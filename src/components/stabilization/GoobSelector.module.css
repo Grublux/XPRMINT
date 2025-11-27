@@ -389,6 +389,10 @@
   text-align: center;
 }
 
+.expandedTraitHeaderPulse {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
 .expandedTraitsRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
