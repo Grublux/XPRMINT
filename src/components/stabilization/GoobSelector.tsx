@@ -670,7 +670,10 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       ) : expandedGoobId && labFilter === 'Lab' ? (
         <ExpandedGoobView
           tokenId={expandedGoobId}
-          onClose={() => setExpandedGoobId(null)}
+          onClose={() => {
+            setExpandedGoobId(null);
+            onChange(null); // Clear selectedGoobId in parent component
+          }}
           selectedItemsForGoob={selectedItemsForGoob}
           setSelectedItemsForGoob={setSelectedItemsForGoob}
           onRestoreItem={onRestoreItem}
@@ -1444,6 +1447,10 @@ const ExpandedGoobView: React.FC<{
   // State for vibes animation
   const [showVibesAnimation, setShowVibesAnimation] = React.useState(false);
   
+  // Ref to match preview table width to image wrapper
+  const imageWrapperRef = React.useRef<HTMLDivElement>(null);
+  const [previewTableWidth, setPreviewTableWidth] = React.useState<number | null>(null);
+  
   // Listen for animation events from SendVibesButton
   React.useEffect(() => {
     const handleVibesAnimation = (e: Event) => {
@@ -1455,6 +1462,32 @@ const ExpandedGoobView: React.FC<{
     window.addEventListener('vibes-animation', handleVibesAnimation);
     return () => window.removeEventListener('vibes-animation', handleVibesAnimation);
   }, [tokenId]);
+  
+  // Match preview table width to image wrapper width
+  React.useEffect(() => {
+    const updatePreviewWidth = () => {
+      if (imageWrapperRef.current) {
+        const width = imageWrapperRef.current.offsetWidth;
+        setPreviewTableWidth(width);
+      }
+    };
+    
+    updatePreviewWidth();
+    window.addEventListener('resize', updatePreviewWidth);
+    
+    // Also update when image loads
+    const image = imageWrapperRef.current?.querySelector('img');
+    if (image) {
+      image.addEventListener('load', updatePreviewWidth);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', updatePreviewWidth);
+      if (image) {
+        image.removeEventListener('load', updatePreviewWidth);
+      }
+    };
+  }, [imageUrl, isLoading]);
   
   // Also check localStorage for animation trigger (fallback)
   React.useEffect(() => {
@@ -1937,7 +1970,7 @@ const ExpandedGoobView: React.FC<{
         {isLoading ? (
           <div className={styles.expandedLoading}>Loading...</div>
         ) : imageUrl ? (
-          <div className={styles.expandedImageWrapper}>
+          <div className={styles.expandedImageWrapper} ref={imageWrapperRef}>
             <div 
               className={styles.expandedVibesReadout}
               style={{
@@ -1986,6 +2019,107 @@ const ExpandedGoobView: React.FC<{
               alt={`Goob #${tokenId.toString()}`}
               className={styles.expandedGoobImage}
             />
+            
+            {/* Lock Trait Buttons - shown when traits are eligible (error < 5% and not locked) */}
+            {(() => {
+            if (!isInitialized || !displayState) {
+              console.log('[LockButton] Not rendering: isInitialized=', isInitialized, 'displayState=', !!displayState);
+              return null;
+            }
+            
+            // Calculate lockedCount
+            const lockedCount = (displayState.lockedFreq ? 1 : 0) +
+                               (displayState.lockedTemp ? 1 : 0) +
+                               (displayState.lockedPH ? 1 : 0) +
+                               (displayState.lockedSal ? 1 : 0);
+            
+            // Calculate SP cost based on lockedCount
+            const getLockCost = (count: number): number => {
+              if (count === 0) return 0;
+              else if (count === 1) return 8;
+              else if (count === 2) return 10;
+              else return 12;
+            };
+            
+            const lockCost = getLockCost(lockedCount);
+            
+            // Check which traits are eligible (error < 5% and not locked)
+            const eligibleTraits: Array<{ name: string; cost: number; error: number }> = [];
+            
+            const checkTrait = (name: string, current: number, target: number, isLocked: boolean) => {
+              if (isLocked) return;
+              const error = calculatePercentDifference(current, target);
+              console.log(`[LockButton] Checking ${name}: current=${current}, target=${target}, error=${error.toFixed(2)}%, isLocked=${isLocked}`);
+              if (error < 5) {
+                eligibleTraits.push({ name, cost: lockCost, error });
+              }
+            };
+            
+            checkTrait('Freq', displayState.currFreq, displayState.targetFreq, displayState.lockedFreq || false);
+            checkTrait('Temp', displayState.currTemp, displayState.targetTemp, displayState.lockedTemp || false);
+            checkTrait('pH', displayState.currPH, displayState.targetPH, displayState.lockedPH || false);
+            checkTrait('Salinity', displayState.currSal, displayState.targetSal, displayState.lockedSal || false);
+            
+            console.log(`[LockButton] isInitialized=${isInitialized}, displayState=${!!displayState}, eligibleTraits.length=${eligibleTraits.length}`);
+            
+            if (eligibleTraits.length === 0) {
+              console.log('[LockButton] No eligible traits, returning null');
+              return null;
+            }
+            
+            console.log('[LockButton] Rendering buttons for:', eligibleTraits.map(t => t.name).join(', '));
+            
+            return (
+              <div style={{ 
+                position: 'absolute',
+                bottom: '140px', // Position well above the trait table (increased from 120px to ensure full clearance)
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '8px',
+                alignItems: 'center',
+                width: '100%',
+                maxWidth: '800px',
+                padding: '0 12px',
+                zIndex: 10, // Higher z-index to ensure it's above the table
+              }}>
+                {eligibleTraits.map((trait) => (
+                  <button
+                    key={trait.name}
+                    onClick={() => {
+                      // TODO: Implement lock trait functionality
+                      console.log(`Lock ${trait.name} for ${trait.cost} SP`);
+                    }}
+                    style={{
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#ffffff',
+                      backgroundColor: '#10b981', // Solid green background, no transparency
+                      border: '2px solid #059669',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      minWidth: '200px',
+                      opacity: 1, // Ensure no transparency
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#059669';
+                      e.currentTarget.style.borderColor = '#047857';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#10b981';
+                      e.currentTarget.style.borderColor = '#059669';
+                    }}
+                  >
+                    Lock {trait.name} for {trait.cost} SP?
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
+            
             {/* Traits Table - positioned at bottom of image */}
             <div className={styles.expandedTraitsTable}>
           <div className={styles.expandedTraitsHeader}>
@@ -2115,36 +2249,10 @@ const ExpandedGoobView: React.FC<{
         
         {/* Preview Table - shown when items are selected */}
         {imageUrl && !isLoading && selectedItemsForGoob.size > 0 && previewState && (
-          <div className={styles.previewTableContainer}>
-            <div className={styles.previewTableTitle}>Preview</div>
-            <div className={styles.previewTable}>
-              <div className={styles.expandedTraitsHeader}>
-                <div className={styles.expandedTraitHeader}>Freq</div>
-                <div className={styles.expandedTraitHeader}>Temp</div>
-                <div className={styles.expandedTraitHeader}>pH</div>
-                <div className={styles.expandedTraitHeader}>Salinity</div>
-              </div>
+          <div className={styles.previewTableContainer} style={previewTableWidth ? { width: `${previewTableWidth}px` } : undefined}>
+            <div className={styles.previewTable} style={previewTableWidth ? { width: `${previewTableWidth}px` } : undefined}>
               <div className={styles.expandedTraitsRow}>
-                <span className={styles.expandedTraitRowLabel}>New State</span>
-                <div className={styles.expandedTraitCell}>
-                  {previewState.currFreq}
-                  {previewState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
-                </div>
-                <div className={styles.expandedTraitCell}>
-                  {previewState.currTemp}
-                  {previewState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
-                </div>
-                <div className={styles.expandedTraitCell}>
-                  {previewState.currPH}
-                  {previewState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
-                </div>
-                <div className={styles.expandedTraitCell}>
-                  {previewState.currSal}
-                  {previewState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
-                </div>
-              </div>
-              <div className={styles.expandedTraitsRow}>
-                <span className={styles.expandedTraitRowLabel}>Change</span>
+                <span className={styles.expandedTraitRowLabel}>Net Effect</span>
                 {(() => {
                   if (!displayState) return null;
                   const changeFreq = previewState.currFreq - displayState.currFreq;
@@ -2190,6 +2298,25 @@ const ExpandedGoobView: React.FC<{
                     </>
                   );
                 })()}
+              </div>
+              <div className={styles.expandedTraitsRow}>
+                <span className={styles.expandedTraitRowLabel}>New State</span>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currFreq}
+                  {previewState.lockedFreq && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currTemp}
+                  {previewState.lockedTemp && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currPH}
+                  {previewState.lockedPH && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
+                <div className={styles.expandedTraitCell}>
+                  {previewState.currSal}
+                  {previewState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
+                </div>
               </div>
               <div className={styles.expandedTraitsRow}>
                 <span className={styles.expandedTraitRowLabel}>New Error</span>

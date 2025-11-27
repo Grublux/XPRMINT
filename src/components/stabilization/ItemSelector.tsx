@@ -506,6 +506,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                   filterCategory={selectedFilter}
                   creatureId={creatureId}
                   selectedItemsForGoob={selectedItemsForGoob}
+                  isSimulating={isSimulating}
                   onAddItem={(itemId) => {
                     // Check if item is Epic
                     let isEpic = false;
@@ -650,7 +651,8 @@ const ItemCard: React.FC<{
   creatureId?: bigint | number | null;
   selectedItemsForGoob?: Map<number, number>;
   onAddItem?: (itemId: number) => void;
-}> = ({ itemId, balance, onModalOpen, filterCategory, creatureId, selectedItemsForGoob, onAddItem }) => {
+  isSimulating?: boolean;
+}> = ({ itemId, balance, onModalOpen, filterCategory, creatureId, selectedItemsForGoob, onAddItem, isSimulating = false }) => {
   // Check if we have cached metadata - if so, load immediately
   const getCachedMetadata = (): any => {
     try {
@@ -666,6 +668,25 @@ const ItemCard: React.FC<{
   const [isVisible, setIsVisible] = useState(hasCached);
   const cardRef = useRef<HTMLDivElement>(null);
   const { metadata, isLoading } = useItemMetadata(isVisible ? itemId : null);
+  
+  // Get Goob state if creatureId is provided (Lab view) - for secondary effect color coding
+  // In simulation mode, get from localStorage; otherwise use on-chain hook
+  const getSimulatedCreatureState = (goobId: bigint | number): any | null => {
+    try {
+      const key = `simulated-creature-state-${goobId.toString()}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (err) {
+      console.error('[ItemSelector] Failed to load simulated state:', err);
+    }
+    return null;
+  };
+  
+  const { state: creatureState } = useCreatureState(creatureId ? Number(creatureId) : 0);
+  const simulatedState = creatureId && isSimulating ? getSimulatedCreatureState(BigInt(Number(creatureId))) : null;
+  const goobState = creatureId ? (simulatedState || creatureState) : null;
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -897,7 +918,9 @@ const ItemCard: React.FC<{
         {/* Trait and magnitude display */}
         {metadata?.attributes && (() => {
           let primaryTrait: string | null = null;
-          let primaryDelta: number | null = null;
+          let primaryDeltaMagnitude: number | null = null;
+          let secondaryTrait: string | null = null;
+          let secondaryDeltaMagnitude: number | null = null;
           
           for (const attr of metadata.attributes) {
             if (attr.trait_type === 'Primary Trait') {
@@ -912,28 +935,146 @@ const ItemCard: React.FC<{
                 primaryTrait = 'Salinity';
               }
             } else if (attr.trait_type === 'Primary Delta Magnitude') {
-              primaryDelta = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+              primaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+            } else if (attr.trait_type === 'Secondary Trait') {
+              const value = String(attr.value).toLowerCase();
+              if (value.includes('frequency')) {
+                secondaryTrait = 'Freq';
+              } else if (value.includes('temperature')) {
+                secondaryTrait = 'Temp';
+              } else if (value.includes('ph') || value === 'ph') {
+                secondaryTrait = 'pH';
+              } else if (value.includes('salinity')) {
+                secondaryTrait = 'Salinity';
+              }
+            } else if (attr.trait_type === 'Secondary Delta Magnitude') {
+              secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
             }
           }
           
-          if (primaryTrait && primaryDelta !== null) {
+          // If no Goob is selected, show neutral (just magnitude, no sign, white)
+          if (!goobState) {
             return (
-              <div 
-                style={{ 
-                  fontSize: '15px',
-                  fontWeight: 300,
-                  lineHeight: '1.2',
-                  textAlign: 'center',
-                  color: 'var(--muted)',
-                  marginTop: '2px',
-                  width: '100%',
-                }}
-              >
-                {primaryTrait} {primaryDelta}
-              </div>
+              <>
+                {primaryTrait && primaryDeltaMagnitude !== null && (
+                  <div 
+                    style={{ 
+                      fontSize: '15px',
+                      fontWeight: 300,
+                      lineHeight: '1.2',
+                      textAlign: 'center',
+                      marginTop: '2px',
+                      width: '100%',
+                      color: 'var(--muted)', // Neutral white when no Goob selected
+                    }}
+                  >
+                    {primaryTrait} {primaryDeltaMagnitude}
+                  </div>
+                )}
+                {secondaryTrait && secondaryDeltaMagnitude !== null && (
+                  <div 
+                    style={{ 
+                      fontSize: '15px',
+                      fontWeight: 300,
+                      lineHeight: '1.2',
+                      textAlign: 'center',
+                      marginTop: '2px',
+                      width: '100%',
+                      color: 'var(--muted)', // Neutral white when no Goob selected
+                    }}
+                  >
+                    {secondaryTrait} {secondaryDeltaMagnitude}
+                  </div>
+                )}
+              </>
             );
           }
-          return null;
+          
+          // Calculate primary direction based on current Goob state
+          let primaryDirection = 1;
+          if (primaryTrait && goobState) {
+            const getCurrent = (t: string) => {
+              if (t === 'Freq') return goobState.currFreq;
+              if (t === 'Temp') return goobState.currTemp;
+              if (t === 'pH') return goobState.currPH;
+              if (t === 'Salinity') return goobState.currSal;
+              return 0;
+            };
+            const getTarget = (t: string) => {
+              if (t === 'Freq') return goobState.targetFreq;
+              if (t === 'Temp') return goobState.targetTemp;
+              if (t === 'pH') return goobState.targetPH;
+              if (t === 'Salinity') return goobState.targetSal;
+              return 0;
+            };
+            const current = getCurrent(primaryTrait);
+            const target = getTarget(primaryTrait);
+            primaryDirection = current > target ? -1 : 1;
+          }
+          
+          // Calculate actual deltas with correct signs
+          const primaryDelta = primaryDeltaMagnitude !== null ? primaryDirection * primaryDeltaMagnitude : null;
+          const secondaryDelta = secondaryDeltaMagnitude !== null ? primaryDirection * secondaryDeltaMagnitude : null;
+          
+          // Helper to determine if effect moves towards target (always true for primary, check for secondary)
+          const isTowardsTarget = (trait: string, delta: number): boolean => {
+            if (!goobState || delta === 0) return true;
+            const getCurrent = (t: string) => {
+              if (t === 'Freq') return goobState.currFreq;
+              if (t === 'Temp') return goobState.currTemp;
+              if (t === 'pH') return goobState.currPH;
+              if (t === 'Salinity') return goobState.currSal;
+              return 0;
+            };
+            const getTarget = (t: string) => {
+              if (t === 'Freq') return goobState.targetFreq;
+              if (t === 'Temp') return goobState.targetTemp;
+              if (t === 'pH') return goobState.targetPH;
+              if (t === 'Salinity') return goobState.targetSal;
+              return 0;
+            };
+            const current = getCurrent(trait);
+            const target = getTarget(trait);
+            const newValue = current + delta;
+            const distanceBefore = Math.abs(current - target);
+            const distanceAfter = Math.abs(newValue - target);
+            return distanceAfter < distanceBefore;
+          };
+          
+          return (
+            <>
+              {primaryTrait && primaryDelta !== null && (
+                <div 
+                  style={{ 
+                    fontSize: '15px',
+                    fontWeight: 300,
+                    lineHeight: '1.2',
+                    textAlign: 'center',
+                    marginTop: '2px',
+                    width: '100%',
+                    color: '#10b981', // Primary always moves towards target (green)
+                  }}
+                >
+                  {primaryTrait} {primaryDelta > 0 ? '+' : ''}{primaryDelta}
+                </div>
+              )}
+              {secondaryTrait && secondaryDelta !== null && (
+                <div 
+                  style={{ 
+                    fontSize: '15px',
+                    fontWeight: 300,
+                    lineHeight: '1.2',
+                    textAlign: 'center',
+                    marginTop: '2px',
+                    width: '100%',
+                    color: isTowardsTarget(secondaryTrait, secondaryDelta) ? '#10b981' : '#ef4444',
+                  }}
+                >
+                  {secondaryTrait} {secondaryDelta > 0 ? '+' : ''}{secondaryDelta}
+                </div>
+              )}
+            </>
+          );
         })()}
       </div>
     </div>
