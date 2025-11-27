@@ -1995,37 +1995,6 @@ const ExpandedGoobView: React.FC<{
             <div className={styles.expandedTraitHeader}>Salinity</div>
           </div>
           <div className={styles.expandedTraitsRow}>
-            <span className={styles.expandedTraitRowLabel}>Target</span>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetFreq
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetTemp
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetPH
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-            <div className={styles.expandedTraitCell}>
-              {isInitialized && displayState ? (
-                displayState.targetSal
-              ) : (
-                <span className={styles.expandedTraitEmpty}>—</span>
-              )}
-            </div>
-          </div>
-          <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>State</span>
             <div className={styles.expandedTraitCell}>
               {isInitialized && displayState ? (
@@ -2063,6 +2032,37 @@ const ExpandedGoobView: React.FC<{
                   {displayState.currSal}
                   {displayState.lockedSal && <span className={styles.lockedBadge}> LOCKED</span>}
                 </>
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+          </div>
+          <div className={styles.expandedTraitsRow}>
+            <span className={styles.expandedTraitRowLabel}>Target</span>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetFreq
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetTemp
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetPH
+              ) : (
+                <span className={styles.expandedTraitEmpty}>—</span>
+              )}
+            </div>
+            <div className={styles.expandedTraitCell}>
+              {isInitialized && displayState ? (
+                displayState.targetSal
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}

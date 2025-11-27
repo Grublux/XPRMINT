@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAccount } from 'wagmi';
 import { StabilizationDashboard } from '../components/stabilization/StabilizationDashboard';
 import { useWhitelistStatus } from '../hooks/stabilizationV3';
@@ -60,6 +60,7 @@ export default function StabilizationPage() {
   // Daily Drip timer logic
   const [timeUntilDrip, setTimeUntilDrip] = useState<number | null>(null);
   const [canClaimDrip, setCanClaimDrip] = useState(false);
+  const canClaimDripRef = useRef(false);
   
   // Check if page reload - simulate 1 minute left
   const isPageReload = useMemo(() => {
@@ -72,6 +73,11 @@ export default function StabilizationPage() {
     } catch {}
     return false;
   }, []);
+  
+  // Sync ref with state
+  useEffect(() => {
+    canClaimDripRef.current = canClaimDrip;
+  }, [canClaimDrip]);
   
   useEffect(() => {
     const calculateTimeUntilDrip = () => {
@@ -92,41 +98,73 @@ export default function StabilizationPage() {
       return noon.getTime() - now.getTime();
     };
     
-    const updateTimer = () => {
-      const timeLeft = calculateTimeUntilDrip();
-      if (timeLeft <= 0) {
-        setCanClaimDrip(true);
-        setTimeUntilDrip(null);
-      } else {
-        setCanClaimDrip(false);
-        // Decrement by 1 second each time
-        setTimeUntilDrip(prev => {
-          if (prev === null) return timeLeft;
-          // If it's the first time or we're more than 2 seconds off, reset to calculated time
-          const diff = Math.abs(prev - timeLeft);
-          if (diff > 2000) {
-            return timeLeft;
-          }
-          // Otherwise decrement by 1 second
-          return Math.max(0, prev - 1000);
-        });
-      }
-    };
-    
     // Initialize with calculated time
     const initialTime = calculateTimeUntilDrip();
     if (initialTime > 0) {
       setTimeUntilDrip(initialTime);
       setCanClaimDrip(false);
+      canClaimDripRef.current = false;
     } else {
       setCanClaimDrip(true);
+      canClaimDripRef.current = true;
       setTimeUntilDrip(null);
     }
     
-    const interval = setInterval(updateTimer, 1000);
+    const interval = setInterval(() => {
+      // Don't update if claim button is already showing - wait for user to click it
+      if (canClaimDripRef.current) {
+        return; // Stop counting down, button is visible
+      }
+      
+      setTimeUntilDrip(prev => {
+        if (prev === null) {
+          // Recalculate if null
+          const recalculated = calculateTimeUntilDrip();
+          if (recalculated > 0) {
+            setCanClaimDrip(false);
+            canClaimDripRef.current = false;
+            return recalculated;
+          } else {
+            setCanClaimDrip(true);
+            canClaimDripRef.current = true;
+            return null;
+          }
+        }
+        
+        // Decrement by 1 second
+        const newTime = prev - 1000;
+        
+        if (newTime <= 0) {
+          setCanClaimDrip(true);
+          canClaimDripRef.current = true;
+          return null;
+        } else {
+          return newTime;
+        }
+      });
+    }, 1000);
     
     return () => clearInterval(interval);
   }, [isPageReload]);
+  
+  // Handle claim drip button click - reset timer after claim
+  const handleClaimDrip = () => {
+    // TODO: Implement actual claim logic
+    // After claim is successful, reset the timer
+    const now = new Date();
+    const noon = new Date(now);
+    noon.setHours(12, 0, 0, 0);
+    
+    // If it's past noon today, set to noon tomorrow
+    if (now > noon) {
+      noon.setDate(noon.getDate() + 1);
+    }
+    
+    const timeUntilNext = noon.getTime() - now.getTime();
+    setTimeUntilDrip(timeUntilNext);
+    setCanClaimDrip(false);
+    canClaimDripRef.current = false;
+  };
   
   // Format time until drip
   const formatTimeUntilDrip = (ms: number): string => {
@@ -190,7 +228,7 @@ export default function StabilizationPage() {
             <div className={styles.statLabel}>Daily Drip In</div>
             {hasInitializedGoob ? (
               canClaimDrip ? (
-                <button className={styles.claimDripButton}>
+                <button className={styles.claimDripButton} onClick={handleClaimDrip}>
                   Claim Drip
                 </button>
               ) : timeUntilDrip !== null ? (
