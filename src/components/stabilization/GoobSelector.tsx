@@ -7,8 +7,10 @@ import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
+import { useSendVibes } from '../../hooks/stabilizationV3/useSendVibes';
 import { useQueryClient } from '@tanstack/react-query';
-import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
+import { useReadContract } from 'wagmi';
+import { STAB_V3_ADDRESS, ITEM_V3_ADDRESS, creatureStabilizerV3Abi } from '../../config/contracts/stabilizationV3';
 import styles from './GoobSelector.module.css';
 import cardStyles from './GoobCard.module.css';
 
@@ -621,9 +623,16 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       
       {/* Title - "Goobs ####" when expanded */}
       {expandedGoobId && labFilter === 'Lab' && (
-        <div className={styles.expandedTitle}>
-          Goobs #{expandedGoobId.toString()}
-        </div>
+        <>
+          <div className={styles.expandedTitle}>
+            Goobs #{expandedGoobId.toString()}
+          </div>
+          {/* Send Vibes Button - positioned right after title */}
+          <SendVibesButton 
+            tokenId={expandedGoobId} 
+            isSimulating={isSimulating}
+          />
+        </>
       )}
 
       {/* Hint Text - hidden when Goob is expanded */}
@@ -680,6 +689,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
                 isSelectedForBatch={isSelectedForBatch}
                 showPlusButton={labFilter === 'Waiting Room'}
                 isWaitingRoom={labFilter === 'Waiting Room'}
+                isSimulating={isSimulating}
                 onSelect={() => {
                   if (labFilter === 'Lab') {
                     // In Lab: expand the Goob and set selectedId so ItemSelector knows
@@ -1118,6 +1128,307 @@ const ApplySuccessModal: React.FC<{
   );
 };
 
+// Send Vibes Button Component
+const SendVibesButton: React.FC<{
+  tokenId: bigint;
+  isSimulating: boolean;
+}> = ({ tokenId, isSimulating }) => {
+  const { state: creatureState } = useCreatureState(Number(tokenId));
+  const { sendVibes, isPending: isSendingVibes, isSuccess: vibesSentSuccess } = useSendVibes();
+  
+  // Get simulated state if in simulation mode
+  const simulatedState = isSimulating ? getSimulatedCreatureState(tokenId) : null;
+  const displayState = simulatedState || creatureState;
+  
+  // Get lastVibesDay, GAME_START, and DAY_SECONDS from contract
+  const { data: lastVibesDay, refetch: refetchLastVibesDay } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'lastVibesDay',
+    args: [tokenId],
+    query: {
+      enabled: !isSimulating && tokenId > 0n,
+    },
+  });
+  
+  const { data: gameStart } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'GAME_START',
+    query: {
+      enabled: !isSimulating,
+    },
+  });
+  
+  const { data: daySeconds } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'DAY_SECONDS',
+    query: {
+      enabled: !isSimulating,
+    },
+  });
+  
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [showVibesAnimation, setShowVibesAnimation] = React.useState(false);
+  const [timeUntilNextVibes, setTimeUntilNextVibes] = React.useState<number | null>(null);
+  const countdownIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const manuallySetCountdownRef = React.useRef<boolean>(false);
+  
+  // Cleanup interval on unmount
+  React.useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
+  
+  // Store animation state in a way ExpandedGoobView can access it
+  React.useEffect(() => {
+    if (showVibesAnimation) {
+      window.dispatchEvent(new CustomEvent('vibes-animation', { detail: { tokenId: tokenId.toString(), show: true } }));
+    } else {
+      window.dispatchEvent(new CustomEvent('vibes-animation', { detail: { tokenId: tokenId.toString(), show: false } }));
+    }
+  }, [showVibesAnimation, tokenId]);
+  
+  // Calculate time until next vibes can be sent - ONLY on mount or when dependencies change
+  React.useEffect(() => {
+    // In simulation mode, check localStorage for last vibes time
+    if (isSimulating) {
+      // Clear any existing interval first
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+      
+      const lastVibesKey = `last-vibes-time-${tokenId.toString()}`;
+      const lastVibesTime = localStorage.getItem(lastVibesKey);
+      if (lastVibesTime) {
+        const lastTime = parseInt(lastVibesTime, 10);
+        const now = Date.now();
+        const timeLeft = (24 * 60 * 60 * 1000) - (now - lastTime);
+        if (timeLeft > 0) {
+          setTimeUntilNextVibes(timeLeft);
+          const interval = setInterval(() => {
+            const lastVibesTime = localStorage.getItem(lastVibesKey);
+            if (lastVibesTime) {
+              const lastTime = parseInt(lastVibesTime, 10);
+              const currentTime = Date.now();
+              const remaining = (24 * 60 * 60 * 1000) - (currentTime - lastTime);
+              if (remaining <= 0) {
+                setTimeUntilNextVibes(null);
+                clearInterval(interval);
+                countdownIntervalRef.current = null;
+              } else {
+                setTimeUntilNextVibes(remaining);
+              }
+            }
+          }, 1000);
+          countdownIntervalRef.current = interval;
+          return () => {
+            clearInterval(interval);
+            if (countdownIntervalRef.current === interval) {
+              countdownIntervalRef.current = null;
+            }
+          };
+        } else {
+          setTimeUntilNextVibes(null);
+        }
+      } else {
+        setTimeUntilNextVibes(null);
+      }
+      return;
+    }
+    
+    // Real mode: use contract data
+    if (!lastVibesDay || !gameStart || !daySeconds) {
+      setTimeUntilNextVibes(null);
+      return;
+    }
+    
+    const calculateTimeUntilNext = () => {
+      const now = Math.floor(Date.now() / 1000);
+      const gameStartTime = Number(gameStart);
+      const daySecondsValue = Number(daySeconds);
+      
+      if (now < gameStartTime) {
+        setTimeUntilNextVibes(null);
+        return;
+      }
+      const currentDay = Math.floor((now - gameStartTime) / daySecondsValue);
+      const lastVibesDayNum = Number(lastVibesDay);
+      const nextVibesDay = lastVibesDayNum + 1;
+      const nextVibesTimestamp = gameStartTime + (nextVibesDay * daySecondsValue);
+      const timeLeft = (nextVibesTimestamp - now) * 1000;
+      
+      if (timeLeft <= 0) {
+        setTimeUntilNextVibes(null);
+      } else {
+        setTimeUntilNextVibes(timeLeft);
+      }
+    };
+    
+    calculateTimeUntilNext();
+    const interval = setInterval(calculateTimeUntilNext, 1000);
+    return () => clearInterval(interval);
+  }, [lastVibesDay, gameStart, daySeconds, isSimulating, tokenId]);
+  
+  // Handle vibes sent success
+  React.useEffect(() => {
+    if (vibesSentSuccess) {
+      setShowVibesAnimation(true);
+      setTimeout(() => setShowVibesAnimation(false), 2000);
+      refetchLastVibesDay();
+    }
+  }, [vibesSentSuccess, refetchLastVibesDay]);
+  
+  // Format time until next vibes
+  const formatTimeUntilNextVibes = (ms: number): string => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  // Handle send vibes
+  const handleSendVibes = async () => {
+    console.log('Send Vibes clicked!', { isSendingVibes, isSimulating, displayState });
+    if (isSendingVibes) return;
+    
+    // In simulation mode, just update the local state
+    if (isSimulating) {
+      const currentState = displayState || getSimulatedCreatureState(tokenId);
+      console.log('Current state:', currentState);
+      if (currentState && typeof currentState.vibes === 'number' && currentState.vibes < 10) {
+        const newVibes = Math.min(currentState.vibes + 1, 10);
+        const updatedState = {
+          ...currentState,
+          vibes: newVibes,
+        };
+        setSimulatedCreatureState(tokenId, updatedState);
+        
+        // Trigger animations immediately - store in localStorage for ExpandedGoobView to read
+        const animKey = `vibes-anim-${tokenId.toString()}`;
+        localStorage.setItem(animKey, Date.now().toString());
+        setShowVibesAnimation(true);
+        window.dispatchEvent(new CustomEvent('vibes-animation', { 
+          detail: { tokenId: tokenId.toString(), show: true } 
+        }));
+        setTimeout(() => {
+          setShowVibesAnimation(false);
+          window.dispatchEvent(new CustomEvent('vibes-animation', { 
+            detail: { tokenId: tokenId.toString(), show: false } 
+          }));
+        }, 2000);
+        
+        // Set countdown immediately
+        const lastVibesKey = `last-vibes-time-${tokenId.toString()}`;
+        const now = Date.now();
+        localStorage.setItem(lastVibesKey, now.toString());
+        const countdownTime = 24 * 60 * 60 * 1000;
+        
+        // Clear any existing interval first
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        
+        // Mark that we're manually setting the countdown
+        manuallySetCountdownRef.current = true;
+        
+        // Set countdown state immediately
+        setTimeUntilNextVibes(countdownTime);
+        
+        // Force a re-render immediately
+        setRefreshKey(prev => prev + 1);
+        
+        // Set up interval to update countdown every second
+        countdownIntervalRef.current = setInterval(() => {
+          const lastVibesTime = localStorage.getItem(lastVibesKey);
+          if (lastVibesTime) {
+            const lastTime = parseInt(lastVibesTime, 10);
+            const currentTime = Date.now();
+            const remaining = (24 * 60 * 60 * 1000) - (currentTime - lastTime);
+            console.log('Countdown tick:', remaining);
+            if (remaining <= 0) {
+              setTimeUntilNextVibes(null);
+              if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+                countdownIntervalRef.current = null;
+              }
+            } else {
+              setTimeUntilNextVibes(remaining);
+            }
+          }
+        }, 1000);
+        
+        // Force immediate re-render by updating refresh key
+        setRefreshKey(prev => prev + 1);
+        
+        // ALSO force a state update by calling setTimeUntilNextVibes again in next tick
+        setTimeout(() => {
+          setTimeUntilNextVibes(countdownTime);
+          console.log('FORCED COUNTDOWN UPDATE:', countdownTime);
+        }, 0);
+        
+        // Force re-render to update vibes counter
+        setRefreshKey(prev => prev + 1);
+        
+        // Also trigger a custom event to force ExpandedGoobView to refresh
+        window.dispatchEvent(new CustomEvent('vibes-updated', { 
+          detail: { tokenId: tokenId.toString(), newVibes } 
+        }));
+      }
+      return;
+    }
+    
+    // Real mode: call contract
+    try {
+      await sendVibes(Number(tokenId));
+    } catch (error) {
+      console.error('Failed to send vibes:', error);
+    }
+  };
+  
+  const showCountdown = timeUntilNextVibes !== null && timeUntilNextVibes > 0;
+  
+  // ALWAYS show countdown if there's time remaining (regardless of vibes level)
+  if (showCountdown) {
+    return (
+      <div className={styles.sendVibesButtonContainer}>
+        <div className={styles.vibesCountdown}>
+          Send Vibes in {formatTimeUntilNextVibes(timeUntilNextVibes)}
+        </div>
+      </div>
+    );
+  }
+  
+  // If no countdown, only show button if vibes < 10
+  if (!displayState || typeof displayState.vibes !== 'number' || displayState.vibes >= 10) {
+    return null;
+  }
+  
+  // Show button when vibes < 10 and no active countdown
+  return (
+    <div className={styles.sendVibesButtonContainer}>
+      <button
+        className={styles.sendVibesButton}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSendVibes();
+        }}
+        disabled={isSendingVibes}
+        type="button"
+      >
+        {isSendingVibes ? 'Sending...' : 'Send Vibes'}
+      </button>
+    </div>
+  );
+};
+
 // Expanded Goob view component
 const ExpandedGoobView: React.FC<{
   tokenId: bigint;
@@ -1128,12 +1439,246 @@ const ExpandedGoobView: React.FC<{
   isSimulating?: boolean;
 }> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem, isSimulating = false }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
-  const { state: creatureState } = useCreatureState(Number(tokenId));
+  const { state: creatureState, refetch: refetchCreatureState } = useCreatureState(Number(tokenId));
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
+  // Get lastVibesDay, GAME_START, and DAY_SECONDS from contract
+  const { data: lastVibesDay, refetch: refetchLastVibesDay } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'lastVibesDay',
+    args: [tokenId],
+    query: {
+      enabled: !isSimulating && tokenId > 0n,
+    },
+  });
+  
+  const { data: gameStart } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'GAME_START',
+    query: {
+      enabled: !isSimulating,
+    },
+  });
+  
+  const { data: daySeconds } = useReadContract({
+    address: STAB_V3_ADDRESS,
+    abi: creatureStabilizerV3Abi,
+    functionName: 'DAY_SECONDS',
+    query: {
+      enabled: !isSimulating,
+    },
+  });
+  
+  // Send Vibes hook
+  const { sendVibes, isPending: isSendingVibes, isSuccess: vibesSentSuccess } = useSendVibes();
+  
   // State for apply changes flow (declared early to avoid initialization errors)
   const [refreshKey, setRefreshKey] = React.useState(0);
+  
+  // State for vibes animation and countdown
+  const [showVibesAnimation, setShowVibesAnimation] = React.useState(false);
+  const [timeUntilNextVibes, setTimeUntilNextVibes] = React.useState<number | null>(null);
+  
+  // Listen for animation events from SendVibesButton
+  React.useEffect(() => {
+    const handleVibesAnimation = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.tokenId === tokenId.toString()) {
+        setShowVibesAnimation(customEvent.detail.show);
+      }
+    };
+    window.addEventListener('vibes-animation', handleVibesAnimation);
+    return () => window.removeEventListener('vibes-animation', handleVibesAnimation);
+  }, [tokenId]);
+  
+  // Also check localStorage for animation trigger (fallback)
+  React.useEffect(() => {
+    const checkAnimation = () => {
+      const animKey = `vibes-anim-${tokenId.toString()}`;
+      const animTime = localStorage.getItem(animKey);
+      if (animTime) {
+        const time = parseInt(animTime, 10);
+        const now = Date.now();
+        if (now - time < 3000) {
+          setShowVibesAnimation(true);
+          setTimeout(() => {
+            setShowVibesAnimation(false);
+            localStorage.removeItem(animKey);
+          }, 2000);
+        }
+      }
+    };
+    checkAnimation();
+    const interval = setInterval(checkAnimation, 100);
+    return () => clearInterval(interval);
+  }, [tokenId]);
+  
+  // Helper to get vibes color
+  const getVibesColor = (vibes: number): string => {
+    if (vibes === 0) return '#7f1d1d'; // Deep red
+    if (vibes < 5) {
+      // 1-4: Gradually lighten from deep red
+      const ratio = vibes / 5;
+      const r = Math.round(127 + (239 - 127) * ratio);
+      const g = Math.round(29 + (68 - 29) * ratio);
+      const b = Math.round(29 + (68 - 29) * ratio);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    if (vibes < 9) {
+      // 5-8: Transition from red to green
+      const ratio = (vibes - 5) / 4;
+      const r = Math.round(239 - (239 - 16) * ratio);
+      const g = Math.round(68 + (185 - 68) * ratio);
+      const b = Math.round(68 + (129 - 68) * ratio);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    if (vibes === 9) return '#10b981'; // Green
+    if (vibes === 10) return '#059669'; // Best green (darker)
+    return '#ef4444'; // Default red
+  };
+  
+  // Calculate time until next vibes can be sent
+  React.useEffect(() => {
+    // In simulation mode, check localStorage for last vibes time
+    if (isSimulating) {
+      const lastVibesKey = `last-vibes-time-${tokenId.toString()}`;
+      const lastVibesTime = localStorage.getItem(lastVibesKey);
+      if (lastVibesTime) {
+        const lastTime = parseInt(lastVibesTime, 10);
+        const now = Date.now();
+        const timeLeft = (24 * 60 * 60 * 1000) - (now - lastTime);
+        if (timeLeft > 0) {
+          setTimeUntilNextVibes(timeLeft);
+          // Clear any existing interval first
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+          }
+          const interval = setInterval(() => {
+            const lastVibesTime = localStorage.getItem(lastVibesKey);
+            if (lastVibesTime) {
+              const lastTime = parseInt(lastVibesTime, 10);
+              const currentTime = Date.now();
+              const remaining = (24 * 60 * 60 * 1000) - (currentTime - lastTime);
+              if (remaining <= 0) {
+                setTimeUntilNextVibes(null);
+                clearInterval(interval);
+                countdownIntervalRef.current = null;
+              } else {
+                setTimeUntilNextVibes(remaining);
+              }
+            }
+          }, 1000);
+          countdownIntervalRef.current = interval;
+          return () => {
+            clearInterval(interval);
+            if (countdownIntervalRef.current === interval) {
+              countdownIntervalRef.current = null;
+            }
+          };
+        } else {
+          setTimeUntilNextVibes(null);
+        }
+      } else {
+        setTimeUntilNextVibes(null);
+      }
+      return;
+    }
+    
+    // Real mode: use contract data
+    if (!lastVibesDay || !gameStart || !daySeconds) {
+      setTimeUntilNextVibes(null);
+      return;
+    }
+    
+    const calculateTimeUntilNext = () => {
+      const now = Math.floor(Date.now() / 1000); // Current timestamp in seconds
+      const gameStartTime = Number(gameStart);
+      const daySecondsValue = Number(daySeconds);
+      
+      // Calculate current day
+      const currentTime = now;
+      if (currentTime < gameStartTime) {
+        setTimeUntilNextVibes(null);
+        return;
+      }
+      const currentDay = Math.floor((currentTime - gameStartTime) / daySecondsValue);
+      
+      // lastVibesDay is the day number when vibes were last sent
+      const lastVibesDayNum = Number(lastVibesDay);
+      const nextVibesDay = lastVibesDayNum + 1;
+      
+      // Calculate timestamp for start of next vibes day
+      const nextVibesTimestamp = gameStartTime + (nextVibesDay * daySecondsValue);
+      const timeLeft = (nextVibesTimestamp - currentTime) * 1000; // Convert to milliseconds
+      
+      if (timeLeft <= 0) {
+        setTimeUntilNextVibes(null);
+      } else {
+        setTimeUntilNextVibes(timeLeft);
+      }
+    };
+    
+    calculateTimeUntilNext();
+    const interval = setInterval(calculateTimeUntilNext, 1000);
+    
+    return () => clearInterval(interval);
+  }, [lastVibesDay, gameStart, daySeconds, isSimulating]);
+  
+  // Handle vibes sent success
+  React.useEffect(() => {
+    if (vibesSentSuccess) {
+      setShowVibesAnimation(true);
+      setTimeout(() => setShowVibesAnimation(false), 2000);
+      refetchCreatureState();
+      refetchLastVibesDay();
+      // Reset countdown will happen automatically via the useEffect above
+    }
+  }, [vibesSentSuccess, refetchCreatureState, refetchLastVibesDay]);
+  
+  // Format time until next vibes
+  const formatTimeUntilNextVibes = (ms: number): string => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  // Handle send vibes
+  const handleSendVibes = async () => {
+    if (isSendingVibes) return;
+    
+    // In simulation mode, just update the local state
+    if (isSimulating) {
+      const currentState = displayState || getSimulatedCreatureState(tokenId);
+      if (currentState && typeof currentState.vibes === 'number' && currentState.vibes < 10) {
+        const newVibes = Math.min(currentState.vibes + 1, 10);
+        const updatedState = {
+          ...currentState,
+          vibes: newVibes,
+        };
+        setSimulatedCreatureState(tokenId, updatedState);
+        setShowVibesAnimation(true);
+        setTimeout(() => setShowVibesAnimation(false), 2000);
+        setRefreshKey(prev => prev + 1); // Force re-render
+        
+        // Store last vibes time for countdown
+        const lastVibesKey = `last-vibes-time-${tokenId.toString()}`;
+        localStorage.setItem(lastVibesKey, Date.now().toString());
+        setTimeUntilNextVibes(24 * 60 * 60 * 1000);
+      }
+      return;
+    }
+    
+    // Real mode: call contract
+    try {
+      await sendVibes(Number(tokenId));
+    } catch (error) {
+      console.error('Failed to send vibes:', error);
+    }
+  };
   
   // Track scroll position when first item is added to prevent focus jump
   const goobItemAreaRef = React.useRef<HTMLDivElement | null>(null);
@@ -1170,12 +1715,26 @@ const ExpandedGoobView: React.FC<{
   }, [selectedItemsForGoob.size]);
   
   // Get simulated state if in simulation mode
+  const [vibesUpdateKey, setVibesUpdateKey] = React.useState(0);
+  
+  // Listen for vibes updates
+  React.useEffect(() => {
+    const handleVibesUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.tokenId === tokenId.toString()) {
+        setVibesUpdateKey(prev => prev + 1);
+      }
+    };
+    window.addEventListener('vibes-updated', handleVibesUpdate);
+    return () => window.removeEventListener('vibes-updated', handleVibesUpdate);
+  }, [tokenId]);
+  
   const simulatedState = React.useMemo(() => {
     if (isSimulating) {
       return getSimulatedCreatureState(tokenId);
     }
     return null;
-  }, [isSimulating, tokenId, refreshKey]);
+  }, [isSimulating, tokenId, refreshKey, vibesUpdateKey]);
   
   // Use simulated state if available, otherwise use on-chain state
   const displayState = simulatedState || creatureState;
@@ -1558,9 +2117,49 @@ const ExpandedGoobView: React.FC<{
           <div className={styles.expandedLoading}>Loading...</div>
         ) : imageUrl ? (
           <div className={styles.expandedImageWrapper}>
-            <div className={styles.expandedVibesReadout}>
+            <div 
+              className={styles.expandedVibesReadout}
+              style={{
+                color: isInitialized && displayState ? getVibesColor(displayState.vibes) : 'var(--muted)',
+              }}
+            >
               Vibes: {isInitialized && displayState ? displayState.vibes : '—'}
             </div>
+            {/* Kisses/Hearts Animation */}
+            {showVibesAnimation && (
+              <>
+                <div className={styles.vibesAnimation}>
+                  {(() => {
+                    // Choose ONE emoji type randomly for ALL animations
+                    const emojiType = Math.random() < 0.5 ? '💋' : '❤️';
+                    return Array.from({ length: 12 }).map((_, i) => {
+                      const randomX = Math.random() * 100;
+                      const randomY = Math.random() * 100;
+                      const randomDelay = Math.random() * 0.5;
+                      return (
+                        <span
+                          key={i}
+                          className={styles.vibesHeart}
+                          style={{
+                            '--random-x': randomX,
+                            '--random-y': randomY,
+                            animationDelay: `${randomDelay}s`,
+                            left: `${randomX}%`,
+                            top: `${randomY}%`,
+                          } as React.CSSProperties}
+                        >
+                          {emojiType}
+                        </span>
+                      );
+                    });
+                  })()}
+                </div>
+                {/* +1 Floating Animation */}
+                <div className={styles.plusOneFloat}>
+                  +1
+                </div>
+              </>
+            )}
             <img
               src={imageUrl}
               alt={`Goob #${tokenId.toString()}`}
@@ -1959,13 +2558,45 @@ const GoobCard: React.FC<{
   isSelectedForBatch: boolean;
   showPlusButton: boolean;
   isWaitingRoom: boolean;
+  isSimulating?: boolean;
   onSelect: () => void;
   onSelectForBatch: (e: React.MouseEvent) => void;
-}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, isWaitingRoom, onSelect, onSelectForBatch }) => {
+}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, isWaitingRoom, isSimulating = false, onSelect, onSelectForBatch }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
+  const { state: creatureState } = useCreatureState(Number(tokenId));
+  
+  // Get simulated state if in simulation mode
+  const simulatedState = isSimulating ? getSimulatedCreatureState(tokenId) : null;
+  
+  // Use simulated state if available, otherwise use on-chain state
+  const displayState = simulatedState || creatureState;
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
   const imageUrl = metadata?.image_data || metadata?.image || null;
+  
+  // Helper to get vibes color
+  const getVibesColor = (vibes: number): string => {
+    if (vibes === 0) return '#7f1d1d'; // Deep red
+    if (vibes < 5) {
+      // 1-4: Gradually lighten from deep red
+      const ratio = vibes / 5;
+      const r = Math.round(127 + (239 - 127) * ratio);
+      const g = Math.round(29 + (68 - 29) * ratio);
+      const b = Math.round(29 + (68 - 29) * ratio);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    if (vibes < 9) {
+      // 5-8: Transition from red to green
+      const ratio = (vibes - 5) / 4;
+      const r = Math.round(239 - (239 - 16) * ratio);
+      const g = Math.round(68 + (185 - 68) * ratio);
+      const b = Math.round(68 + (129 - 68) * ratio);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    if (vibes === 9) return '#10b981'; // Green
+    if (vibes === 10) return '#059669'; // Best green (darker)
+    return '#ef4444'; // Default red
+  };
 
   return (
     <button
@@ -2034,6 +2665,26 @@ const GoobCard: React.FC<{
           position: 'relative',
         }}
       >
+        {/* Vibes Counter - only show in Lab view */}
+        {!isWaitingRoom && displayState && typeof displayState.vibes === 'number' && (
+          <div 
+            style={{
+              position: 'absolute',
+              top: '4px',
+              left: '4px',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: getVibesColor(displayState.vibes),
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
+          >
+            Vibes: {displayState.vibes}
+          </div>
+        )}
         {isLoading ? (
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>Loading...</div>
         ) : imageUrl ? (
