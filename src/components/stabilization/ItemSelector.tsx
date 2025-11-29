@@ -1030,8 +1030,6 @@ const ItemCard: React.FC<{
           let primaryDeltaMagnitude: number | null = null;
           let secondaryTrait: string | null = null;
           let secondaryDeltaMagnitude: number | null = null;
-          let spYield: number | null = null;
-          
           for (const attr of metadata.attributes) {
             if (attr.trait_type === 'Primary Trait') {
               const value = String(attr.value).toLowerCase();
@@ -1059,8 +1057,6 @@ const ItemCard: React.FC<{
               }
             } else if (attr.trait_type === 'Secondary Delta Magnitude') {
               secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
-            } else if (attr.trait_type === 'SP Yield') {
-              spYield = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
             }
           }
           
@@ -1231,7 +1227,7 @@ const ExpandedItemView: React.FC<{
 }> = ({ itemId, balance, onClose, creatureId, isSimulating = false, userGoobIds = [], onItemBurned }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const { state: creatureState } = useCreatureState(creatureId ? Number(creatureId) : 0);
-  const { burnForSP, isPending: isBurning, isSuccess: isBurnSuccess } = useBurnItemForSP();
+  const { burnForSP, isPending: isBurning } = useBurnItemForSP();
   const { refetch: refetchSP } = useWalletSP();
   const imageUrl = metadata?.image || metadata?.image_data || null;
   
@@ -1404,7 +1400,7 @@ const ExpandedItemView: React.FC<{
                   }}
                 >
                   <div style={{ fontSize: '16px', opacity: 0.8 }}>SP</div>
-                  <div>{itemAttributes.spYield}</div>
+                  <div>{itemAttributes?.spYield}</div>
                 </div>
               )}
             </div>
@@ -1513,7 +1509,7 @@ const ExpandedItemView: React.FC<{
                 ×
               </button>
               <div className={styles.fakeTransactionText}>
-                Burn Item for {itemAttributes.spYield} SP?
+                Burn Item for {itemAttributes?.spYield} SP?
               </div>
               <button 
                 className={styles.fakeTransactionButton}
@@ -1524,7 +1520,7 @@ const ExpandedItemView: React.FC<{
                   // After 1 second delay, process burn
                   setTimeout(async () => {
                     const burnCreatureId = getBurnCreatureId();
-                    const spYield = itemAttributes.spYield || 0;
+                    const spYield = itemAttributes?.spYield || 0;
                     
                     if (isSimulating) {
                       // In simulation: update balance and SP

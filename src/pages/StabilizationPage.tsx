@@ -209,7 +209,6 @@ export default function StabilizationPage() {
   
   // State for daily drip claim fake transaction
   const [showDripTransactionModal, setShowDripTransactionModal] = useState(false);
-  const [isProcessingDrip, setIsProcessingDrip] = useState(false);
   const [showDripSuccessModal, setShowDripSuccessModal] = useState(false);
   const [dripItemsReceived, setDripItemsReceived] = useState<Array<{ 
     id: number; 
@@ -231,48 +230,6 @@ export default function StabilizationPage() {
     setShowDripTransactionModal(true);
   };
 
-  // Helper to check if a Goob is initialized (has simulated state or on-chain state)
-  const getInitializedGoobs = useMemo(() => {
-    if (!isSimulationOn) {
-      // In real mode, we'd need to check on-chain state
-      // For now, return all Goobs as potentially initialized
-      return walletGoobs || [];
-    }
-    
-    // In simulation mode, check localStorage for initialized Goobs that are IN THE LAB
-    const initialized: bigint[] = [];
-    const allGoobs = simulatedGoobs || [];
-    
-    // Get Goobs that are in the lab
-    let goobsInLab: Set<string> = new Set();
-    try {
-      const stored = localStorage.getItem('goobs-in-lab-simulation');
-      if (stored) {
-        const ids = JSON.parse(stored) as string[];
-        goobsInLab = new Set(ids);
-      }
-    } catch {}
-    
-    // Only check Goobs that are in the lab
-    for (const goobId of allGoobs) {
-      const goobIdStr = goobId.toString();
-      if (!goobsInLab.has(goobIdStr)) continue; // Skip if not in lab
-      
-      try {
-        const key = `simulated-creature-state-${goobIdStr}`;
-        const stored = localStorage.getItem(key);
-        if (stored) {
-          const state = JSON.parse(stored);
-          // Check if initialized (has non-zero targets)
-          if (state && (state.targetFreq !== 0 || state.targetTemp !== 0 || state.targetPH !== 0 || state.targetSal !== 0)) {
-            initialized.push(goobId);
-          }
-        }
-      } catch {}
-    }
-    
-    return initialized;
-  }, [isSimulationOn, simulatedGoobs, walletGoobs]);
 
   // Check if user has any Goobs (for counter display - counter shows if there are Goobs, even if not initialized yet)
   const hasAnyGoobs = useMemo(() => {
@@ -520,8 +477,6 @@ export default function StabilizationPage() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
   
-  // Check if user has initialized Goob (for claiming)
-  const hasInitializedGoob = getInitializedGoobs.length > 0;
 
   return (
     <div className={styles.pageContainer}>
@@ -593,7 +548,6 @@ export default function StabilizationPage() {
         isSimulating={isSimulationOn}
         isWhitelisted={isTester}
         onEnableSimulation={() => setIsSimulationOn(true)}
-        onSimulationItemsCountChange={setSimulationItemsCount}
       />
 
       {/* Daily Drip Fake Transaction Modal */}
