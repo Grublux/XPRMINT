@@ -594,8 +594,21 @@ export default function StabilizationPage() {
             <button 
               className={styles.modalCloseButton}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 handleCloseDripSuccess();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCloseDripSuccess();
+              }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                zIndex: 10,
+                pointerEvents: 'auto',
               }}
               aria-label="Close"
             >
@@ -706,9 +719,12 @@ export default function StabilizationPage() {
                   handleCloseDripSuccess();
                 }}
                 style={{
-                  position: 'relative',
+                  position: 'absolute',
+                  bottom: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
                   zIndex: 3,
-                  marginTop: '20px',
+                  pointerEvents: 'auto',
                 }}
               >
                 Dismiss
