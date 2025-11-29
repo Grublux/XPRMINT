@@ -6,6 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useWalletItemsSummary } from '../../hooks/stabilizationV3/useWalletItemsSummary';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
+import { useBurnItemForSP } from '../../hooks/stabilizationV3/useBurnItemForSP';
+import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
+import { useUserGoobs } from '../../hooks/goobs/useUserGoobs';
+import { useSimulatedGoobs } from '../../hooks/goobs/useSimulatedGoobs';
 import { ITEM_V3_ADDRESS, itemToken1155V3Abi } from '../../config/contracts/stabilizationV3';
 import styles from './ItemSelector.module.css';
 
@@ -40,6 +44,16 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
   const publicClient = usePublicClient();
   const queryClient = useQueryClient();
   const { items: walletItems, isLoading: walletIsLoading, isError } = useWalletItemsSummary();
+  const { goobs: walletGoobs } = useUserGoobs();
+  const { goobs: simulatedGoobs } = useSimulatedGoobs();
+  
+  // Get user's Goob IDs for burning (use any Goob ID - contract just needs it for ownership check)
+  const userGoobIds = React.useMemo(() => {
+    if (isSimulating) {
+      return simulatedGoobs.map(g => g.tokenId);
+    }
+    return walletGoobs.map(g => g.tokenId);
+  }, [isSimulating, walletGoobs, simulatedGoobs]);
   
   // For whitelisted wallets during early testing: only use simulation mode
   // Don't load real items when whitelisted and not simulating
@@ -378,7 +392,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
       return () => clearTimeout(timeout);
     }
   }, [categoryCounts]);
-  
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 items-center text-center w-full">
@@ -430,24 +444,24 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
     <div style={{ paddingTop: '20px', width: '100%' }}>
       {/* Filter Buttons - hidden when item is expanded */}
       {!expandedItemId && (
-          <div className={styles.filterContainer}>
+      <div className={styles.filterContainer}>
             {(['Freq', 'Temp', 'pH', 'Salinity', 'Epic', 'All'] as FilterCategory[]).map((category) => (
-              <button
-                key={category}
-                className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
-                onClick={() => setSelectedFilter(category)}
-              >
+          <button
+            key={category}
+            className={`${styles.filterButton} ${selectedFilter === category ? styles.filterButtonActive : ''}`}
+            onClick={() => setSelectedFilter(category)}
+          >
                 <div>{category}</div>
                 <div className={styles.filterButtonQty}>{categoryCounts[category] || 0}</div>
-              </button>
-            ))}
-          </div>
+          </button>
+        ))}
+      </div>
       )}
       
       {/* Helper text - only in Lab view (when creatureId is set), hide when items are selected */}
       {!expandedItemId && creatureId && selectedItemsForGoob.size === 0 && (
         <div className={styles.itemsHelperText}>
-          Click to expand or hit "+" to add
+          Click item to expand details
         </div>
       )}
       
@@ -457,9 +471,41 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
           balance={items.find(i => i.id === expandedItemId)?.balance || 0n}
           onClose={() => setExpandedItemId(null)}
           creatureId={creatureId}
+          isSimulating={isSimulating}
+          userGoobIds={userGoobIds}
+          onItemBurned={(burnedItemId) => {
+            // Remove item from inventory (decrement balance)
+            setItemBalances(prev => {
+              const next = new Map(prev);
+              const currentBalance = next.get(burnedItemId) ?? items.find(i => i.id === burnedItemId)?.balance ?? 0n;
+              if (currentBalance > 1n) {
+                next.set(burnedItemId, currentBalance - 1n);
+              } else {
+                next.delete(burnedItemId);
+              }
+              return next;
+            });
+            
+            // In simulation mode, also update simulationItems in parent
+            if (isSimulating && externalSetSimulationItems) {
+              externalSetSimulationItems(prev => {
+                const next = new Map(prev);
+                const currentBalance = next.get(burnedItemId) ?? 0n;
+                if (currentBalance > 1n) {
+                  next.set(burnedItemId, currentBalance - 1n);
+                } else {
+                  next.delete(burnedItemId);
+                }
+                return next;
+              });
+            }
+            
+            // Don't close expanded view when item is burned - let the success modal handle it
+            // The expanded view will close when the user dismisses the success modal
+          }}
         />
       ) : (
-        <div className={styles.itemGrid}>
+      <div className={styles.itemGrid}>
           {items
             .filter(item => {
               // Filter out items with 0 balance
@@ -495,15 +541,15 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
             .map((item) => {
               const balance = itemBalances.get(item.id) ?? item.balance;
               return (
-                <ItemCard 
-                  key={item.id} 
-                  itemId={item.id} 
+          <ItemCard 
+            key={item.id} 
+            itemId={item.id} 
                   balance={balance}
                   onModalOpen={() => {
                     // Always expand the item when card is clicked (both Lab and non-Lab views)
                     setExpandedItemId(item.id);
                   }}
-                  filterCategory={selectedFilter}
+            filterCategory={selectedFilter}
                   creatureId={creatureId}
                   selectedItemsForGoob={selectedItemsForGoob}
                   isSimulating={isSimulating}
@@ -636,7 +682,7 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
                 />
               );
             })}
-        </div>
+      </div>
       )}
     </div>
   );
@@ -878,10 +924,48 @@ const ItemCard: React.FC<{
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             padding: '2px 4px',
             borderRadius: '2px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            lineHeight: '1.2',
           }}
         >
-          x{balance.toString()}
+          <div style={{ fontSize: '8px', opacity: 0.8 }}>Qty</div>
+          <div>x{balance.toString()}</div>
         </div>
+
+        {/* SP readout in bottom left of image */}
+        {metadata?.attributes && (() => {
+          let spYield: number | null = null;
+          for (const attr of metadata.attributes) {
+            if (attr.trait_type === 'SP Yield') {
+              spYield = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
+              break;
+            }
+          }
+          return spYield !== null ? (
+            <div 
+              style={{ 
+                position: 'absolute',
+                bottom: '4px',
+                left: '4px',
+                fontSize: '10px',
+                color: 'rgb(110, 231, 183)',
+                fontWeight: 300,
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                padding: '2px 4px',
+                borderRadius: '2px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                lineHeight: '1.2',
+              }}
+            >
+              <div style={{ fontSize: '8px', opacity: 0.8 }}>SP</div>
+              <div>{spYield}</div>
+            </div>
+          ) : null;
+        })()}
       </div>
 
       {/* Info Section */}
@@ -915,12 +999,38 @@ const ItemCard: React.FC<{
         >
           {metadata?.name || `Item #${itemId}`}
         </div>
+        {/* Rarity display under item name */}
+        {metadata?.attributes && (() => {
+          let rarity: string | null = null;
+          for (const attr of metadata.attributes) {
+            if (attr.trait_type === 'Rarity') {
+              rarity = String(attr.value);
+              break;
+            }
+          }
+          return rarity ? (
+            <div 
+              style={{ 
+                fontSize: '10px',
+                fontStyle: 'italic',
+                lineHeight: '1.2',
+                textAlign: 'center',
+                color: 'var(--muted)',
+                marginTop: '2px',
+                width: '100%',
+              }}
+            >
+              {rarity}
+            </div>
+          ) : null;
+        })()}
         {/* Trait and magnitude display */}
         {metadata?.attributes && (() => {
           let primaryTrait: string | null = null;
           let primaryDeltaMagnitude: number | null = null;
           let secondaryTrait: string | null = null;
           let secondaryDeltaMagnitude: number | null = null;
+          let spYield: number | null = null;
           
           for (const attr of metadata.attributes) {
             if (attr.trait_type === 'Primary Trait') {
@@ -949,6 +1059,8 @@ const ItemCard: React.FC<{
               }
             } else if (attr.trait_type === 'Secondary Delta Magnitude') {
               secondaryDeltaMagnitude = typeof attr.value === 'number' ? Math.abs(attr.value) : Math.abs(parseInt(String(attr.value), 10));
+            } else if (attr.trait_type === 'SP Yield') {
+              spYield = typeof attr.value === 'number' ? attr.value : parseInt(String(attr.value), 10);
             }
           }
           
@@ -1073,6 +1185,32 @@ const ItemCard: React.FC<{
                   {secondaryTrait} {secondaryDelta > 0 ? '+' : ''}{secondaryDelta}
                 </div>
               )}
+              {(() => {
+                let rarity: string | null = null;
+                if (metadata?.attributes) {
+                  for (const attr of metadata.attributes) {
+                    if (attr.trait_type === 'Rarity') {
+                      rarity = String(attr.value);
+                      break;
+                    }
+                  }
+                }
+                return rarity ? (
+                  <div 
+                    style={{ 
+                      fontSize: '15px',
+                      fontWeight: 300,
+                      lineHeight: '1.2',
+                      textAlign: 'center',
+                      marginTop: '2px',
+                      width: '100%',
+                      color: 'var(--muted)',
+                    }}
+                  >
+                    {rarity}
+                  </div>
+                ) : null;
+              })()}
             </>
           );
         })()}
@@ -1087,12 +1225,29 @@ const ExpandedItemView: React.FC<{
   balance: bigint;
   onClose: () => void;
   creatureId?: bigint | number | null;
-}> = ({ itemId, balance, onClose, creatureId }) => {
+  isSimulating?: boolean;
+  userGoobIds?: bigint[]; // List of user's Goob IDs for burning
+  onItemBurned?: (itemId: number) => void; // Callback to update parent state
+}> = ({ itemId, balance, onClose, creatureId, isSimulating = false, userGoobIds = [], onItemBurned }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const { state: creatureState } = useCreatureState(creatureId ? Number(creatureId) : 0);
+  const { burnForSP, isPending: isBurning, isSuccess: isBurnSuccess } = useBurnItemForSP();
+  const { refetch: refetchSP } = useWalletSP();
   const imageUrl = metadata?.image || metadata?.image_data || null;
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 }); // Default to center (percentage)
+  
+  // State for burn fake transaction
+  const [showBurnModal, setShowBurnModal] = useState(false);
+  const [isProcessingBurn, setIsProcessingBurn] = useState(false);
+  const [showBurnSuccessModal, setShowBurnSuccessModal] = useState(false);
+  const [burnedSPAmount, setBurnedSPAmount] = useState<number | null>(null);
+  const [burnedItemName, setBurnedItemName] = useState<string | null>(null);
+  
+  // Get a valid creatureId for burning (use provided one, or first from user's Goobs, or 0 as fallback)
+  const getBurnCreatureId = (): bigint => {
+    if (creatureId) return BigInt(Number(creatureId));
+    if (userGoobIds.length > 0) return userGoobIds[0];
+    return 0n; // Fallback - contract will check ownership
+  };
 
   // Fix known description issues
   const fixedDescription = useMemo(() => {
@@ -1200,21 +1355,7 @@ const ExpandedItemView: React.FC<{
                 <img
                   src={imageUrl}
                   alt={metadata?.name || `Item #${itemId}`}
-                  className={`${styles.expandedItemImage} ${isZoomed ? styles.expandedItemImageZoomed : ''}`}
-                  onClick={(e) => {
-                    if (!isZoomed) {
-                      // Only calculate click position when zooming IN
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const x = ((e.clientX - rect.left) / rect.width) * 100;
-                      const y = ((e.clientY - rect.top) / rect.height) * 100;
-                      setZoomOrigin({ x, y });
-                    }
-                    // Zoom out uses the same origin that was set during zoom in
-                    setIsZoomed(!isZoomed);
-                  }}
-                  style={{
-                    transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`
-                  }}
+                  className={styles.expandedItemImage}
                 />
               )}
               {/* Quantity readout in bottom right of image */}
@@ -1231,9 +1372,39 @@ const ExpandedItemView: React.FC<{
                     padding: '4px 8px',
                     borderRadius: '2px',
                     pointerEvents: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    lineHeight: '1.2',
                   }}
                 >
-                  x{balance.toString()}
+                  <div style={{ fontSize: '16px', opacity: 0.8 }}>Qty</div>
+                  <div>x{balance.toString()}</div>
+                </div>
+              )}
+              
+              {/* SP readout in bottom left of image */}
+              {imageUrl && itemAttributes?.spYield !== null && (
+                <div 
+                  style={{ 
+                    position: 'absolute',
+                    bottom: '4px',
+                    left: '4px',
+                    fontSize: '20px',
+                    color: 'rgb(110, 231, 183)',
+                    fontWeight: 300,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    padding: '4px 8px',
+                    borderRadius: '2px',
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    lineHeight: '1.2',
+                  }}
+                >
+                  <div style={{ fontSize: '16px', opacity: 0.8 }}>SP</div>
+                  <div>{itemAttributes.spYield}</div>
                 </div>
               )}
             </div>
@@ -1259,7 +1430,7 @@ const ExpandedItemView: React.FC<{
 
                 {itemAttributes.primaryTrait && itemAttributes.primaryDelta !== null && (
                   <div className={styles.expandedAttributeItem}>
-                    <span className={styles.expandedAttributeName}>Primary Affect</span>
+                    <span className={styles.expandedAttributeName}>Primary Effect</span>
                     <span 
                       className={styles.expandedAttributeValue}
                       style={{ color: getEffectColor(itemAttributes.primaryTrait, itemAttributes.primaryDelta, true) }}
@@ -1271,7 +1442,7 @@ const ExpandedItemView: React.FC<{
 
                 {itemAttributes.secondaryTrait && itemAttributes.secondaryDelta !== null && (
                   <div className={styles.expandedAttributeItem}>
-                    <span className={styles.expandedAttributeName}>Secondary Affect</span>
+                    <span className={styles.expandedAttributeName}>Secondary Effect</span>
                     <span 
                       className={styles.expandedAttributeValue}
                       style={{ color: getEffectColor(itemAttributes.secondaryTrait, itemAttributes.secondaryDelta, false) }}
@@ -1282,14 +1453,192 @@ const ExpandedItemView: React.FC<{
                 )}
 
                 {itemAttributes.spYield !== null && (
-                  <div className={styles.expandedAttributeItem}>
-                    <span className={styles.expandedAttributeName}>SP Yield</span>
-                    <span className={styles.expandedAttributeValue}>{itemAttributes.spYield}</span>
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (!isBurning && !isProcessingBurn) {
+                        setShowBurnModal(true);
+                      }
+                    }}
+                    disabled={isBurning || isProcessingBurn}
+                    style={{
+                      marginTop: '8px',
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#ffffff',
+                      backgroundColor: '#ef4444',
+                      border: '2px solid #dc2626',
+                      borderRadius: '6px',
+                      cursor: !isBurning && !isProcessingBurn ? 'pointer' : 'not-allowed',
+                      transition: 'all 0.2s',
+                      width: '100%',
+                      opacity: (isBurning || isProcessingBurn) ? 0.5 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isBurning && !isProcessingBurn) {
+                        e.currentTarget.style.backgroundColor = '#dc2626';
+                        e.currentTarget.style.borderColor = '#b91c1c';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isBurning && !isProcessingBurn) {
+                        e.currentTarget.style.backgroundColor = '#ef4444';
+                        e.currentTarget.style.borderColor = '#dc2626';
+                      }
+                    }}
+                  >
+                    {isBurning || isProcessingBurn ? 'Burning...' : `Burn Item for ${itemAttributes.spYield} SP`}
+                  </button>
                 )}
               </div>
             )}
           </>
+        )}
+        
+        {/* Burn Item Fake Transaction Modal */}
+        {showBurnModal && itemAttributes?.spYield !== null && (
+          <div 
+            className={styles.fakeTransactionOverlay}
+            onClick={() => setShowBurnModal(false)}
+          >
+            <div 
+              className={styles.modalContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                className={styles.modalCloseButton}
+                onClick={() => setShowBurnModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className={styles.fakeTransactionText}>
+                Burn Item for {itemAttributes.spYield} SP?
+              </div>
+              <button 
+                className={styles.fakeTransactionButton}
+                onClick={async () => {
+                  setShowBurnModal(false);
+                  setIsProcessingBurn(true);
+                  
+                  // After 1 second delay, process burn
+                  setTimeout(async () => {
+                    const burnCreatureId = getBurnCreatureId();
+                    const spYield = itemAttributes.spYield || 0;
+                    
+                    if (isSimulating) {
+                      // In simulation: update balance and SP
+                      console.log(`[Simulated Burn] Burning item ${itemId} for ${spYield} SP`);
+                      
+                      // Update simulated SP in localStorage
+                      try {
+                        const currentSP = localStorage.getItem('simulated-wallet-sp');
+                        const currentSPValue = currentSP ? parseInt(currentSP, 10) : 0;
+                        const newSPValue = currentSPValue + spYield;
+                        localStorage.setItem('simulated-wallet-sp', String(newSPValue));
+                        console.log(`[Simulated Burn] Updated SP: ${currentSPValue} -> ${newSPValue}`);
+                      } catch (err) {
+                        console.error('[Simulated Burn] Failed to update SP:', err);
+                      }
+                      
+                      // Dispatch event to update Global SP display
+                      window.dispatchEvent(new CustomEvent('sp-updated'));
+                    } else {
+                      try {
+                        await burnForSP(burnCreatureId, BigInt(itemId));
+                        // Refetch SP balance after successful burn - this will update Global SP display
+                        if (refetchSP) {
+                          await refetchSP();
+                        }
+                        // Also trigger a custom event to notify parent components
+                        window.dispatchEvent(new CustomEvent('sp-updated'));
+                      } catch (error) {
+                        console.error('[BurnItem] Failed to burn item:', error);
+                        setIsProcessingBurn(false);
+                        return;
+                      }
+                    }
+                    
+                    // Show success modal FIRST - before removing item
+                    setBurnedSPAmount(spYield);
+                    setBurnedItemName(metadata?.name || `Item #${itemId}`);
+                    
+                    // Hide processing overlay and show success modal
+                    setIsProcessingBurn(false);
+                    setShowBurnSuccessModal(true);
+                    
+                    // Remove item from inventory AFTER modal is shown
+                    // Delay to ensure modal fully renders before item is removed
+                    setTimeout(() => {
+                      if (onItemBurned) {
+                        onItemBurned(itemId);
+                      }
+                    }, 500);
+                  }, 1000);
+                }}
+              >
+                Sign Fake Transaction
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Processing Burn Overlay */}
+        {isProcessingBurn && (
+          <div className={styles.fakeTransactionOverlay}>
+            <div className={styles.modalContent}>
+              <div className={styles.spinner}></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Burn Success Modal */}
+        {showBurnSuccessModal && burnedSPAmount !== null && burnedItemName && (
+          <div 
+            className={styles.fakeTransactionOverlay}
+            style={{ zIndex: 1001 }}
+            onClick={() => {
+              setShowBurnSuccessModal(false);
+              setBurnedSPAmount(null);
+              setBurnedItemName(null);
+              // Close expanded view after modal is dismissed
+              onClose();
+            }}
+          >
+            <div 
+              className={styles.modalContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                className={styles.modalCloseButton}
+                onClick={() => {
+                  setShowBurnSuccessModal(false);
+                  setBurnedSPAmount(null);
+                  setBurnedItemName(null);
+                  // Close expanded view after modal is dismissed
+                  onClose();
+                }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className={styles.fakeTransactionText}>
+                Successfully burned {burnedItemName} You received {burnedSPAmount} Global SP
+              </div>
+              <button 
+                className={styles.fakeTransactionButton}
+                onClick={() => {
+                  setShowBurnSuccessModal(false);
+                  setBurnedSPAmount(null);
+                  setBurnedItemName(null);
+                  // Close expanded view after modal is dismissed
+                  onClose();
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

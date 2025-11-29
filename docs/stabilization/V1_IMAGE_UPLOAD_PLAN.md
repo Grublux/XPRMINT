@@ -232,3 +232,4 @@ echo "Templates with images: $WITH_IMAGE / $TOTAL"
 **READY FOR DEPLOYMENT** 🚀
 
 
+

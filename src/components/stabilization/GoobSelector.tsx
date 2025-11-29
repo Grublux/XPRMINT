@@ -8,6 +8,8 @@ import { useGoobMetadata } from '../../hooks/goobs/useGoobMetadata';
 import { useCreatureState } from '../../hooks/stabilizationV3/useCreatureState';
 import { useItemMetadata } from '../../hooks/stabilizationV3/useItemMetadata';
 import { useSendVibes } from '../../hooks/stabilizationV3/useSendVibes';
+import { useLockTrait } from '../../hooks/stabilizationV3/useLockTrait';
+import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReadContract } from 'wagmi';
 import { STAB_V3_ADDRESS, ITEM_V3_ADDRESS, creatureStabilizerV3Abi } from '../../config/contracts/stabilizationV3';
@@ -1438,11 +1440,127 @@ const ExpandedGoobView: React.FC<{
 }> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem, isSimulating = false }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
+  const { lockTrait: lockTraitContract, isPending: isLocking, isSuccess: isLockSuccess } = useLockTrait();
+  const { sp: walletSP } = useWalletSP();
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
   // State for apply changes flow (declared early to avoid initialization errors)
   const [refreshKey, setRefreshKey] = React.useState(0);
+  
+  // State for lock trait fake transaction
+  const [showLockTraitModal, setShowLockTraitModal] = React.useState(false);
+  const [pendingLockTrait, setPendingLockTrait] = React.useState<{ name: string; cost: number } | null>(null);
+  const [isProcessingLock, setIsProcessingLock] = React.useState(false);
+  const [lockTraitError, setLockTraitError] = React.useState<string | null>(null);
+  const [showLockSuccessModal, setShowLockSuccessModal] = React.useState(false);
+  const [lockedTraitName, setLockedTraitName] = React.useState<string | null>(null);
+  
+  // Get bonded SP from creature state
+  const bondedSP = React.useMemo(() => {
+    if (isSimulating) {
+      const simulatedState = getSimulatedCreatureState(tokenId);
+      return simulatedState?.bondedSP || 0;
+    } else if (creatureState) {
+      return creatureState.bondedSP || 0;
+    }
+    return 0;
+  }, [isSimulating, tokenId, creatureState]);
+  
+  // Total available SP (bonded + wallet)
+  const totalAvailableSP = React.useMemo(() => {
+    return bondedSP + walletSP;
+  }, [bondedSP, walletSP]);
+  
+  // Handle trait locking
+  const handleLockTrait = React.useCallback(async (traitName: string, lockCost: number) => {
+    // Check SP balance (bonded SP first, then wallet SP)
+    if (!isSimulating) {
+      // In real mode, check bonded SP + wallet SP
+      if (totalAvailableSP < lockCost) {
+        setLockTraitError('Not enough SP, Burn items to receive SP');
+        return;
+      }
+    }
+    
+    // Show fake transaction modal
+    setPendingLockTrait({ name: traitName, cost: lockCost });
+    setShowLockTraitModal(true);
+    setLockTraitError(null);
+  }, [isSimulating, totalAvailableSP]);
+  
+  // Handle fake lock transaction sign
+  const handleFakeLockSign = React.useCallback(async () => {
+    if (!pendingLockTrait) return;
+    
+    setShowLockTraitModal(false);
+    setIsProcessingLock(true);
+    
+    // After 1 second delay, process lock
+    setTimeout(async () => {
+      // Map trait name to traitIndex: 0 = Sal, 1 = pH, 2 = Temp, 3 = Freq
+      const traitIndexMap: Record<string, 0 | 1 | 2 | 3> = {
+        'Salinity': 0,
+        'pH': 1,
+        'Temp': 2,
+        'Freq': 3,
+      };
+      
+      const traitIndex = traitIndexMap[pendingLockTrait.name];
+      if (traitIndex === undefined) {
+        console.error('[LockTrait] Invalid trait name:', pendingLockTrait.name);
+        setIsProcessingLock(false);
+        return;
+      }
+      
+      if (isSimulating) {
+        // Update simulated state
+        const currentState = getSimulatedCreatureState(tokenId);
+        if (currentState) {
+          const updatedState = { ...currentState };
+          if (pendingLockTrait.name === 'Freq') updatedState.lockedFreq = true;
+          else if (pendingLockTrait.name === 'Temp') updatedState.lockedTemp = true;
+          else if (pendingLockTrait.name === 'pH') updatedState.lockedPH = true;
+          else if (pendingLockTrait.name === 'Salinity') updatedState.lockedSal = true;
+          
+          // Deduct SP cost from bonded SP in simulation
+          updatedState.bondedSP = Math.max(0, updatedState.bondedSP - pendingLockTrait.cost);
+          
+          setSimulatedCreatureState(tokenId, updatedState);
+          setRefreshKey(prev => prev + 1);
+          console.log(`[LockTrait] Locked ${pendingLockTrait.name} in simulation mode`);
+        }
+        
+        // Show success modal
+        setLockedTraitName(pendingLockTrait.name);
+        setShowLockSuccessModal(true);
+        setIsProcessingLock(false);
+        setPendingLockTrait(null);
+      } else {
+        // Call contract
+        try {
+          await lockTraitContract(tokenId, traitIndex);
+          // Wait for transaction to confirm - success will be handled by useEffect
+        } catch (error) {
+          console.error('[LockTrait] Failed to lock trait:', error);
+          setLockTraitError('Failed to lock trait');
+          setIsProcessingLock(false);
+          setPendingLockTrait(null);
+        }
+      }
+    }, 1000);
+  }, [pendingLockTrait, tokenId, isSimulating, lockTraitContract]);
+  
+  // Refresh state and show success modal when lock succeeds (real mode)
+  React.useEffect(() => {
+    if (isLockSuccess && !isSimulating && pendingLockTrait) {
+      setRefreshKey(prev => prev + 1);
+      setLockedTraitName(pendingLockTrait.name);
+      setShowLockSuccessModal(true);
+      setIsProcessingLock(false);
+      setPendingLockTrait(null);
+    }
+  }, [isLockSuccess, isSimulating, pendingLockTrait]);
   
   // State for vibes animation
   const [showVibesAnimation, setShowVibesAnimation] = React.useState(false);
@@ -2070,53 +2188,76 @@ const ExpandedGoobView: React.FC<{
             console.log('[LockButton] Rendering buttons for:', eligibleTraits.map(t => t.name).join(', '));
             
             return (
-              <div style={{ 
-                position: 'absolute',
-                bottom: '140px', // Position well above the trait table (increased from 120px to ensure full clearance)
-                left: '50%',
-                transform: 'translateX(-50%)',
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '8px',
-                alignItems: 'center',
-                width: '100%',
-                maxWidth: '800px',
-                padding: '0 12px',
-                zIndex: 10, // Higher z-index to ensure it's above the table
-              }}>
-                {eligibleTraits.map((trait) => (
-                  <button
-                    key={trait.name}
-                    onClick={() => {
-                      // TODO: Implement lock trait functionality
-                      console.log(`Lock ${trait.name} for ${trait.cost} SP`);
-                    }}
-                    style={{
-                      padding: '10px 20px',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      color: '#ffffff',
-                      backgroundColor: '#10b981', // Solid green background, no transparency
-                      border: '2px solid #059669',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      minWidth: '200px',
-                      opacity: 1, // Ensure no transparency
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#059669';
-                      e.currentTarget.style.borderColor = '#047857';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#10b981';
-                      e.currentTarget.style.borderColor = '#059669';
-                    }}
-                  >
-                    Lock {trait.name} for {trait.cost} SP?
-                  </button>
-                ))}
-              </div>
+              <>
+                {lockTraitError && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '180px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    padding: '8px 16px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    borderRadius: '6px',
+                    color: '#ef4444',
+                    fontSize: '12px',
+                    textAlign: 'center',
+                    zIndex: 11,
+                    maxWidth: '800px',
+                    width: 'calc(100% - 24px)',
+                  }}>
+                    {lockTraitError}
+                  </div>
+                )}
+                <div style={{ 
+                  position: 'absolute',
+                  bottom: '140px', // Position well above the trait table (increased from 120px to ensure full clearance)
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px',
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '800px',
+                  padding: '0 12px',
+                  zIndex: 10, // Higher z-index to ensure it's above the table
+                }}>
+                  {eligibleTraits.map((trait) => (
+                    <button
+                      key={trait.name}
+                      onClick={() => {
+                        if (isLocking || isProcessingLock) return; // Prevent multiple clicks
+                        handleLockTrait(trait.name, trait.cost);
+                      }}
+                      disabled={isLocking || isProcessingLock}
+                      style={{
+                        padding: '10px 20px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#ffffff',
+                        backgroundColor: '#10b981', // Solid green background, no transparency
+                        border: '2px solid #059669',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        minWidth: '200px',
+                        opacity: 1, // Ensure no transparency
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#059669';
+                        e.currentTarget.style.borderColor = '#047857';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#10b981';
+                        e.currentTarget.style.borderColor = '#059669';
+                      }}
+                    >
+                      Lock {trait.name} for {trait.cost} SP?
+                    </button>
+                  ))}
+                </div>
+              </>
             );
           })()}
             
@@ -2154,17 +2295,17 @@ const ExpandedGoobView: React.FC<{
               
               return (
                 <>
-                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Freq') ? styles.expandedTraitHeaderPulse : ''}`}>Freq</div>
-                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Temp') ? styles.expandedTraitHeaderPulse : ''}`}>Temp</div>
-                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('pH') ? styles.expandedTraitHeaderPulse : ''}`}>pH</div>
-                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Salinity') ? styles.expandedTraitHeaderPulse : ''}`}>Salinity</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Freq') ? styles.expandedTraitHeaderPulse : ''} ${displayState?.lockedFreq ? styles.expandedTraitHeaderLocked : ''}`}>Freq</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Temp') ? styles.expandedTraitHeaderPulse : ''} ${displayState?.lockedTemp ? styles.expandedTraitHeaderLocked : ''}`}>Temp</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('pH') ? styles.expandedTraitHeaderPulse : ''} ${displayState?.lockedPH ? styles.expandedTraitHeaderLocked : ''}`}>pH</div>
+                  <div className={`${styles.expandedTraitHeader} ${isEligibleForLock('Salinity') ? styles.expandedTraitHeaderPulse : ''} ${displayState?.lockedSal ? styles.expandedTraitHeaderLocked : ''}`}>Salinity</div>
                 </>
               );
             })()}
           </div>
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>State</span>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedFreq ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <>
                   {displayState.currFreq}
@@ -2174,7 +2315,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedTemp ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <>
                   {displayState.currTemp}
@@ -2184,7 +2325,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedPH ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <>
                   {displayState.currPH}
@@ -2194,7 +2335,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedSal ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <>
                   {displayState.currSal}
@@ -2207,28 +2348,28 @@ const ExpandedGoobView: React.FC<{
           </div>
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>Target</span>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedFreq ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 displayState.targetFreq
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedTemp ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 displayState.targetTemp
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedPH ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 displayState.targetPH
               ) : (
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedSal ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 displayState.targetSal
               ) : (
@@ -2238,7 +2379,7 @@ const ExpandedGoobView: React.FC<{
           </div>
           <div className={styles.expandedTraitsRow}>
             <span className={styles.expandedTraitRowLabel}>Error</span>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedFreq ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currFreq, displayState.targetFreq))}>
                   {calculatePercentDifference(displayState.currFreq, displayState.targetFreq).toFixed(1)}%
@@ -2247,7 +2388,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedTemp ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currTemp, displayState.targetTemp))}>
                   {calculatePercentDifference(displayState.currTemp, displayState.targetTemp).toFixed(1)}%
@@ -2256,7 +2397,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedPH ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currPH, displayState.targetPH))}>
                   {calculatePercentDifference(displayState.currPH, displayState.targetPH).toFixed(1)}%
@@ -2265,7 +2406,7 @@ const ExpandedGoobView: React.FC<{
                 <span className={styles.expandedTraitEmpty}>—</span>
               )}
             </div>
-            <div className={styles.expandedTraitCell}>
+            <div className={`${styles.expandedTraitCell} ${isInitialized && displayState?.lockedSal ? styles.expandedTraitCellLocked : ''}`}>
               {isInitialized && displayState ? (
                 <span className={getDifferenceColorClass(calculatePercentDifference(displayState.currSal, displayState.targetSal))}>
                   {calculatePercentDifference(displayState.currSal, displayState.targetSal).toFixed(1)}%
@@ -2528,6 +2669,90 @@ const ExpandedGoobView: React.FC<{
             setShowApplySuccessModal(false);
           }}
         />
+      )}
+      
+      {/* Lock Trait Fake Transaction Modal */}
+      {showLockTraitModal && pendingLockTrait && (
+        <div 
+          className={styles.fakeTransactionOverlay}
+          onClick={() => {
+            setShowLockTraitModal(false);
+            setPendingLockTrait(null);
+          }}
+        >
+          <div 
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className={styles.modalCloseButton}
+              onClick={() => {
+                setShowLockTraitModal(false);
+                setPendingLockTrait(null);
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className={styles.fakeTransactionText}>
+              Lock {pendingLockTrait.name} for {pendingLockTrait.cost} SP?
+            </div>
+            <button 
+              className={styles.fakeTransactionButton}
+              onClick={handleFakeLockSign}
+            >
+              Sign Fake Transaction
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Processing Lock Overlay */}
+      {isProcessingLock && (
+        <div className={styles.fakeTransactionOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.spinner}></div>
+          </div>
+        </div>
+      )}
+      
+      {/* Lock Success Modal */}
+      {showLockSuccessModal && lockedTraitName && (
+        <div 
+          className={styles.fakeTransactionOverlay}
+          onClick={() => {
+            setShowLockSuccessModal(false);
+            setLockedTraitName(null);
+          }}
+        >
+          <div 
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className={styles.modalCloseButton}
+              onClick={() => {
+                setShowLockSuccessModal(false);
+                setLockedTraitName(null);
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className={styles.fakeTransactionText}>
+              {lockedTraitName} successfully locked
+            </div>
+            <button 
+              className={styles.fakeTransactionButton}
+              onClick={() => {
+                setShowLockSuccessModal(false);
+                setLockedTraitName(null);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

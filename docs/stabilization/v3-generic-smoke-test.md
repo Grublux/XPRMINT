@@ -255,3 +255,4 @@ Use `GoobGatedV3SmokeTest.s.sol` when:
 - Verifying Goobs ownership checks
 - Testing with real Goob NFTs
 
+

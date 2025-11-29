@@ -201,3 +201,4 @@ Successfully uploaded images for 64 templates
 - Check Magic Eden's collection page for re-index option
 
 
+

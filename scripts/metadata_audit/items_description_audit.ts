@@ -80,3 +80,4 @@ console.log(`\nFull metadata written to: ${auditPath}`);
 console.log(`Full metadata (complete) written to: ${fullMetadataPath}`);
 
 
+

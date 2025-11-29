@@ -153,7 +153,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ itemId, isOpen, onClose, c
 
                   {itemAttributes.primaryTrait && itemAttributes.primaryDelta !== null && (
                     <div className={styles.attributeItem}>
-                      <span className={styles.attributeName}>Primary Affect</span>
+                      <span className={styles.attributeName}>Primary Effect</span>
                       <span 
                         className={styles.attributeValue}
                         style={{ color: getEffectColor(itemAttributes.primaryTrait, itemAttributes.primaryDelta, true) }}
@@ -165,7 +165,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ itemId, isOpen, onClose, c
 
                   {itemAttributes.secondaryTrait && itemAttributes.secondaryDelta !== null && (
                     <div className={styles.attributeItem}>
-                      <span className={styles.attributeName}>Secondary Affect</span>
+                      <span className={styles.attributeName}>Secondary Effect</span>
                       <span 
                         className={styles.attributeValue}
                         style={{ color: getEffectColor(itemAttributes.secondaryTrait, itemAttributes.secondaryDelta, false) }}

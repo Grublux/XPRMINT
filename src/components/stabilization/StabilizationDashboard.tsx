@@ -66,6 +66,36 @@ export const StabilizationDashboard: React.FC<Props> = ({
     }
     return new Map(); // Items don't persist across tab switches either
   });
+
+  // Listen for drip items to add to inventory
+  React.useEffect(() => {
+    const handleAddDripItems = (event: Event) => {
+      if (!isSimulating) return;
+      
+      const customEvent = event as CustomEvent<Array<{ itemId: number; quantity: number }>>;
+      const newItems = new Map(simulationItems);
+      customEvent.detail.forEach(({ itemId, quantity }) => {
+        const currentBalance = newItems.get(itemId) || 0n;
+        newItems.set(itemId, currentBalance + BigInt(quantity));
+      });
+      setSimulationItems(newItems);
+    };
+    
+    window.addEventListener('add-drip-items', handleAddDripItems);
+    return () => window.removeEventListener('add-drip-items', handleAddDripItems);
+  }, [isSimulating, simulationItems]);
+
+  // Calculate total items count and notify parent
+  const totalSimulationItems = React.useMemo(() => {
+    return Array.from(simulationItems.values()).reduce((sum, balance) => sum + Number(balance), 0);
+  }, [simulationItems]);
+  
+  // Notify parent component when simulation items count changes
+  React.useEffect(() => {
+    if (isSimulating) {
+      window.dispatchEvent(new CustomEvent('simulation-items-updated', { detail: totalSimulationItems }));
+    }
+  }, [isSimulating, totalSimulationItems]);
   const itemSelectorRef = useRef<ItemSelectorRef>(null);
   
   const { sp, isLoading: spLoading } = useWalletSP();
