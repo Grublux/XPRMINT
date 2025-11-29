@@ -121,6 +121,9 @@ contract CreatureStabilizer is
     /// @notice Emitted when a tester address is added or removed.
     event TesterUpdated(address indexed account, bool approved);
 
+    /// @notice Emitted when the catalog address is updated.
+    event CatalogUpdated(address indexed newCatalog);
+
     // ============ Modifiers ============
 
     modifier onlyStabilizer() {
@@ -1124,6 +1127,16 @@ contract CreatureStabilizer is
     function setItemToken(address _itemToken) external onlyOwner {
         require(_itemToken != address(0), "CreatureStabilizer: zero item token");
         itemToken = _itemToken;
+    }
+
+    /**
+     * @notice Set the ItemCatalog address (owner only)
+     * @param newCatalog Address of new ItemCatalog contract
+     */
+    function setCatalog(address newCatalog) external onlyOwner {
+        require(newCatalog != address(0), "CreatureStabilizer: catalog cannot be zero address");
+        itemCatalog = newCatalog;
+        emit CatalogUpdated(newCatalog);
     }
 }
 

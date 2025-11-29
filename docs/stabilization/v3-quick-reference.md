@@ -12,21 +12,23 @@ This document provides a single source of truth for all V3 contract addresses, e
 |----------|---------|-------------|
 | **STAB_V3** | `0xe5fb969eec4985e8EB92334fFE11EA45035467CB` | CreatureStabilizer V3 proxy |
 | **ITEM_V3** | `0x64dd1CB8A77fB55d4838897FD6F60e28B2e8fEd8` | ItemToken1155 V3 proxy |
+| **CATALOG_V3** | `0x9949c4a837a5fa4E26cEd122dDcF50C6dBBA555f` | ItemCatalog V3 proxy (implementation: `0x9C3848721D02aF3F6Ec0F285BB6134BEA8e10984`) |
 | **PROXY_ADMIN_V3** | `0xD6b4087cAd41F45a06A344c193de9B0EbcE957DB` | Central ProxyAdmin (note: individual proxies have their own ProxyAdmins) |
 
 ### Supporting Contracts
 
 | Contract | Address | Description |
 |----------|---------|-------------|
-| **CATALOG_V1** | `0x06266255ee081AcA64328dE8fcc939923eE6e8c8` | ItemCatalog proxy (reused from V1) |
+| **CATALOG_V1** | `0x06266255ee081AcA64328dE8fcc939923eE6e8c8` | ItemCatalog V1 proxy (legacy, read-only, unused by V3 systems) |
 | **GOOBS_CONTRACT** | `0xfc9a6fbbf61fffb6d4faf170d3b5d1b275728117` | Goobs ERC-721 contract |
 
 ### Implementation Addresses (Current)
 
 | Contract | Address | Notes |
 |----------|---------|-------|
-| **STAB_V3 Implementation** | `0xD1EC836fafbF6c94479c8Bcc9B8B74e0517CA031` | Upgraded with `getDailyItems()` |
-| **ITEM_V3 Implementation** | Check via EIP-1967 slot | Use `cast` to read implementation slot |
+| **STAB_V3 Implementation** | `0x9b2d6Da6808f54a5d4F98230D77CE8054052618A` | Upgraded with `getDailyItems()` and `setCatalog()` |
+| **ITEM_V3 Implementation** | `0xa99469aDDAeA2D1DeC0aC8FDA6a39807888216ab` | Upgraded with `setCatalog()` |
+| **CATALOG_V3 Implementation** | `0x9C3848721D02aF3F6Ec0F285BB6134BEA8e10984` | Initial deployment with `updateTemplateSecondaryTrait()` |
 
 ## 🔧 Environment Variables Setup
 
@@ -42,6 +44,7 @@ export DEPLOYER_PRIVATE_KEY=<your_private_key>
 ```bash
 export STAB_V3=0xe5fb969eec4985e8EB92334fFE11EA45035467CB
 export ITEM_V3=0x64dd1CB8A77fB55d4838897FD6F60e28B2e8fEd8
+export CATALOG_V3=0x9949c4a837a5fa4E26cEd122dDcF50C6dBBA555f
 export PROXY_ADMIN_V3=0xD6b4087cAd41F45a06A344c193de9B0EbcE957DB
 ```
 
@@ -50,7 +53,8 @@ export PROXY_ADMIN_V3=0xD6b4087cAd41F45a06A344c193de9B0EbcE957DB
 ```bash
 export GOOBS_CONTRACT=0xfc9a6fbbf61fffb6d4faf170d3b5d1b275728117
 export GOOB_ID=888  # or CREATURE_ID
-export CATALOG_V1=0x06266255ee081AcA64328dE8fcc939923eE6e8c8
+export CATALOG_V3=0x9949c4a837a5fa4E26cEd122dDcF50C6dBBA555f  # New V3 catalog
+export CATALOG_V1=0x06266255ee081AcA64328dE8fcc939923eE6e8c8  # Legacy V1 catalog (read-only)
 ```
 
 ## 🚀 Common Commands
@@ -66,6 +70,12 @@ cast call $STAB_V3 "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b
 
 # Check ITEM_V3 name
 cast call $ITEM_V3 "name()(string)" --rpc-url $RPC
+
+# Check CATALOG_V3 template count
+cast call $CATALOG_V3 "templateCount()(uint256)" --rpc-url $RPC
+
+# Check CATALOG_V3 implementation
+cast storage $CATALOG_V3 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc --rpc-url $RPC
 ```
 
 ### Test New Functions
@@ -144,7 +154,7 @@ After any deployment or upgrade:
 
 ---
 
-**Last Updated:** After `getDailyItems()` upgrade deployment
+**Last Updated:** After CATALOG_V3 migration (secondary traits update)
 **Network:** ApeChain Mainnet (Chain ID: 33139)
 **RPC:** https://apechain.calderachain.xyz/http
 

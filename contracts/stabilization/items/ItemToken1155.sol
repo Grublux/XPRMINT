@@ -84,6 +84,16 @@ contract ItemToken1155 is
     }
 
     /**
+     * @notice Set the ItemCatalog address (owner only)
+     * @param newCatalog Address of new ItemCatalog contract
+     */
+    function setCatalog(address newCatalog) external onlyOwner {
+        require(newCatalog != address(0), "ItemToken1155: catalog cannot be zero address");
+        itemCatalog = newCatalog;
+        emit CatalogUpdated(newCatalog);
+    }
+
+    /**
      * @notice Get collection name (for marketplaces)
      * @return Collection name
      */
@@ -403,5 +413,6 @@ contract ItemToken1155 is
         return string(buffer);
     }
 
+    event CatalogUpdated(address indexed newCatalog);
 }
 

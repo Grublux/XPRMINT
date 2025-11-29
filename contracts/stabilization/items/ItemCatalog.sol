@@ -168,6 +168,23 @@ contract ItemCatalog is Initializable, OwnableUpgradeable {
     }
 
     /**
+     * @notice Update template secondary trait and delta (gameplay change)
+     * @param templateId Template identifier
+     * @param newSecondaryTrait New secondary trait (0-3 for traits, 4 for None)
+     * @param newSecondaryDelta New secondary delta magnitude (positive value)
+     */
+    function updateTemplateSecondaryTrait(
+        uint256 templateId,
+        uint8 newSecondaryTrait,
+        int16 newSecondaryDelta
+    ) external onlyOwner {
+        require(templateId < templates.length, "ItemCatalog: invalid templateId");
+        templates[templateId].secondaryTrait = newSecondaryTrait;
+        templates[templateId].secondaryDelta = newSecondaryDelta;
+        emit TemplateSecondaryTraitUpdated(templateId, newSecondaryTrait, newSecondaryDelta);
+    }
+
+    /**
      * @notice Get image bytes from SSTORE2 pointer
      * @param imagePtr SSTORE2 address
      * @return imageBytes Raw image bytes
@@ -213,6 +230,7 @@ contract ItemCatalog is Initializable, OwnableUpgradeable {
     event TemplateAdded(uint256 indexed templateId, string name);
     event TemplateImageUpdated(uint256 indexed templateId, address imagePtr);
     event TemplateMetadataUpdated(uint256 indexed templateId, string name, string description);
+    event TemplateSecondaryTraitUpdated(uint256 indexed templateId, uint8 secondaryTrait, int16 secondaryDelta);
 }
 
 

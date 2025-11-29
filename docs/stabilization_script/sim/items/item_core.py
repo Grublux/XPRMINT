@@ -70,7 +70,8 @@ PRIMARY_DELTAS = {
 SECONDARY_SCALE_MIN = 0.15
 SECONDARY_SCALE_MAX = 0.30
 
-# Interdependence mapping
+# Interdependence mapping (DEPRECATED - now using item-specific secondary traits from catalog)
+# Kept for backward compatibility with procedural generation fallback
 INTERDEPENDENCE = {
     TRAIT_SALINITY: TRAIT_TEMPERATURE,
     TRAIT_TEMPERATURE: TRAIT_FREQUENCY,

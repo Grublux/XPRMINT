@@ -17,7 +17,6 @@ from item_core import (
     RARITY_NAMES,
     TRAIT_SALINITY, TRAIT_PH, TRAIT_TEMPERATURE, TRAIT_FREQUENCY,
     TRAIT_NAMES,
-    INTERDEPENDENCE,
     SECONDARY_SCALE_MIN,
     SECONDARY_SCALE_MAX,
 )
@@ -30,6 +29,75 @@ DELTA_RANGES = {
     "rare": (4, 6),
     # Epic items use special logic, not raw deltas
     "epic": (0, 0),
+}
+
+# Item-specific secondary trait mapping
+# Maps template_id -> secondary_trait_name
+# This replaces the old INTERDEPENDENCE mapping which was trait-based
+ITEM_SECONDARY_TRAIT_MAP = {
+    # Salinity items (0-12)
+    0: "ph",      # Rust-Flake Calibrator
+    1: "ph",      # Brass Drip Coupling
+    2: "ph",      # Pickle-Line Tubing Section
+    3: "ph",      # Salinity Gauge Cartridge
+    4: "temperature",  # Tap-Valve Concentrator
+    5: "temperature",  # Dust of Minto Horn
+    6: "temperature",  # Pickle-Brine Filter Disk
+    7: "temperature",  # Minewater Compression Brick
+    8: "frequency",  # Electro-Salt Capacitor
+    9: "frequency",  # Outhouse Sludge Tablet
+    10: "frequency",  # Cellar Salt-Press Plate
+    11: "frequency",  # Iono-Regulation Core
+    12: "frequency",  # House-Linen Mineral Strip
+    
+    # pH items (13-25)
+    13: "salinity",  # pH Drip Regulator
+    14: "salinity",  # Neutralizing Valve Pellet
+    15: "salinity",  # Vinegar-Stone Bite
+    16: "salinity",  # Balancing Basin Cartridge
+    17: "temperature",  # Metered Dose Basin Syringe
+    18: "temperature",  # Unicorn Brew Settling Disc
+    19: "temperature",  # Dairy-Ladle pH Paddle
+    20: "temperature",  # Guestroom Basin Scale Chip
+    21: "frequency",  # Basin-Reactor Flask
+    22: "frequency",  # Mineral pH Regulator Shard
+    23: "frequency",  # Volatility Modulation Tube
+    24: "frequency",  # Deep-Clean Scraper Head
+    25: "frequency",  # pH Equilibrium Lance
+    
+    # Temperature items (26-39)
+    26: "salinity",  # Flux-Wick Assembly
+    27: "salinity",  # Conduction Scrap Chip
+    28: "salinity",  # Stove Coil Topper
+    29: "salinity",  # Pantry Thermo-Crank
+    30: "salinity",  # Boiler-Runoff Coil Segment
+    31: "ph",  # Cellar-Core Capsule
+    32: "ph",  # Generator-Chain Flux Loop
+    33: "ph",  # Goat-Stall Comfort Rod
+    34: "ph",  # Bedframe Coil Support
+    35: "frequency",  # Kinetic-Whip Rod
+    36: "frequency",  # Charge-Burst Pebble
+    37: "frequency",  # Stabilizer Core Block
+    38: "frequency",  # Smokehouse Ember Disk
+    39: "frequency",  # Flux Convergence Node
+    
+    # Frequency items (40-53)
+    40: "salinity",  # Chime-Plate Resonator
+    41: "salinity",  # Buzz-Coil Relay
+    42: "salinity",  # Vibe-Spring Coupling
+    43: "salinity",  # Broom-Handle Resonance Rod
+    44: "salinity",  # Stove-Plate Resonance Cage
+    45: "ph",  # Tuning Fork Assembly
+    46: "ph",  # Bar-Top Acoustic Rod
+    47: "ph",  # Maintenance Rattle Clamp
+    48: "ph",  # Door-Hinge Resonance Pin
+    49: "temperature",  # Bottling Conveyor Harmonic Wheel
+    50: "temperature",  # Lantern-Soot Oscillation Baffle
+    51: "temperature",  # Chroma Conduction Core
+    52: "temperature",  # Stage-Bell Resonance Drum
+    53: "temperature",  # Boiler-Gauge Flux Coupler
+    
+    # Epic items (54-63) have no secondary trait
 }
 
 
@@ -114,12 +182,9 @@ def _parse_canonical_list() -> List[ItemTemplate]:
                 # Store magnitude (positive); direction will be determined at apply-time based on current vs target
                 primary_delta = primary_delta_magnitude
                 
-                # Calculate FIXED secondary delta magnitude based on interdependence
-                # INTERDEPENDENCE uses numeric indices, so we need to convert
-                secondary_trait_index = INTERDEPENDENCE.get(trait_index)
-                if secondary_trait_index is not None:
-                    # Convert back to string name
-                    secondary_trait_name = TRAIT_NAMES.get(secondary_trait_index)
+                # Get item-specific secondary trait from mapping
+                secondary_trait_name = ITEM_SECONDARY_TRAIT_MAP.get(template_id)
+                if secondary_trait_name is not None:
                     # Secondary is 15-30% of primary (deterministic based on template_id)
                     # Use a separate seed for secondary scale to ensure determinism
                     scale_rng = random.Random(f"secondary_scale:{template_id}")
@@ -127,7 +192,7 @@ def _parse_canonical_list() -> List[ItemTemplate]:
                     secondary_delta_magnitude = max(1, int(primary_delta_magnitude * scale))
                     secondary_delta = secondary_delta_magnitude
                 else:
-                    # This should never happen for valid traits, but handle gracefully
+                    # No secondary trait for this item (should only happen for epic items)
                     secondary_trait_name = None
                     secondary_delta = 0
                 

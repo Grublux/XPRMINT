@@ -65,6 +65,8 @@ SP_YIELD = {
 }
 
 # Interdependence matrix: primary_trait -> secondary_trait
+# DEPRECATED: Now using item-specific secondary traits from catalog (see catalog.py ITEM_SECONDARY_TRAIT_MAP)
+# Kept for reference and backward compatibility
 INTERDEPENDENCE: Dict[str, str] = {
     "salinity": "temperature",
     "temperature": "frequency",
