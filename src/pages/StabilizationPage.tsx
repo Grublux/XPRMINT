@@ -222,20 +222,10 @@ export default function StabilizationPage() {
   }>>([]);
   const [showBagAnimation, setShowBagAnimation] = useState(false);
   const [showItemsFadeIn, setShowItemsFadeIn] = useState(false);
-  const [showStaticBag, setShowStaticBag] = useState(false);
   const [webpKey, setWebpKey] = useState(0);
   const bagImageRef = useRef<HTMLImageElement | null>(null);
-  const staticBagImageRef = useRef<HTMLImageElement | null>(null);
-  const [bagImageSize, setBagImageSize] = useState<{ width: number; height: number; top: number; left: number } | null>(null);
-  const dripTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const dripTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Size capture is now handled in handleFakeDripSign
-
-  // Preload static bag image
-  useEffect(() => {
-    const img = new Image();
-    img.src = '/bag_3.png';
-  }, []);
 
   // Handle claim drip button click - show fake transaction modal
   const handleClaimDrip = () => {
@@ -319,9 +309,7 @@ export default function StabilizationPage() {
       setShowDripSuccessModal(true);
       setShowBagAnimation(true);
       setShowItemsFadeIn(false);
-      setShowStaticBag(false);
       setTimeout(() => {
-        setShowStaticBag(true);
         setShowItemsFadeIn(true);
       }, 3000);
       return;
@@ -436,24 +424,7 @@ export default function StabilizationPage() {
     dripTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
     dripTimeoutsRef.current = [];
     
-    // Capture webp size right before items appear (at 2.9 seconds)
-    const captureTimeout = setTimeout(() => {
-      if (bagImageRef.current && !showStaticBag) {
-        const img = bagImageRef.current;
-        const rect = img.getBoundingClientRect();
-        const container = img.parentElement;
-        if (rect.width > 0 && rect.height > 0 && container) {
-          const containerRect = container.getBoundingClientRect();
-          setBagImageSize({
-            width: rect.width,
-            height: rect.height,
-            top: rect.top - containerRect.top,
-            left: rect.left - containerRect.left,
-          });
-        }
-      }
-    }, 2900);
-    dripTimeoutsRef.current.push(captureTimeout);
+    // No need to capture size anymore since webp freezes on final frame
     
     // Items appear at 3 seconds (same timing as before, even though webp is longer)
     const itemsTimeout = setTimeout(() => {
@@ -481,10 +452,7 @@ export default function StabilizationPage() {
     setShowDripSuccessModal(false);
     setShowBagAnimation(false);
     setShowItemsFadeIn(false);
-    setShowStaticBag(false);
     setDripItemsReceived([]);
-    setBagImageSize(null); // Reset captured size
-    setBagImageSize(null); // Reset captured size
     
     // Reset timer after claim
     // In simulation mode, always reset to 60 seconds (1 minute)
