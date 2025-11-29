@@ -223,7 +223,19 @@ export default function StabilizationPage() {
   const [showBagAnimation, setShowBagAnimation] = useState(false);
   const [showItemsFadeIn, setShowItemsFadeIn] = useState(false);
   const [showStaticBag, setShowStaticBag] = useState(false);
+  const [webpKey, setWebpKey] = useState(0);
   const bagImageRef = useRef<HTMLImageElement | null>(null);
+  const staticBagImageRef = useRef<HTMLImageElement | null>(null);
+  const [bagImageSize, setBagImageSize] = useState<{ width: number; height: number; top: number; left: number } | null>(null);
+  const dripTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // Size capture is now handled in handleFakeDripSign
+
+  // Preload static bag image
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/bag_3.png';
+  }, []);
 
   // Handle claim drip button click - show fake transaction modal
   const handleClaimDrip = () => {
@@ -418,32 +430,61 @@ export default function StabilizationPage() {
     setShowDripSuccessModal(true);
     setShowBagAnimation(true);
     setShowItemsFadeIn(false); // Start with items hidden
-    setShowStaticBag(false); // Start with webp animation
+    setWebpKey(prev => prev + 1); // Force webp to remount and play from start
     
-    // After bag animation plays fully (3 seconds), HIDE webp and show static image, then fade in items
-    setTimeout(() => {
-      // HIDE the looping webp and show static bag_3.png instead
-      setShowStaticBag(true);
-      // Freeze the animation on the last frame
+    // Clear any existing timeouts
+    dripTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    dripTimeoutsRef.current = [];
+    
+    // Capture webp size right before items appear (at 2.9 seconds)
+    const captureTimeout = setTimeout(() => {
+      if (bagImageRef.current && !showStaticBag) {
+        const img = bagImageRef.current;
+        const rect = img.getBoundingClientRect();
+        const container = img.parentElement;
+        if (rect.width > 0 && rect.height > 0 && container) {
+          const containerRect = container.getBoundingClientRect();
+          setBagImageSize({
+            width: rect.width,
+            height: rect.height,
+            top: rect.top - containerRect.top,
+            left: rect.left - containerRect.left,
+          });
+        }
+      }
+    }, 2900);
+    dripTimeoutsRef.current.push(captureTimeout);
+    
+    // Items appear at 3 seconds (same timing as before, even though webp is longer)
+    const itemsTimeout = setTimeout(() => {
       setShowItemsFadeIn(true);
       
-      // Add items to simulation inventory
+      // Add items to simulation inventory when items appear
       if (isSimulationOn) {
         // Dispatch event to add items to inventory
         window.dispatchEvent(new CustomEvent('add-drip-items', { 
           detail: itemsReceived.map(item => ({ itemId: item.id, quantity: item.quantity }))
         }));
       }
-    }, 3000); // Wait 3 seconds for bag animation to play fully
+    }, 3000);
+    dripTimeoutsRef.current.push(itemsTimeout);
+    
+    // bag_ani_once.webp loops once and freezes on final frame - no need to switch to static image
   };
 
   // Handle closing drip success modal and reset timer
   const handleCloseDripSuccess = () => {
+    // Clear all timeouts
+    dripTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    dripTimeoutsRef.current = [];
+    
     setShowDripSuccessModal(false);
     setShowBagAnimation(false);
     setShowItemsFadeIn(false);
     setShowStaticBag(false);
     setDripItemsReceived([]);
+    setBagImageSize(null); // Reset captured size
+    setBagImageSize(null); // Reset captured size
     
     // Reset timer after claim
     // In simulation mode, always reset to 60 seconds (1 minute)
@@ -589,7 +630,15 @@ export default function StabilizationPage() {
           <div 
             className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
-            style={{ position: 'relative', minHeight: '500px' }}
+            style={{ 
+              position: 'relative', 
+              minHeight: '600px',
+              height: '600px', // Fixed height to prevent resizing when items appear
+              width: '90vw', 
+              maxWidth: '700px',
+              padding: 0, // Remove padding so bag fills entire modal
+              overflow: 'hidden', // Prevent any layout shifts
+            }}
           >
             <button 
               className={styles.modalCloseButton}
@@ -625,31 +674,32 @@ export default function StabilizationPage() {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   zIndex: 1,
                   pointerEvents: 'none', // Allow clicks to pass through to items
+                  padding: 0,
+                  margin: 0,
+                  overflow: 'hidden', // Prevent any layout shifts
                 }}
               >
-                {!showStaticBag ? (
-                  <img 
-                    key="webp-animation"
-                    ref={bagImageRef}
-                    src="/bag_sped_noloop_fast.webp"
-                    alt="Bag animation"
-                    className={styles.bagAnimation}
-                    style={{ display: 'block' }}
-                  />
-                ) : (
-                  <img 
-                    key="static-bag"
-                    src="/bag_3.png"
-                    alt="Bag"
-                    className={styles.bagAnimation}
-                    style={{ display: 'block' }}
-                  />
-                )}
+                <img 
+                  key={`webp-animation-${webpKey}`}
+                  ref={bagImageRef}
+                  src={`/bag_ani_once.webp?t=${webpKey}`}
+                  alt="Bag animation"
+                  className={styles.bagAnimation}
+                  style={{ 
+                    display: 'block',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    margin: 0,
+                    padding: 0,
+                  }}
+                />
               </div>
             )}
 
@@ -660,13 +710,22 @@ export default function StabilizationPage() {
                 style={{
                   opacity: showItemsFadeIn ? 1 : 0,
                   transition: 'opacity 0.5s ease-in',
-                  position: 'relative',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
                   zIndex: 2,
                   width: '100%',
-                  display: showItemsFadeIn ? 'flex' : 'none',
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   padding: '20px',
+                  pointerEvents: showItemsFadeIn ? 'auto' : 'none',
+                  overflow: 'auto', // Allow scrolling for items, but don't affect parent
+                  boxSizing: 'border-box',
                 }}
               >
                 <h2 className={styles.modalTitle}>You received {dripItemsReceived.length} item{dripItemsReceived.length === 1 ? '' : 's'}:</h2>
