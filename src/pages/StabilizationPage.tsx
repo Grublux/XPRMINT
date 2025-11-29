@@ -311,7 +311,7 @@ export default function StabilizationPage() {
       setShowItemsFadeIn(false);
       setTimeout(() => {
         setShowItemsFadeIn(true);
-      }, 3000);
+      }, 3800);
       return;
     }
     
@@ -426,7 +426,7 @@ export default function StabilizationPage() {
     
     // No need to capture size anymore since webp freezes on final frame
     
-    // Items appear at 3 seconds (same timing as before, even though webp is longer)
+    // Items appear at 3.8 seconds (0.8 seconds later than original 3 seconds)
     const itemsTimeout = setTimeout(() => {
       setShowItemsFadeIn(true);
       
@@ -437,7 +437,7 @@ export default function StabilizationPage() {
           detail: itemsReceived.map(item => ({ itemId: item.id, quantity: item.quantity }))
         }));
       }
-    }, 3000);
+    }, 3800);
     dripTimeoutsRef.current.push(itemsTimeout);
     
     // bag_ani_once.webp loops once and freezes on final frame - no need to switch to static image
@@ -677,7 +677,7 @@ export default function StabilizationPage() {
                 className={styles.dripItemsContainer}
                 style={{
                   opacity: showItemsFadeIn ? 1 : 0,
-                  transition: 'opacity 0.5s ease-in',
+                  transition: 'opacity 0.3s ease-in',
                   position: 'absolute',
                   top: 0,
                   left: 0,
