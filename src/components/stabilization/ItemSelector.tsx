@@ -473,6 +473,136 @@ export const ItemSelector = forwardRef<ItemSelectorRef, ItemSelectorProps>(({
           creatureId={creatureId}
           isSimulating={isSimulating}
           userGoobIds={userGoobIds}
+          selectedItemsForGoob={selectedItemsForGoob}
+          onAddItem={(itemId) => {
+            // Check if item is Epic
+            let isEpic = false;
+            try {
+              const queryKey = ['item-metadata', ITEM_V3_ADDRESS, itemId.toString()];
+              const cachedData = queryClient.getQueryData(queryKey);
+              if (cachedData) {
+                const metadata = cachedData as any;
+                if (metadata?.attributes) {
+                  for (const attr of metadata.attributes) {
+                    if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                      isEpic = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              // Try localStorage
+              try {
+                const key = `item-metadata-${ITEM_V3_ADDRESS}-${itemId}`;
+                const cached = localStorage.getItem(key);
+                if (cached) {
+                  const metadata = JSON.parse(cached);
+                  if (metadata?.attributes) {
+                    for (const attr of metadata.attributes) {
+                      if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                        isEpic = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+              } catch (e2) {
+                // Ignore
+              }
+            }
+            
+            // Check if there are already items selected
+            const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
+            
+            // Epic items can only be applied alone
+            if (isEpic && currentTotal > 0) {
+              return; // Don't add Epic if other items exist
+            }
+            
+            // Non-Epic items can't be added if Epic exists
+            if (!isEpic && currentTotal > 0) {
+              // Check if any existing item is Epic
+              let hasEpic = false;
+              for (const [existingId] of selectedItemsForGoob.entries()) {
+                try {
+                  const queryKey = ['item-metadata', ITEM_V3_ADDRESS, existingId.toString()];
+                  const cachedData = queryClient.getQueryData(queryKey);
+                  if (cachedData) {
+                    const metadata = cachedData as any;
+                    if (metadata?.attributes) {
+                      for (const attr of metadata.attributes) {
+                        if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                          hasEpic = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                } catch (e) {
+                  try {
+                    const key = `item-metadata-${ITEM_V3_ADDRESS}-${existingId}`;
+                    const cached = localStorage.getItem(key);
+                    if (cached) {
+                      const metadata = JSON.parse(cached);
+                      if (metadata?.attributes) {
+                        for (const attr of metadata.attributes) {
+                          if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                            hasEpic = true;
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  } catch (e2) {
+                    // Ignore
+                  }
+                }
+              }
+              
+              if (hasEpic) {
+                return; // Don't add non-Epic if Epic exists
+              }
+            }
+            
+            // Check 3-item limit (excluding Epic which can be alone)
+            if (!isEpic && currentTotal >= 3) {
+              return; // Don't add if already at limit
+            }
+            
+            // Add item to selected items
+            setSelectedItemsForGoob(prev => {
+              const next = new Map(prev);
+              const currentCount = next.get(itemId) || 0;
+              next.set(itemId, currentCount + 1);
+              return next;
+            });
+            
+            // Decrement balance (same as + button)
+            const item = items.find(i => i.id === itemId);
+            if (item) {
+              setItemBalances(prev => {
+                const next = new Map(prev);
+                const currentBalance = next.get(itemId) ?? item.balance;
+                if (currentBalance > 0n) {
+                  next.set(itemId, currentBalance - 1n);
+                }
+                return next;
+              });
+              
+              // In simulation mode, also update simulationItems in parent
+              if (isSimulating && externalSetSimulationItems) {
+                externalSetSimulationItems(prev => {
+                  const next = new Map(prev);
+                  const currentBalance = next.get(itemId) ?? 0n;
+                  if (currentBalance > 0n) {
+                    next.set(itemId, currentBalance - 1n);
+                  }
+                  return next;
+                });
+              }
+            }
+          }}
           onItemBurned={(burnedItemId) => {
             // Remove item from inventory (decrement balance)
             setItemBalances(prev => {
@@ -1223,12 +1353,15 @@ const ExpandedItemView: React.FC<{
   creatureId?: bigint | number | null;
   isSimulating?: boolean;
   userGoobIds?: bigint[]; // List of user's Goob IDs for burning
+  selectedItemsForGoob?: Map<number, number>;
+  onAddItem?: (itemId: number) => void;
   onItemBurned?: (itemId: number) => void; // Callback to update parent state
-}> = ({ itemId, balance, onClose, creatureId, isSimulating = false, userGoobIds = [], onItemBurned }) => {
+}> = ({ itemId, balance, onClose, creatureId, isSimulating = false, userGoobIds = [], selectedItemsForGoob = new Map(), onAddItem, onItemBurned }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const { state: creatureState } = useCreatureState(creatureId ? Number(creatureId) : 0);
   const { burnForSP, isPending: isBurning } = useBurnItemForSP();
   const { refetch: refetchSP } = useWalletSP();
+  const queryClient = useQueryClient();
   const imageUrl = metadata?.image || metadata?.image_data || null;
   
   // State for burn fake transaction
@@ -1346,6 +1479,68 @@ const ExpandedItemView: React.FC<{
           <div className={styles.expandedLoading}>Loading item details...</div>
         ) : (
           <>
+            {/* Add to Goob button - only show when Goob is selected */}
+            {creatureId && onAddItem && balance > 0n && (
+              <button
+                className={styles.addToGoobButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onAddItem) {
+                    onAddItem(itemId);
+                    // Close expanded view after adding item
+                    onClose();
+                  }
+                }}
+                disabled={
+                  (() => {
+                    const currentTotal = Array.from(selectedItemsForGoob.values()).reduce((sum, count) => sum + count, 0);
+                    if (isEpic && currentTotal > 0) return true; // Epic can't be added with other items
+                    if (!isEpic && currentTotal >= 3) return true; // Non-Epic can't exceed 3
+                    // Check if non-Epic is being added when Epic exists
+                    if (!isEpic && currentTotal > 0) {
+                      for (const [existingId] of selectedItemsForGoob.entries()) {
+                        // Check if existing item is Epic
+                        try {
+                          const queryKey = ['item-metadata', ITEM_V3_ADDRESS, existingId.toString()];
+                          const cachedData = queryClient.getQueryData(queryKey);
+                          if (cachedData) {
+                            const metadata = cachedData as any;
+                            if (metadata?.attributes) {
+                              for (const attr of metadata.attributes) {
+                                if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                                  return true; // Can't add non-Epic when Epic exists
+                                }
+                              }
+                            }
+                          }
+                        } catch (e) {
+                          // Try localStorage
+                          try {
+                            const key = `item-metadata-${ITEM_V3_ADDRESS}-${existingId}`;
+                            const cached = localStorage.getItem(key);
+                            if (cached) {
+                              const metadata = JSON.parse(cached);
+                              if (metadata?.attributes) {
+                                for (const attr of metadata.attributes) {
+                                  if (attr.trait_type === 'Rarity' && String(attr.value).toLowerCase().trim() === 'epic') {
+                                    return true; // Can't add non-Epic when Epic exists
+                                  }
+                                }
+                              }
+                            }
+                          } catch (e2) {
+                            // Ignore
+                          }
+                        }
+                      }
+                    }
+                    return false;
+                  })()
+                }
+              >
+                Add to Goob
+              </button>
+            )}
             <div className={styles.expandedItemImageWrapper}>
               {imageUrl && (
                 <img
