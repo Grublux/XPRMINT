@@ -96,6 +96,179 @@
   margin-bottom: 16px;
 }
 
+.howToButton {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.howToButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.howToModalContent {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.modalCloseButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--text);
+  font-size: 32px;
+  font-weight: 300;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+  z-index: 1001;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .modalCloseButton {
+    top: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 36px;
+  }
+}
+
+.modalCloseButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.howToModalTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: var(--text);
+}
+
+.howToModalBody {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.howToSection {
+  margin-bottom: 20px;
+}
+
+.howToSectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  margin-top: 0;
+  color: var(--text);
+}
+
+.howToAccordion {
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.howToAccordionSummary {
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  transition: background-color 0.2s;
+}
+
+.howToAccordionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.howToAccordionSummary::after {
+  content: '+';
+  font-size: 20px;
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+
+.howToAccordion[open] .howToAccordionSummary::after {
+  content: '−';
+}
+
+.howToAccordionSummary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.howToAccordionContent {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.howToAccordionContent p {
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.howToAccordionContent ul {
+  margin-left: 20px;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.howToAccordionContent li {
+  margin-bottom: 8px;
+}
+
+.howToAccordionContent strong {
+  font-weight: 600;
+}
+
 .statsSection {
   display: flex;
   justify-content: space-between;

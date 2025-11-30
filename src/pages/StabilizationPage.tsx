@@ -12,6 +12,8 @@ import styles from './StabilizationPage.module.css';
 export default function StabilizationPage() {
   const { address } = useAccount();
   const { whitelistEnabled, isTester, isReadOnly, isContractOwner } = useWhitelistStatus();
+  const [showHowToModal, setShowHowToModal] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
   
   // Initialize isSimulationOn from localStorage for persistence
   const [isSimulationOn, setIsSimulationOn] = useState(() => {
@@ -98,6 +100,28 @@ export default function StabilizationPage() {
   const [canClaimDrip, setCanClaimDrip] = useState(false);
   const canClaimDripRef = useRef(false);
   
+  // Check if user has any Goobs in the lab (for Claim Drip button and timer)
+  // Must be defined before useEffect that uses it
+  const [goobsInLabKey, setGoobsInLabKey] = useState(0);
+  const hasGoobsInLab = useMemo(() => {
+    if (isSimulationOn) {
+      try {
+        const stored = localStorage.getItem('goobs-in-lab-simulation');
+        if (stored) {
+          const ids = JSON.parse(stored) as string[];
+          return ids.length > 0;
+        }
+      } catch (e) {
+        console.error('[StabilizationPage] Error reading goobs-in-lab-simulation:', e);
+      }
+      return false;
+    } else {
+      // Real mode - for now, assume all wallet Goobs are in lab
+      // This should be updated to check actual lab status from contract
+      return (walletGoobs?.length || 0) > 0;
+    }
+  }, [isSimulationOn, walletGoobs, goobsInLabKey]);
+  
   // Check if page reload - reset simulated SP and simulate 1 minute left for drip
   const isPageReload = useMemo(() => {
     if (typeof window === 'undefined') return false;
@@ -134,6 +158,14 @@ export default function StabilizationPage() {
   }, [canClaimDrip]);
   
   useEffect(() => {
+    // Only start timer if there are Goobs in lab
+    if (!hasGoobsInLab) {
+      setTimeUntilDrip(null);
+      setCanClaimDrip(false);
+      canClaimDripRef.current = false;
+      return;
+    }
+    
     const calculateTimeUntilDrip = () => {
       // In simulation mode, always use 60 seconds (1 minute) as a "day"
       if (isSimulationOn) {
@@ -148,11 +180,6 @@ export default function StabilizationPage() {
       // If it's past noon today, set to noon tomorrow
       if (now > noon) {
         noon.setDate(noon.getDate() + 1);
-      }
-      
-      // On page reload, simulate 1 minute left
-      if (isPageReload) {
-        return 60 * 1000; // 1 minute in milliseconds
       }
       
       return noon.getTime() - now.getTime();
@@ -174,6 +201,14 @@ export default function StabilizationPage() {
       // Don't update if claim button is already showing - wait for user to click it
       if (canClaimDripRef.current) {
         return; // Stop counting down, button is visible
+      }
+      
+      // Check if Goobs are still in lab
+      if (!hasGoobsInLab) {
+        setTimeUntilDrip(null);
+        setCanClaimDrip(false);
+        canClaimDripRef.current = false;
+        return;
       }
       
       setTimeUntilDrip(prev => {
@@ -205,7 +240,7 @@ export default function StabilizationPage() {
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [isPageReload, isSimulationOn]);
+  }, [isPageReload, isSimulationOn, hasGoobsInLab]);
   
   // State for daily drip claim fake transaction
   const [showDripTransactionModal, setShowDripTransactionModal] = useState(false);
@@ -238,6 +273,26 @@ export default function StabilizationPage() {
     const goobs = isSimulationOn ? simulatedGoobs : walletGoobs;
     return (goobs?.length || 0) > 0;
   }, [isSimulationOn, simulatedGoobs, walletGoobs]);
+  
+  // Listen for changes to goobs-in-lab in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setGoobsInLabKey(prev => prev + 1);
+    };
+    
+    // Listen for custom event when Goobs are added to lab
+    window.addEventListener('goobs-in-lab-updated', handleStorageChange);
+    
+    // Also poll localStorage periodically (fallback) - less frequent to avoid lag
+    const interval = setInterval(() => {
+      setGoobsInLabKey(prev => prev + 1);
+    }, 2000); // Check every 2 seconds instead of 1
+    
+    return () => {
+      window.removeEventListener('goobs-in-lab-updated', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Handle fake transaction sign for daily drip
   const handleFakeDripSign = () => {
@@ -520,6 +575,12 @@ export default function StabilizationPage() {
         </div>
       ) : null}
       <div className={styles.titleContainer}>
+        <button 
+          className={styles.howToButton}
+          onClick={() => setShowHowToModal(true)}
+        >
+          READ ME
+        </button>
         <h1 className={styles.title}>Dashboard</h1>
         <div className={styles.statsSection}>
           <div className={styles.statItem}>
@@ -537,18 +598,22 @@ export default function StabilizationPage() {
           <div className={styles.statItem}>
             <div className={styles.statLabel}>Daily Drip In</div>
             {hasAnyGoobs ? (
-              canClaimDrip ? (
-                <button className={styles.claimDripButton} onClick={handleClaimDrip}>
-                  Claim Drip
-                </button>
-              ) : timeUntilDrip !== null ? (
-                <div className={styles.statValue}>{formatTimeUntilDrip(timeUntilDrip)}</div>
+              hasGoobsInLab ? (
+                canClaimDrip ? (
+                  <button className={styles.claimDripButton} onClick={handleClaimDrip}>
+                    Claim Drip
+                  </button>
+                ) : timeUntilDrip !== null ? (
+                  <div className={styles.statValue}>{formatTimeUntilDrip(timeUntilDrip)}</div>
+                ) : (
+                  <div className={styles.statValue}>—</div>
+                )
               ) : (
                 <div className={styles.statValue}>—</div>
               )
-          ) : (
+            ) : (
               <div className={styles.statValue}>—</div>
-          )}
+            )}
           </div>
         </div>
       </div>
@@ -721,10 +786,15 @@ export default function StabilizationPage() {
                           {item.rarity && (
                             <span className={styles.modalItemRarity}>Rarity: {item.rarity}</span>
                           )}
-                          {item.category && (
+                          {item.category && item.category !== 'Epic' && (
                             <span className={styles.modalItemCategory}>
                               {item.category}
                               {item.magnitude !== undefined && ` ${item.magnitude}`}
+                            </span>
+                          )}
+                          {item.category === 'Epic' && item.magnitude !== undefined && (
+                            <span className={styles.modalItemCategory}>
+                              {item.magnitude}
                             </span>
                           )}
                           <span className={styles.modalItemQuantity}>+{item.quantity}</span>
@@ -757,6 +827,288 @@ export default function StabilizationPage() {
                 Dismiss
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* How To Modal */}
+      {showHowToModal && (
+        <div 
+          className={styles.modalOverlay}
+          onClick={() => {
+            setShowHowToModal(false);
+            setOpenAccordion(null);
+          }}
+        >
+          <div 
+            className={styles.howToModalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className={styles.modalCloseButton}
+              onClick={() => {
+                setShowHowToModal(false);
+                setOpenAccordion(null);
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h2 className={styles.howToModalTitle}>How To</h2>
+            <div className={styles.howToModalBody}>
+              <div className={styles.howToSection}>
+                <h3 className={styles.howToSectionTitle}>Primary Objective</h3>
+                <p>Use items to push all four traits into the 5% stabilization band, lock each of them, and enter the Resonance Phase.</p>
+              </div>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 1}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 1 ? null : 1);
+                  }}
+                >
+                  1. Traits
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <ul>
+                    <li>Each Goob has 4 visible traits with visible targets.</li>
+                    <li>Traits begin outside the stabilization band.</li>
+                    <li>Your goal is to bring each trait within ±5% of its target.</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 2}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 2 ? null : 2);
+                  }}
+                >
+                  2. Items
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>Items are used to move traits closer to their targets.</p>
+                  <p>Each item affects:</p>
+                  <ul>
+                    <li><strong>One primary trait</strong> - Always moves toward the target.</li>
+                    <li><strong>One secondary trait</strong> - Always moves in the same direction as the primary effect. (Ignored if that trait is locked.)</li>
+                  </ul>
+                  <p>Items may also be burned for SP, which is required to pay for trait locks.</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 3}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 3 ? null : 3);
+                  }}
+                >
+                  3. Daily Drip
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>Each Goob that is active in the lab receives 1 daily drip item.</p>
+                  <ul>
+                    <li>A "day" is currently set at 60 seconds.</li>
+                    <li>If your Goob is active before the daily reset, it will receive that day's drip.</li>
+                  </ul>
+                  <p><strong>Vibes Streak Bonus</strong></p>
+                  <p>If you maintain Vibes at 10 for 7 consecutive days, that Goob's daily drip doubles:</p>
+                  <ul>
+                    <li>1 item/day → 2 items/day</li>
+                    <li>This bonus lasts as long as Vibes remain at 10</li>
+                  </ul>
+                  <p>(If Vibes drop, drip returns to 1/day until a new 7-day streak is achieved.)</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 4}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 4 ? null : 4);
+                  }}
+                >
+                  4. Stability Points (SP)
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>SP is used to pay for lock costs.</p>
+                  <p>There are two types of SP:</p>
+                  <p><strong>Bonded SP</strong></p>
+                  <ul>
+                    <li>Earn +3 Bonded SP every 7-day Vibes streak (Vibes at 10)</li>
+                    <li>Bound to one specific Goob</li>
+                  </ul>
+                  <p><strong>Global SP</strong></p>
+                  <ul>
+                    <li>Earned by burning items</li>
+                    <li>Shared across all Goobs in your wallet</li>
+                  </ul>
+                  <p>To burn an item and gain Global SP:</p>
+                  <ol>
+                    <li>Click the item's thumbnail image</li>
+                    <li>In the expanded view, scroll to the bottom</li>
+                    <li>Tap "Burn for SP"</li>
+                  </ol>
+                  <p>(This does not move traits — it only gives SP.)</p>
+                  <p>Bonded SP is always spent before Global SP.</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 5}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 5 ? null : 5);
+                  }}
+                >
+                  5. Locking Traits
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>A trait becomes lockable when it is within 5% of its target.</p>
+                  <p>Lock costs:</p>
+                  <ul>
+                    <li>Lock 1: Free</li>
+                    <li>Lock 2: 8 SP</li>
+                    <li>Lock 3: 10 SP</li>
+                    <li>Lock 4: 12 SP</li>
+                  </ul>
+                  <p>SP is spent bonded first, then global SP.</p>
+                  <p>Locked traits never move again and ignore all secondary effects.</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 6}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 6 ? null : 6);
+                  }}
+                >
+                  6. Daily Actions
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>Each day you can:</p>
+                  <ul>
+                    <li>Apply items</li>
+                    <li>Burn items</li>
+                    <li>Lock traits</li>
+                    <li>Send Vibes (once per day)</li>
+                  </ul>
+                  <p><strong>Vibes rules:</strong></p>
+                  <ul>
+                    <li>Sending Vibes: +1 (max 10)</li>
+                    <li>Skipping a day: –1 next day</li>
+                    <li>7 days at Vibes 10 → +3 Bonded SP and double item drip</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 7}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 7 ? null : 7);
+                  }}
+                >
+                  7. Stabilization
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>A Goob completes Stabilization when:</p>
+                  <ul>
+                    <li>All 4 traits are locked</li>
+                  </ul>
+                  <p>After stabilization:</p>
+                  <ul>
+                    <li>Item drip stops</li>
+                    <li>Goob enters the Resonance Phase</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 8}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 8 ? null : 8);
+                  }}
+                >
+                  8. Resonance Phase
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>The Resonance Phase lasts 7 days.</p>
+                  <p>During this period:</p>
+                  <ul>
+                    <li>Your Goob's Vibes counter stays active</li>
+                    <li>You can still send Vibes daily</li>
+                  </ul>
+                  <p>After the 7 days are complete, your Goob becomes eligible for Incubation.</p>
+                  <p>Your Goob must be at Vibes 10 the moment you incubate.</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 9}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 9 ? null : 9);
+                  }}
+                >
+                  9. Evolution
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>If:</p>
+                  <ul>
+                    <li>The 7 day resonance phase has completed</li>
+                    <li>Vibes = 10</li>
+                  </ul>
+                  <p>You may Incubate and your Goob evolves.</p>
+                </div>
+              </details>
+
+              <div className={styles.howToSection}>
+                <h3 className={styles.howToSectionTitle}>Summary</h3>
+                <p>Push traits → Lock traits → Stabilize → Resonance 7 days → Vibes at 10 → Evolve.</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -1,12 +1,9 @@
 import { Outlet } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import HamburgerMenu from '../components/HamburgerMenu/HamburgerMenu';
-import HowToPlayOverlay from '../components/Overlays/HowToPlayOverlay';
 import styles from './AppLayout.module.css';
 
 export default function AppLayout(){
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showWalletMenu, setShowWalletMenu] = useState(false);
   const walletMenuRef = useRef<HTMLDivElement>(null);
   const { address, isConnected } = useAccount();
@@ -115,7 +112,6 @@ export default function AppLayout(){
       <header className={styles.header}>
         <div className={styles.headerContent}>
                 <div className={styles.headerLeft}>
-                  <HamburgerMenu onHowToPlayClick={() => setShowHowToPlay(true)} />
                   <div className={styles.titleText}>XPRMINT</div>
                 </div>
           <div className={styles.headerRight}>
@@ -149,7 +145,6 @@ export default function AppLayout(){
         </div>
       </header>
       <main className={styles.main}><Outlet/></main>
-      <HowToPlayOverlay isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
     </div>
   );
 }

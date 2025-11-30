@@ -38,7 +38,7 @@ interface GoobSelectorProps {
   onEnableSimulation?: () => void;
 }
 
-type LabFilter = 'Waiting Room' | 'Lab';
+type LabFilter = 'Waiting Room' | 'Lab' | 'Resonance';
 
 // Helper function to generate initialization values for a Goob
 function generateInitialization(_goobId: bigint): {
@@ -328,6 +328,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     // Skip saving if goobsInLab is empty - this prevents overwriting with empty data
     if (goobsInLab.size === 0) {
       console.log('[GoobsInLab] Skipping save - goobsInLab is empty');
+      // Still dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('goobs-in-lab-updated'));
       return;
     }
     
@@ -335,6 +337,8 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       const ids = Array.from(goobsInLab);
       console.log('[GoobsInLab] Saving to localStorage:', storageKey, ids);
       localStorage.setItem(storageKey, JSON.stringify(ids));
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('goobs-in-lab-updated'));
     } catch (error) {
       console.error('[GoobsInLab] Failed to save to localStorage', error);
     }
@@ -379,12 +383,56 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
   }>>([]);
   const [sentGoobIds, setSentGoobIds] = useState<bigint[]>([]);
   const [pendingGoobIds, setPendingGoobIds] = useState<bigint[]>([]);
+  const [resonanceUpdateKey, setResonanceUpdateKey] = useState(0);
+  
+  // Listen for resonance achievement events to update counter
+  useEffect(() => {
+    const handleResonanceUpdate = () => {
+      setResonanceUpdateKey(prev => prev + 1);
+    };
+    window.addEventListener('goob-resonance-achieved', handleResonanceUpdate);
+    return () => {
+      window.removeEventListener('goob-resonance-achieved', handleResonanceUpdate);
+    };
+  }, []);
+
+  // Helper to check if a Goob is in resonance (all 4 traits locked)
+  // Note: Goobs in resonance are removed from goobsInLab, so we check locked state directly
+  const isGoobInResonance = React.useCallback((tokenId: bigint): boolean => {
+    if (isSimulating) {
+      const simulatedState = getSimulatedCreatureState(tokenId);
+      if (simulatedState) {
+        return simulatedState.lockedCount === 4;
+      }
+      return false;
+    } else {
+      // For real mode, we'd need to check on-chain state
+      // For now, we'll use a simple check - this could be optimized with a hook
+      // that batches state checks
+      return false; // Will be updated when we have on-chain state access
+    }
+  }, [isSimulating]);
 
   // Count Goobs in each category (calculate before early returns for useEffect)
-  const labCount = goobs.filter((g: { tokenId: bigint }) => {
-    const idStr = g.tokenId.toString();
-    return goobsInLab.has(idStr);
-  }).length;
+  // Force recalculation by checking all Goobs' states directly
+  const resonanceCount = React.useMemo(() => {
+    if (isSimulating) {
+      // In simulation, check each Goob's locked state directly
+      return goobs.filter((g: { tokenId: bigint }) => {
+        const state = getSimulatedCreatureState(g.tokenId);
+        return state?.lockedCount === 4;
+      }).length;
+    }
+    return goobs.filter((g: { tokenId: bigint }) => isGoobInResonance(g.tokenId)).length;
+  }, [goobs, isGoobInResonance, isSimulating, resonanceUpdateKey]);
+
+  const labCount = React.useMemo(() => {
+    return goobs.filter((g: { tokenId: bigint }) => {
+      const idStr = g.tokenId.toString();
+      const inLab = goobsInLab.has(idStr);
+      return inLab && !isGoobInResonance(g.tokenId); // In lab but not in resonance
+    }).length;
+  }, [goobs, goobsInLab, isGoobInResonance]);
 
   // Detect when new goobs are added to lab (must be before any conditional returns)
   useEffect(() => {
@@ -470,10 +518,18 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
     });
   };
 
+
   const filteredGoobs = goobs.filter((g: { tokenId: bigint }) => {
     const idStr = g.tokenId.toString();
     const inLab = goobsInLab.has(idStr);
-    return labFilter === 'Lab' ? inLab : !inLab;
+    
+    if (labFilter === 'Resonance') {
+      return isGoobInResonance(g.tokenId);
+    } else if (labFilter === 'Lab') {
+      return inLab && !isGoobInResonance(g.tokenId); // In lab but not in resonance
+    } else {
+      return !inLab; // Waiting Room
+    }
   });
 
   const selectedForLabCount = goobsSelectedForBatch.size;
@@ -614,11 +670,21 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
             >
               Lab
             </button>
+            <button
+              className={`${styles.filterButton} ${labFilter === 'Resonance' ? styles.filterButtonActive : ''}`}
+              onClick={() => {
+                setLabFilter('Resonance');
+                setExpandedGoobId(null);
+                onChange(null); // Clear selection when switching tabs
+              }}
+            >
+              Resonance
+            </button>
           </div>
           
           {/* Count readout */}
           <div className={styles.goobCountReadout}>
-            Waiting Room: {waitingRoomCount} | Lab: {labCount}
+            Waiting Room: {waitingRoomCount} | Lab: {labCount} | Resonance: {resonanceCount}
           </div>
         </>
       )}
@@ -669,7 +735,11 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
         <div className={styles.noGoobsContainer}>
           <div className={styles.noGoobsTitle}>You have no Goobs in the lab</div>
         </div>
-      ) : expandedGoobId && labFilter === 'Lab' ? (
+      ) : filteredGoobs.length === 0 && labFilter === 'Resonance' ? (
+        <div className={styles.noGoobsContainer}>
+          <div className={styles.noGoobsTitle}>You have no Goobs in Resonance</div>
+        </div>
+      ) : expandedGoobId && (labFilter === 'Lab' || labFilter === 'Resonance') ? (
         <ExpandedGoobView
           tokenId={expandedGoobId}
           onClose={() => {
@@ -686,6 +756,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
           {filteredGoobs.map((g: { tokenId: bigint }) => {
             const isSelected = selectedId === g.tokenId;
             const isSelectedForBatch = goobsSelectedForBatch.has(g.tokenId.toString());
+            const isInResonance = labFilter === 'Resonance' || isGoobInResonance(g.tokenId);
             return (
               <GoobCard
                 key={g.tokenId.toString()}
@@ -695,9 +766,10 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
                 showPlusButton={labFilter === 'Waiting Room'}
                 isWaitingRoom={labFilter === 'Waiting Room'}
                 isSimulating={isSimulating}
+                isInResonance={isInResonance}
                 onSelect={() => {
-                  if (labFilter === 'Lab') {
-                    // In Lab: expand the Goob and set selectedId so ItemSelector knows
+                  if (labFilter === 'Lab' || labFilter === 'Resonance') {
+                    // In Lab or Resonance: expand the Goob and set selectedId so ItemSelector knows
                     setExpandedGoobId(g.tokenId);
                     onChange(g.tokenId);
                   }
@@ -892,10 +964,15 @@ const ReceivedItemsModal: React.FC<{
                   {item.rarity && (
                     <span className={styles.modalItemRarity}>Rarity: {item.rarity}</span>
                   )}
-                  {item.category && (
+                  {item.category && item.category !== 'Epic' && (
                     <span className={styles.modalItemCategory}>
                       {item.category}
                       {item.magnitude !== undefined && ` ${item.magnitude}`}
+                    </span>
+                  )}
+                  {item.category === 'Epic' && item.magnitude !== undefined && (
+                    <span className={styles.modalItemCategory}>
+                      {item.magnitude}
                     </span>
                   )}
                   <span className={styles.modalItemQuantity}>+{item.quantity}</span>
@@ -1437,11 +1514,12 @@ const ExpandedGoobView: React.FC<{
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
   isSimulating?: boolean;
-}> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem, isSimulating = false }) => {
+  onGoobResonance?: (goobId: bigint) => void;
+}> = ({ tokenId, onClose, selectedItemsForGoob = new Map(), setSelectedItemsForGoob, onRestoreItem, isSimulating = false, onGoobResonance }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   const { lockTrait: lockTraitContract, isPending: isLocking, isSuccess: isLockSuccess } = useLockTrait();
-  const { sp: walletSP } = useWalletSP();
+  const { sp: walletSPFromContract } = useWalletSP();
   const imageUrl = metadata?.image_data || metadata?.image || null;
   const queryClient = useQueryClient();
   
@@ -1455,6 +1533,34 @@ const ExpandedGoobView: React.FC<{
   const [lockTraitError, setLockTraitError] = React.useState<string | null>(null);
   const [showLockSuccessModal, setShowLockSuccessModal] = React.useState(false);
   const [lockedTraitName, setLockedTraitName] = React.useState<string | null>(null);
+  const [showResonanceModal, setShowResonanceModal] = React.useState(false);
+  const [showResonanceConfetti, setShowResonanceConfetti] = React.useState(false);
+  
+  // Listen for resonance achievement events from ExpandedGoobView
+  React.useEffect(() => {
+    const handleResonanceAchieved = () => {
+      setShowResonanceModal(true);
+      setShowResonanceConfetti(true);
+      setTimeout(() => setShowResonanceConfetti(false), 3000);
+    };
+    
+    window.addEventListener('goob-resonance-achieved', handleResonanceAchieved);
+    return () => {
+      window.removeEventListener('goob-resonance-achieved', handleResonanceAchieved);
+    };
+  }, []);
+  
+  // Listen for SP updates in simulation mode
+  const [spUpdateKey, setSPUpdateKey] = React.useState(0);
+  React.useEffect(() => {
+    const handleSPUpdate = () => {
+      if (isSimulating) {
+        setSPUpdateKey(prev => prev + 1);
+      }
+    };
+    window.addEventListener('sp-updated', handleSPUpdate);
+    return () => window.removeEventListener('sp-updated', handleSPUpdate);
+  }, [isSimulating]);
   
   // Get bonded SP from creature state
   const bondedSP = React.useMemo(() => {
@@ -1467,6 +1573,20 @@ const ExpandedGoobView: React.FC<{
     return 0;
   }, [isSimulating, tokenId, creatureState]);
   
+  // Get wallet SP (from contract in real mode, from localStorage in simulation mode)
+  const walletSP = React.useMemo(() => {
+    if (isSimulating) {
+      try {
+        const stored = localStorage.getItem('simulated-wallet-sp');
+        return stored ? parseInt(stored, 10) : 0;
+      } catch {
+        return 0;
+      }
+    } else {
+      return walletSPFromContract || 0;
+    }
+  }, [isSimulating, walletSPFromContract, spUpdateKey]);
+  
   // Total available SP (bonded + wallet)
   const totalAvailableSP = React.useMemo(() => {
     return bondedSP + walletSP;
@@ -1474,25 +1594,40 @@ const ExpandedGoobView: React.FC<{
   
   // Handle trait locking
   const handleLockTrait = React.useCallback(async (traitName: string, lockCost: number) => {
-    // Check SP balance (bonded SP first, then wallet SP)
-    if (!isSimulating) {
-      // In real mode, check bonded SP + wallet SP
-      if (totalAvailableSP < lockCost) {
-        setLockTraitError('Not enough SP, Burn items to receive SP');
-        return;
-      }
+    // Clear any previous error
+    setLockTraitError(null);
+    
+    // Check SP balance (bonded SP first, then wallet SP) - both real and simulation mode
+    if (totalAvailableSP < lockCost) {
+      setLockTraitError(`Not enough SP (need ${lockCost}, have ${totalAvailableSP}). Burn items to receive SP.`);
+      return;
     }
     
     // Show fake transaction modal
     setPendingLockTrait({ name: traitName, cost: lockCost });
     setShowLockTraitModal(true);
-    setLockTraitError(null);
-  }, [isSimulating, totalAvailableSP]);
+  }, [totalAvailableSP]);
+  
+  // Clear error when SP changes and becomes sufficient
+  React.useEffect(() => {
+    if (lockTraitError && pendingLockTrait && totalAvailableSP >= pendingLockTrait.cost) {
+      setLockTraitError(null);
+    }
+  }, [totalAvailableSP, lockTraitError, pendingLockTrait]);
   
   // Handle fake lock transaction sign
   const handleFakeLockSign = React.useCallback(async () => {
     if (!pendingLockTrait) return;
     
+    // Check SP balance again before processing (in case it changed)
+    if (totalAvailableSP < pendingLockTrait.cost) {
+      setLockTraitError(`Not enough SP (need ${pendingLockTrait.cost}, have ${totalAvailableSP}). Burn items to receive SP.`);
+      setShowLockTraitModal(false);
+      return;
+    }
+    
+    // Clear error before processing
+    setLockTraitError(null);
     setShowLockTraitModal(false);
     setIsProcessingLock(true);
     
@@ -1523,17 +1658,69 @@ const ExpandedGoobView: React.FC<{
           else if (pendingLockTrait.name === 'pH') updatedState.lockedPH = true;
           else if (pendingLockTrait.name === 'Salinity') updatedState.lockedSal = true;
           
-          // Deduct SP cost from bonded SP in simulation
-          updatedState.bondedSP = Math.max(0, updatedState.bondedSP - pendingLockTrait.cost);
+          // Deduct SP cost: bonded SP first, then global SP
+          const lockCost = pendingLockTrait.cost;
+          const currentBondedSP = updatedState.bondedSP || 0;
+          
+          if (currentBondedSP >= lockCost) {
+            // Use only bonded SP
+            updatedState.bondedSP = currentBondedSP - lockCost;
+          } else {
+            // Use all bonded SP, then deduct remainder from global SP
+            const remainingCost = lockCost - currentBondedSP;
+            updatedState.bondedSP = 0;
+            
+            // Deduct from global SP (localStorage)
+            try {
+              const currentGlobalSP = parseInt(localStorage.getItem('simulated-wallet-sp') || '0', 10);
+              const newGlobalSP = Math.max(0, currentGlobalSP - remainingCost);
+              localStorage.setItem('simulated-wallet-sp', newGlobalSP.toString());
+              
+              // Dispatch event to update SP display
+              window.dispatchEvent(new CustomEvent('sp-updated'));
+            } catch (err) {
+              console.error('[LockTrait] Failed to deduct global SP:', err);
+            }
+          }
+          
+          // Calculate lockedCount after update
+          const lockedCount = (updatedState.lockedFreq ? 1 : 0) + 
+                             (updatedState.lockedTemp ? 1 : 0) + 
+                             (updatedState.lockedPH ? 1 : 0) + 
+                             (updatedState.lockedSal ? 1 : 0);
+          updatedState.lockedCount = lockedCount;
+          
+          // Check if all 4 traits are now locked (Resonance achieved)
+          if (lockedCount === 4) {
+            // Store resonance start time if not already set
+            if (!updatedState.resonanceStartTime) {
+              updatedState.resonanceStartTime = Date.now();
+            }
+            
+            // Move Goob from Lab to Resonance (remove from goobsInLab)
+            if (onGoobResonance) {
+              onGoobResonance(tokenId);
+            }
+            
+            // Dispatch event to parent to show resonance celebration
+            window.dispatchEvent(new CustomEvent('goob-resonance-achieved', { 
+              detail: { goobId: tokenId.toString() } 
+            }));
+          } else {
+            // Show regular lock success modal
+            setLockedTraitName(pendingLockTrait.name);
+            setShowLockSuccessModal(true);
+          }
           
           setSimulatedCreatureState(tokenId, updatedState);
           setRefreshKey(prev => prev + 1);
           console.log(`[LockTrait] Locked ${pendingLockTrait.name} in simulation mode`);
+        } else {
+          // Show regular lock success modal if state not found
+          setLockedTraitName(pendingLockTrait.name);
+          setShowLockSuccessModal(true);
         }
         
-        // Show success modal
-        setLockedTraitName(pendingLockTrait.name);
-        setShowLockSuccessModal(true);
         setIsProcessingLock(false);
         setPendingLockTrait(null);
       } else {
@@ -1549,18 +1736,46 @@ const ExpandedGoobView: React.FC<{
         }
       }
     }, 1000);
-  }, [pendingLockTrait, tokenId, isSimulating, lockTraitContract]);
+  }, [pendingLockTrait, tokenId, isSimulating, lockTraitContract, totalAvailableSP]);
   
   // Refresh state and show success modal when lock succeeds (real mode)
   React.useEffect(() => {
     if (isLockSuccess && !isSimulating && pendingLockTrait) {
       setRefreshKey(prev => prev + 1);
-      setLockedTraitName(pendingLockTrait.name);
-      setShowLockSuccessModal(true);
+      
+      // Check if all 4 traits are now locked
+      const currentState = creatureState;
+      if (currentState) {
+        const lockedCount = (currentState.lockedFreq ? 1 : 0) + 
+                           (currentState.lockedTemp ? 1 : 0) + 
+                           (currentState.lockedPH ? 1 : 0) + 
+                           (currentState.lockedSal ? 1 : 0);
+        
+        if (lockedCount === 4) {
+          // Move Goob from Lab to Resonance
+          if (onGoobResonance) {
+            onGoobResonance(tokenId);
+          }
+          
+          // Dispatch event to parent to show resonance celebration
+          window.dispatchEvent(new CustomEvent('goob-resonance-achieved', { 
+            detail: { goobId: tokenId.toString() } 
+          }));
+        } else {
+          // Show regular lock success modal
+          setLockedTraitName(pendingLockTrait.name);
+          setShowLockSuccessModal(true);
+        }
+      } else {
+        // Fallback to regular modal if state not available
+        setLockedTraitName(pendingLockTrait.name);
+        setShowLockSuccessModal(true);
+      }
+      
       setIsProcessingLock(false);
       setPendingLockTrait(null);
     }
-  }, [isLockSuccess, isSimulating, pendingLockTrait]);
+  }, [isLockSuccess, isSimulating, pendingLockTrait, creatureState, tokenId, onGoobResonance]);
   
   // State for vibes animation
   const [showVibesAnimation, setShowVibesAnimation] = React.useState(false);
@@ -2195,18 +2410,54 @@ const ExpandedGoobView: React.FC<{
                     bottom: '180px',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    padding: '8px 16px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    padding: '12px 16px 12px 16px',
+                    backgroundColor: '#ef4444',
+                    border: '2px solid #dc2626',
                     borderRadius: '6px',
-                    color: '#ef4444',
-                    fontSize: '12px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    fontWeight: 600,
                     textAlign: 'center',
                     zIndex: 11,
                     maxWidth: '800px',
                     width: 'calc(100% - 24px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
                   }}>
-                    {lockTraitError}
+                    <span style={{ fontSize: '16px' }}>⚠️</span>
+                    <span style={{ flex: 1 }}>Warning: {lockTraitError}</span>
+                    <button
+                      onClick={() => setLockTraitError(null)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: '18px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        padding: '0 4px',
+                        lineHeight: '1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '4px',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                      aria-label="Dismiss warning"
+                    >
+                      ×
+                    </button>
                   </div>
                 )}
                 <div style={{ 
@@ -2600,17 +2851,20 @@ const ExpandedGoobView: React.FC<{
                   className={styles.selectedItemsGrid}
                   style={hasEpicItem ? { justifyContent: 'center' } : undefined}
                 >
-                  {Array.from(selectedItemsForGoob.entries()).map(([itemId, count]) => (
-                    <SelectedItemDisplay 
-                      key={itemId} 
-                      itemId={itemId} 
-                      count={count}
-                      selectedItemsForGoob={selectedItemsForGoob}
-                      setSelectedItemsForGoob={setSelectedItemsForGoob}
-                      onRestoreItem={onRestoreItem}
-                      goobState={displayState}
-                    />
-                  ))}
+                  {Array.from(selectedItemsForGoob.entries()).flatMap(([itemId, count]) => 
+                    // Display each item individually instead of grouping by count
+                    Array.from({ length: Number(count) }, (_, index) => (
+                      <SelectedItemDisplay 
+                        key={`${itemId}-${index}`} 
+                        itemId={itemId} 
+                        count={1}
+                        selectedItemsForGoob={selectedItemsForGoob}
+                        setSelectedItemsForGoob={setSelectedItemsForGoob}
+                        onRestoreItem={onRestoreItem}
+                        goobState={displayState}
+                      />
+                    ))
+                  )}
                 </div>
                 {hasEpicItem && (
                   <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px', textAlign: 'center' }}>
@@ -2754,6 +3008,48 @@ const ExpandedGoobView: React.FC<{
           </div>
         </div>
       )}
+
+      {/* Resonance Achievement Modal */}
+      {showResonanceModal && (
+        <div 
+          className={styles.fakeTransactionOverlay}
+          onClick={() => {
+            setShowResonanceModal(false);
+          }}
+        >
+          <div 
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className={styles.modalCloseButton}
+              onClick={() => {
+                setShowResonanceModal(false);
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className={styles.fakeTransactionText} style={{ fontSize: '24px', fontWeight: 700, color: '#fbbf24', marginBottom: '16px' }}>
+              Goob Has achieved Resonance!
+            </div>
+            <div className={styles.fakeTransactionText} style={{ fontSize: '14px', marginBottom: '20px' }}>
+              All 4 traits are locked. Your Goob has entered the Resonance Phase.
+            </div>
+            <button 
+              className={styles.fakeTransactionButton}
+              onClick={() => {
+                setShowResonanceModal(false);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Resonance Confetti */}
+      {showResonanceConfetti && <ConfettiEffect />}
     </div>
   );
 };
@@ -2768,7 +3064,8 @@ const GoobCard: React.FC<{
   isSimulating?: boolean;
   onSelect: () => void;
   onSelectForBatch: (e: React.MouseEvent) => void;
-}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, isWaitingRoom, isSimulating = false, onSelect, onSelectForBatch }) => {
+  isInResonance?: boolean;
+}> = ({ tokenId, isSelected, isSelectedForBatch, showPlusButton, isWaitingRoom, isSimulating = false, onSelect, onSelectForBatch, isInResonance = false }) => {
   const { metadata, isLoading } = useGoobMetadata(tokenId);
   const { state: creatureState } = useCreatureState(Number(tokenId));
   
@@ -2777,6 +3074,44 @@ const GoobCard: React.FC<{
   
   // Use simulated state if available, otherwise use on-chain state
   const displayState = simulatedState || creatureState;
+  
+  // Calculate resonance countdown (7 days from start time)
+  const [resonanceTimeRemaining, setResonanceTimeRemaining] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    if (!isInResonance || !displayState) return;
+    
+    const resonanceStartTime = (displayState as any).resonanceStartTime;
+    if (!resonanceStartTime) return;
+    
+    const calculateTimeRemaining = () => {
+      const now = Date.now();
+      const elapsed = now - resonanceStartTime;
+      const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+      const remaining = sevenDays - elapsed;
+      return remaining > 0 ? remaining : 0;
+    };
+    
+    const updateTime = () => {
+      setResonanceTimeRemaining(calculateTimeRemaining());
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isInResonance, displayState]);
+  
+  const formatResonanceTime = (ms: number): string => {
+    if (ms <= 0) return 'Ready';
+    const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((ms % (60 * 1000)) / 1000);
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m ${seconds}s`;
+  };
 
   // Get image URL (prefer image_data for on-chain, fallback to image)
   const imageUrl = metadata?.image_data || metadata?.image || null;
@@ -2856,6 +3191,25 @@ const GoobCard: React.FC<{
         }
       }}
     >
+      {/* Resonance Countdown - show above card if in resonance */}
+      {isInResonance && resonanceTimeRemaining !== null && (
+        <div 
+          style={{
+            width: '100%',
+            textAlign: 'center',
+            fontSize: '10px',
+            fontWeight: 600,
+            color: '#fbbf24',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            padding: '4px 8px',
+            borderRadius: '4px 4px 0 0',
+            marginBottom: '4px',
+          }}
+        >
+          Resonance: {formatResonanceTime(resonanceTimeRemaining)}
+        </div>
+      )}
+      
       {/* Image Section */}
       <div 
         style={{ 
@@ -2872,7 +3226,7 @@ const GoobCard: React.FC<{
           position: 'relative',
         }}
       >
-        {/* Vibes Counter - only show in Lab view */}
+        {/* Vibes Counter - only show in Lab or Resonance view */}
         {!isWaitingRoom && displayState && typeof displayState.vibes === 'number' && (
           <div 
             style={{
@@ -2993,7 +3347,7 @@ const SelectedItemDisplay: React.FC<{
   setSelectedItemsForGoob?: React.Dispatch<React.SetStateAction<Map<number, number>>>;
   onRestoreItem?: (itemId: number) => void;
   goobState?: any; // Current Goob state to determine secondary effect direction
-}> = ({ itemId, count, selectedItemsForGoob: _selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, goobState }) => {
+}> = ({ itemId, count: _count, selectedItemsForGoob: _selectedItemsForGoob, setSelectedItemsForGoob, onRestoreItem, goobState }) => {
   const { metadata, isLoading } = useItemMetadata(itemId);
   const imageUrl = metadata?.image || metadata?.image_data || null;
   
@@ -3073,21 +3427,7 @@ const SelectedItemDisplay: React.FC<{
         ) : (
           <div style={{ fontSize: '8px', color: 'var(--muted)' }}>No image</div>
         )}
-        {count > 1 && (
-          <div style={{
-            position: 'absolute',
-            top: '4px',
-            right: '4px',
-            fontSize: '10px',
-            color: 'rgb(110, 231, 183)',
-            fontWeight: 600,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            padding: '2px 4px',
-            borderRadius: '2px',
-          }}>
-            x{count}
-          </div>
-        )}
+        {/* Quantity counter removed - items are now displayed individually */}
       </div>
 
       {/* Info Section */}
