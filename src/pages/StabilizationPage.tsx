@@ -951,18 +951,13 @@ export default function StabilizationPage() {
                   4. Daily Drip
                 </summary>
                 <div className={styles.howToAccordionContent}>
-                  <p>Each Goob that is active in the lab receives 1 daily drip item.</p>
-                  <ul>
-                    <li>A "day" is currently set at 60 seconds.</li>
-                    <li>If your Goob is active before the daily reset, it will receive that day's drip.</li>
-                  </ul>
-                  <p><strong>Vibes Streak Bonus</strong></p>
-                  <p>If you maintain Vibes at 10 for 7 consecutive days, that Goob's daily drip doubles:</p>
-                  <ul>
-                    <li>1 item/day → 2 items/day</li>
-                    <li>This bonus lasts as long as Vibes remain at 10</li>
-                  </ul>
-                  <p>(If Vibes drop, drip returns to 1/day until a new 7-day streak is achieved.)</p>
+                  <p>Active Goobs in the Lab can claim 1 free item every day.</p>
+                  <p>Make sure your Goob is already in the Lab before the daily reset to receive that day's drip.</p>
+                  <p>When your daily drip is ready, the Daily Drip timer will show a "Claim Drip" button you can press to collect it.</p>
+                  <p><strong>Boost Your Drip</strong></p>
+                  <p>If you keep your Goob's Vibes at 10 for 7 days in a row,</p>
+                  <p>its daily drip doubles to 2 items per day.</p>
+                  <p>Keep Vibes high to keep the bonus active.</p>
                 </div>
               </details>
 

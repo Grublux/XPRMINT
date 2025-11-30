@@ -690,7 +690,7 @@ export const GoobSelector: React.FC<GoobSelectorProps> = ({
       )}
       
       {/* Title - "Goobs ####" when expanded */}
-      {expandedGoobId && labFilter === 'Lab' && (
+      {expandedGoobId && (labFilter === 'Lab' || labFilter === 'Resonance') && (
         <>
           <div className={styles.expandedTitle}>
             Goobs #{expandedGoobId.toString()}
@@ -3108,9 +3108,7 @@ const GoobCard: React.FC<{
     const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
     const seconds = Math.floor((ms % (60 * 1000)) / 1000);
     
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m ${seconds}s`;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
   };
 
   // Get image URL (prefer image_data for on-chain, fallback to image)

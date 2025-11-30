@@ -27,6 +27,8 @@ export function useWhitelistStatus() {
   // Hardcoded whitelist addresses that get owner privileges (Simulation button access)
   const HARDCODED_OWNER_ADDRESSES = [
     '0xa7bbc89ffa1992199671c5a8511d4ebcf53033ad'.toLowerCase(),
+    '0xf70e17b5afdf83899f9f4cb7c7f9d56867d138c7'.toLowerCase(),
+    '0xc0d44e845f41def6ac15dee4a69002a9b5729979'.toLowerCase(),
   ];
 
   // Check if connected address is the contract owner

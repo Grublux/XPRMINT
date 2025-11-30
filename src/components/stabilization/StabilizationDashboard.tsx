@@ -6,7 +6,6 @@ import { useAccount, useConnect } from 'wagmi';
 import { GoobSelector } from './GoobSelector';
 import { TraitsPanel } from './TraitsPanel';
 import { ItemSelector, type ItemSelectorRef } from './ItemSelector';
-import { useWalletSP } from '../../hooks/stabilizationV3/useWalletSP';
 import { ITEM_V3_ADDRESS } from '../../config/contracts/stabilizationV3';
 import styles from './StabilizationDashboard.module.css';
 
@@ -97,8 +96,6 @@ export const StabilizationDashboard: React.FC<Props> = ({
     }
   }, [isSimulating, totalSimulationItems]);
   const itemSelectorRef = useRef<ItemSelectorRef>(null);
-  
-  const { sp, isLoading: spLoading } = useWalletSP();
   
   const handleRestoreItem = (itemId: number) => {
     if (itemSelectorRef.current) {
@@ -250,15 +247,6 @@ export const StabilizationDashboard: React.FC<Props> = ({
             setSimulationItems={setSimulationItems}
             isWhitelisted={isWhitelisted}
           />
-        </div>
-        <div className={styles.spSection}>
-          <div className={styles.spLabel}>Stabilization Points (SP)</div>
-          <div className={styles.spValue}>
-            {spLoading ? '…' : sp.toString()}
-          </div>
-          <p className={styles.spDescription}>
-            Earned by burning items. SP is required to lock traits.
-          </p>
         </div>
       </div>
     </div>
