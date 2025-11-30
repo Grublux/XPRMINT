@@ -872,14 +872,22 @@ export default function StabilizationPage() {
                     setOpenAccordion(openAccordion === 1 ? null : 1);
                   }}
                 >
-                  1. Traits
+                  1. Initialization
                 </summary>
                 <div className={styles.howToAccordionContent}>
+                  <p>Your Goobs begin in the Waiting Room.</p>
+                  <p>To start Stabilization:</p>
                   <ul>
-                    <li>Each Goob has 4 visible traits with visible targets.</li>
-                    <li>Traits begin outside the stabilization band.</li>
-                    <li>Your goal is to bring each trait within ±5% of its target.</li>
+                    <li>Click each Goob to send it to the Lab</li>
+                    <li>This action initializes the Goob</li>
                   </ul>
+                  <p>Initialization instantly:</p>
+                  <ul>
+                    <li>Generates the Goob's starting trait values</li>
+                    <li>Awards 5 Starter Items</li>
+                    <li>Activates the Goob so it can begin receiving Daily Drip</li>
+                  </ul>
+                  <p>A Goob does not progress until it is sent to the Lab.</p>
                 </div>
               </details>
 
@@ -894,16 +902,14 @@ export default function StabilizationPage() {
                     setOpenAccordion(openAccordion === 2 ? null : 2);
                   }}
                 >
-                  2. Items
+                  2. Traits
                 </summary>
                 <div className={styles.howToAccordionContent}>
-                  <p>Items are used to move traits closer to their targets.</p>
-                  <p>Each item affects:</p>
                   <ul>
-                    <li><strong>One primary trait</strong> - Always moves toward the target.</li>
-                    <li><strong>One secondary trait</strong> - Always moves in the same direction as the primary effect. (Ignored if that trait is locked.)</li>
+                    <li>Each Goob has 4 visible traits with visible targets.</li>
+                    <li>Traits begin outside the stabilization band.</li>
+                    <li>Your goal is to bring each trait within ±5% of its target.</li>
                   </ul>
-                  <p>Items may also be burned for SP, which is required to pay for trait locks.</p>
                 </div>
               </details>
 
@@ -918,7 +924,31 @@ export default function StabilizationPage() {
                     setOpenAccordion(openAccordion === 3 ? null : 3);
                   }}
                 >
-                  3. Daily Drip
+                  3. Items
+                </summary>
+                <div className={styles.howToAccordionContent}>
+                  <p>Items are used to move traits closer to their targets.</p>
+                  <p>Each item affects:</p>
+                  <ul>
+                    <li><strong>One primary trait</strong> - Always moves toward the target.</li>
+                    <li><strong>One secondary trait</strong> - Always moves in the same direction as the primary effect. (Ignored if that trait is locked.)</li>
+                  </ul>
+                  <p>Items may also be burned for SP, which is required to pay for trait locks.</p>
+                </div>
+              </details>
+
+              <details 
+                className={styles.howToAccordion}
+                open={openAccordion === 4}
+              >
+                <summary 
+                  className={styles.howToAccordionSummary}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenAccordion(openAccordion === 4 ? null : 4);
+                  }}
+                >
+                  4. Daily Drip
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>Each Goob that is active in the lab receives 1 daily drip item.</p>
@@ -938,16 +968,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 4}
+                open={openAccordion === 5}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 4 ? null : 4);
+                    setOpenAccordion(openAccordion === 5 ? null : 5);
                   }}
                 >
-                  4. Stability Points (SP)
+                  5. Stability Points (SP)
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>SP is used to pay for lock costs.</p>
@@ -975,16 +1005,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 5}
+                open={openAccordion === 6}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 5 ? null : 5);
+                    setOpenAccordion(openAccordion === 6 ? null : 6);
                   }}
                 >
-                  5. Locking Traits
+                  6. Locking Traits
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>A trait becomes lockable when it is within 5% of its target.</p>
@@ -1002,16 +1032,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 6}
+                open={openAccordion === 7}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 6 ? null : 6);
+                    setOpenAccordion(openAccordion === 7 ? null : 7);
                   }}
                 >
-                  6. Daily Actions
+                  7. Daily Actions
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>Each day you can:</p>
@@ -1032,16 +1062,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 7}
+                open={openAccordion === 8}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 7 ? null : 7);
+                    setOpenAccordion(openAccordion === 8 ? null : 8);
                   }}
                 >
-                  7. Stabilization
+                  8. Stabilization
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>A Goob completes Stabilization when:</p>
@@ -1058,16 +1088,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 8}
+                open={openAccordion === 9}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 8 ? null : 8);
+                    setOpenAccordion(openAccordion === 9 ? null : 9);
                   }}
                 >
-                  8. Resonance Phase
+                  9. Resonance Phase
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>The Resonance Phase lasts 7 days.</p>
@@ -1083,16 +1113,16 @@ export default function StabilizationPage() {
 
               <details 
                 className={styles.howToAccordion}
-                open={openAccordion === 9}
+                open={openAccordion === 10}
               >
                 <summary 
                   className={styles.howToAccordionSummary}
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenAccordion(openAccordion === 9 ? null : 9);
+                    setOpenAccordion(openAccordion === 10 ? null : 10);
                   }}
                 >
-                  9. Evolution
+                  10. Evolution
                 </summary>
                 <div className={styles.howToAccordionContent}>
                   <p>If:</p>
