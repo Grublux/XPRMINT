@@ -1341,6 +1341,24 @@ const ItemCard: React.FC<{
           );
         })()}
       </div>
+      
+      {/* Add button at bottom - only show when Goob is selected */}
+      {showPlusButton && balance > 0n && (
+        <button
+          onClick={handleAddClick}
+          className={styles.addButtonBottom}
+          style={{
+            color: isAtLimit ? 'rgba(128, 128, 128, 0.5)' : 'rgb(16, 185, 129)',
+            cursor: isAtLimit ? 'not-allowed' : 'pointer',
+            opacity: isAtLimit ? 0.5 : 1,
+            borderColor: isAtLimit ? 'rgba(128, 128, 128, 0.5)' : 'rgb(16, 185, 129)',
+            backgroundColor: isAtLimit ? 'rgba(128, 128, 128, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+          }}
+          disabled={isAtLimit}
+        >
+          Add
+        </button>
+      )}
     </div>
   );
 };
