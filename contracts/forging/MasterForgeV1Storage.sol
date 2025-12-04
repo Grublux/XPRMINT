@@ -52,6 +52,12 @@ abstract contract MasterForgeV1Storage {
         address owner;             // mirrors ERC721 owner but kept for convenience
     }
 
+    /// @notice Royalty seat for a position: which NFT collection and tokenId forged it.
+    struct RoyaltySeat {
+        address collection; // ERC721 collection (e.g. NPCs, future Forge NFTs)
+        uint256 tokenId;    // tokenId within that collection
+    }
+
     // -------- Access control --------
 
     /// @dev Address authorized to approve upgrades.
@@ -109,7 +115,19 @@ abstract contract MasterForgeV1Storage {
     /// @notice Maximum allowed batch size for craftBatch.
     uint256 public maxBatchSize;
 
+    // -------- Royalty seats --------
+
+    /// @notice Royalty seat per Forge position (positionId => NFT collection + tokenId).
+    mapping(uint256 => RoyaltySeat) public positionRoyaltySeat;
+
+    /// @notice Collections allowed to act as royalty seats (NPCs now, optional Forge NFTs later).
+    mapping(address => bool) public allowedRoyaltyCollections;
+
+    /// @notice Default royalty collection used when caller does not explicitly specify one.
+    /// @dev For now this will be set to the NPC collection; can be updated to other collections later.
+    address public defaultRoyaltyCollection;
+
     // -------- Storage gap for upgrades --------
 
-    uint256[40] private __gap;
+    uint256[37] private __gap;
 }

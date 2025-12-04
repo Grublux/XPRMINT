@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -46,8 +47,7 @@ contract MasterForgeV1 is
         address positionsToken_,
         uint256 maxBatchSize_
     ) external initializer {
-        __Ownable_init();
-        __UUPSUpgradeable_init();
+        __Ownable_init(msg.sender);
 
         if (defaultInputToken_ == address(0)) {
             revert InvalidInputAmount();
@@ -154,6 +154,21 @@ contract MasterForgeV1 is
     function setMaxBatchSize(uint256 newMax) external onlyOwnerOrUpgrader {
         if (newMax == 0) revert InvalidInputAmount();
         maxBatchSize = newMax;
+    }
+
+    /// @notice Allow or disallow a collection to act as a royalty seat.
+    function setRoyaltyCollection(address collection, bool allowed) external onlyOwnerOrUpgrader {
+        if (collection == address(0)) revert InvalidAdminAddress();
+        allowedRoyaltyCollections[collection] = allowed;
+    }
+
+    /// @notice Set the default royalty collection used when caller does not explicitly specify one.
+    /// @dev For V1 this should be set to the NPC collection.
+    function setDefaultRoyaltyCollection(address collection) external onlyOwnerOrUpgrader {
+        if (collection != address(0) && !allowedRoyaltyCollections[collection]) {
+            revert UnsupportedRoyaltyCollection();
+        }
+        defaultRoyaltyCollection = collection;
     }
 
     // ============ Recipe management ============
@@ -294,11 +309,35 @@ contract MasterForgeV1 is
 
     /**
      * @notice Craft a single position from a recipe.
+     * @param recipeId The recipe to craft from.
+     * @param seatCollection The NFT collection acting as the royalty seat (0 => use defaultRoyaltyCollection).
+     * @param seatTokenId The tokenId within the seat collection that the caller owns.
      */
-    function craft(uint256 recipeId) external nonReentrant returns (uint256 positionId) {
+    function craft(
+        uint256 recipeId,
+        address seatCollection,
+        uint256 seatTokenId
+    ) external nonReentrant returns (uint256 positionId) {
         Recipe memory r = recipes[recipeId];
         if (!r.active) revert RecipeNotActive();
         if (r.inputPerUnit == 0) revert InvalidInputAmount();
+
+        // Resolve royalty seat collection: if none specified, use defaultRoyaltyCollection.
+        address collection = seatCollection;
+        if (collection == address(0)) {
+            collection = defaultRoyaltyCollection;
+        }
+
+        if (collection != address(0)) {
+            // Must be an allowed collection (for V1, NPC contract).
+            if (!allowedRoyaltyCollections[collection]) {
+                revert UnsupportedRoyaltyCollection();
+            }
+            // Require the caller to own the seat NFT.
+            if (IERC721(collection).ownerOf(seatTokenId) != msg.sender) {
+                revert NotRoyaltySeatOwner();
+            }
+        }
 
         address token = r.inputToken == address(0)
             ? defaultInputToken
@@ -340,6 +379,14 @@ contract MasterForgeV1 is
             owner: msg.sender
         });
 
+        // Assign royalty seat if a valid collection was resolved
+        if (collection != address(0)) {
+            positionRoyaltySeat[positionId] = RoyaltySeat({
+                collection: collection,
+                tokenId: seatTokenId
+            });
+        }
+
         totalInputLocked += lockedAmount;
         totalInputByRecipe[recipeId] += lockedAmount;
         totalPositionsByRecipe[recipeId] += 1;
@@ -350,16 +397,39 @@ contract MasterForgeV1 is
 
     /**
      * @notice Craft multiple positions of the same recipe in a single transaction.
+     * @param recipeId The recipe to craft from.
+     * @param count Number of positions to craft.
+     * @param seatCollection The NFT collection acting as the royalty seat (0 => use defaultRoyaltyCollection).
+     * @param seatTokenId The tokenId within the seat collection that the caller owns.
      */
     function craftBatch(
         uint256 recipeId,
-        uint256 count
+        uint256 count,
+        address seatCollection,
+        uint256 seatTokenId
     ) external nonReentrant returns (uint256[] memory positionIds) {
         if (count == 0 || count > maxBatchSize) revert BatchTooLarge();
 
         Recipe memory r = recipes[recipeId];
         if (!r.active) revert RecipeNotActive();
         if (r.inputPerUnit == 0) revert InvalidInputAmount();
+
+        // Resolve royalty seat collection: if none specified, use defaultRoyaltyCollection.
+        address collection = seatCollection;
+        if (collection == address(0)) {
+            collection = defaultRoyaltyCollection;
+        }
+
+        if (collection != address(0)) {
+            // Must be an allowed collection (for V1, NPC contract).
+            if (!allowedRoyaltyCollections[collection]) {
+                revert UnsupportedRoyaltyCollection();
+            }
+            // Require the caller to own the seat NFT.
+            if (IERC721(collection).ownerOf(seatTokenId) != msg.sender) {
+                revert NotRoyaltySeatOwner();
+            }
+        }
 
         address token = r.inputToken == address(0)
             ? defaultInputToken
@@ -407,6 +477,14 @@ contract MasterForgeV1 is
                 inputAmountLocked: lockedPerPosition,
                 owner: msg.sender
             });
+
+            // Assign royalty seat if a valid collection was resolved
+            if (collection != address(0)) {
+                positionRoyaltySeat[positionId] = RoyaltySeat({
+                    collection: collection,
+                    tokenId: seatTokenId
+                });
+            }
 
             positionIds[i] = positionId;
         }
@@ -483,6 +561,21 @@ contract MasterForgeV1 is
     ) external view returns (uint256 totalInput, uint256 totalPositions) {
         totalInput = totalInputByRecipe[recipeId];
         totalPositions = totalPositionsByRecipe[recipeId];
+    }
+
+    /// @notice Returns the address that should receive royalties for a given position.
+    /// @dev If no royalty seat is recorded, falls back to the recipe's forgeCreator.
+    function royaltyReceiverForPosition(uint256 positionId) external view returns (address) {
+        Position memory p = positions[positionId];
+        if (p.owner == address(0)) revert InvalidPosition();
+
+        RoyaltySeat memory seat = positionRoyaltySeat[positionId];
+        if (seat.collection != address(0)) {
+            return IERC721(seat.collection).ownerOf(seat.tokenId);
+        }
+
+        Recipe memory r = recipes[p.recipeId];
+        return r.forgeCreator;
     }
 
     // ============ Internal helpers ============

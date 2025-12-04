@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAccount, useConnect } from 'wagmi';
 import styles from './ForgePage.module.css';
 import { useNGTBalance } from '../hooks/forging/useNGTBalance';
 import { useNPCTokens } from '../hooks/forging/useNPCTokens';
@@ -14,6 +15,8 @@ type ChatBubble = {
 };
 
 export default function ForgePage() {
+  const { address, isConnected } = useAccount();
+  const { connectors, connect } = useConnect();
   const { displayBalance, isPlaceholder, isLoading } = useNGTBalance();
   const { tokens: npcTokens, isLoading: npcLoading, progress: npcProgress, scan: scanNPCs } = useNPCTokens();
   
@@ -46,7 +49,7 @@ export default function ForgePage() {
   // Initial welcome message
   useEffect(() => {
     const timer = setTimeout(() => {
-      addBubble(['Welcome to the Master Forge,', 'first you\'ll need to "Choose NPC" below.']);
+      addBubble(['Welcome to the Master Forge.', 'First you\'ll need to "Choose NPC" below.']);
     }, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -202,6 +205,14 @@ export default function ForgePage() {
             <button 
               className={`${styles.actionButton} ${styles.npcButton} ${selectedNPC ? styles.npcButtonSelected : ''}`} 
               onClick={() => {
+                if (!isConnected || !address) {
+                  // Prompt wallet connection
+                  const connector = connectors[0];
+                  if (connector) {
+                    connect({ connector });
+                  }
+                  return;
+                }
                 setShowNPCModal(true);
                 scanNPCs();
               }}

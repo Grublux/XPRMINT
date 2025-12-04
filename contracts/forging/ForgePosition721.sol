@@ -12,6 +12,10 @@ interface IMasterForgeTokenURI {
     function positionTokenURI(uint256 positionId) external view returns (string memory);
 }
 
+interface IMasterForgeRoyalty {
+    function royaltyReceiverForPosition(uint256 positionId) external view returns (address);
+}
+
 contract ForgePosition721 is NGMI721Upgradeable {
     /// @notice Address of the MasterForgeV1 contract authorized to mint and burn positions.
     address public masterForge;
@@ -71,6 +75,26 @@ contract ForgePosition721 is NGMI721Upgradeable {
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         return IMasterForgeTokenURI(masterForge).positionTokenURI(tokenId);
+    }
+
+    /**
+     * @notice ERC-2981 royalty info with dynamic receiver based on the forging NFT seat.
+     * @dev Royalty percentage (6.9%) is set at initialize time; receiver follows the NPC owner.
+     */
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        public
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        // Get base royalty (bps and default receiver) from NGMI721Upgradeable
+        (receiver, royaltyAmount) = super.royaltyInfo(tokenId, salePrice);
+
+        // Ask MasterForge who should actually receive the royalty for this position.
+        address seatReceiver = IMasterForgeRoyalty(masterForge).royaltyReceiverForPosition(tokenId);
+        if (seatReceiver != address(0)) {
+            receiver = seatReceiver;
+        }
     }
 
     // ============ Admin ============

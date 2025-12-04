@@ -55,5 +55,7 @@ contract MasterForgeV1Events {
     error InvalidFeeConfig();
     error InvalidInputAmount();
     error InvalidForgeName();
+    error UnsupportedRoyaltyCollection();
+    error NotRoyaltySeatOwner();
 }
 
