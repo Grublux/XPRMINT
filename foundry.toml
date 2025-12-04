@@ -23,5 +23,3 @@ fs_permissions = [
     { access = "read", path = "docs/stabilization_script/sim/items/output/" },
     { access = "read", path = "assets/items/" }
 ]
-
-

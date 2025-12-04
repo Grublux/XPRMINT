@@ -414,56 +414,94 @@ contract MasterForgeV1 is
         if (!r.active) revert RecipeNotActive();
         if (r.inputPerUnit == 0) revert InvalidInputAmount();
 
-        // Resolve royalty seat collection: if none specified, use defaultRoyaltyCollection.
-        address collection = seatCollection;
-        if (collection == address(0)) {
-            collection = defaultRoyaltyCollection;
-        }
+        // Resolve and validate royalty seat
+        address collection = _resolveAndValidateSeat(seatCollection, seatTokenId);
 
+        // Get input token
+        address token = r.inputToken == address(0) ? defaultInputToken : r.inputToken;
+        if (token == address(0)) revert InvalidInputAmount();
+
+        // Handle token transfers and fees
+        uint256 totalLocked = _handleBatchTransfers(r, token, count);
+
+        // Mint positions
+        positionIds = _mintBatchPositions(
+            recipeId, count, collection, seatTokenId, totalLocked, r.lockDuration
+        );
+
+        // Update aggregates
+        totalInputLocked += totalLocked;
+        totalInputByRecipe[recipeId] += totalLocked;
+        totalPositionsByRecipe[recipeId] += count;
+        userActivePositions[msg.sender] += count;
+
+        emit CraftedBatch(msg.sender, recipeId, positionIds, totalLocked);
+    }
+
+    /**
+     * @dev Resolve royalty seat collection and validate ownership.
+     */
+    function _resolveAndValidateSeat(
+        address seatCollection,
+        uint256 seatTokenId
+    ) internal view returns (address collection) {
+        collection = seatCollection == address(0) ? defaultRoyaltyCollection : seatCollection;
+        
         if (collection != address(0)) {
-            // Must be an allowed collection (for V1, NPC contract).
             if (!allowedRoyaltyCollections[collection]) {
                 revert UnsupportedRoyaltyCollection();
             }
-            // Require the caller to own the seat NFT.
             if (IERC721(collection).ownerOf(seatTokenId) != msg.sender) {
                 revert NotRoyaltySeatOwner();
             }
         }
+    }
 
-        address token = r.inputToken == address(0)
-            ? defaultInputToken
-            : r.inputToken;
-        if (token == address(0)) revert InvalidInputAmount();
-
+    /**
+     * @dev Handle batch token transfers and fees, return total locked amount.
+     */
+    function _handleBatchTransfers(
+        Recipe memory r,
+        address token,
+        uint256 count
+    ) internal returns (uint256 totalLocked) {
         uint256 totalInput = r.inputPerUnit * count;
-
         IERC20(token).transferFrom(msg.sender, address(this), totalInput);
 
-        uint256 totalCraftFee;
-        uint256 totalLocked = totalInput;
+        totalLocked = totalInput;
         if (r.craftFeeBps > 0) {
-            totalCraftFee = (totalInput * r.craftFeeBps) / 10_000;
-            totalLocked = totalInput - totalCraftFee;
-            _routeFee(token, totalCraftFee, r.feeRecipient);
+            uint256 fee = (totalInput * r.craftFeeBps) / 10_000;
+            totalLocked = totalInput - fee;
+            _routeFee(token, fee, r.feeRecipient);
         }
 
         if (r.coalPerUnit > 0) {
-            uint256 totalCoal = r.coalPerUnit * count;
             IERC1155(r.coalToken1155).safeTransferFrom(
                 msg.sender,
                 address(0x000000000000000000000000000000000000dEaD),
                 r.coalTokenId,
-                totalCoal,
+                r.coalPerUnit * count,
                 ""
             );
         }
+    }
 
+    /**
+     * @dev Mint batch of positions and assign royalty seats.
+     */
+    function _mintBatchPositions(
+        uint256 recipeId,
+        uint256 count,
+        address collection,
+        uint256 seatTokenId,
+        uint256 totalLocked,
+        uint64 lockDuration
+    ) internal returns (uint256[] memory positionIds) {
         uint256 lockedPerPosition = totalLocked / count;
         require(lockedPerPosition * count == totalLocked, "Forge: dust");
 
         uint64 createdAt = uint64(block.timestamp);
-        uint64 unlockAt = createdAt + r.lockDuration;
+        uint64 unlockAt = createdAt + lockDuration;
 
         positionIds = new uint256[](count);
 
@@ -478,7 +516,6 @@ contract MasterForgeV1 is
                 owner: msg.sender
             });
 
-            // Assign royalty seat if a valid collection was resolved
             if (collection != address(0)) {
                 positionRoyaltySeat[positionId] = RoyaltySeat({
                     collection: collection,
@@ -488,13 +525,6 @@ contract MasterForgeV1 is
 
             positionIds[i] = positionId;
         }
-
-        totalInputLocked += totalLocked;
-        totalInputByRecipe[recipeId] += totalLocked;
-        totalPositionsByRecipe[recipeId] += count;
-        userActivePositions[msg.sender] += count;
-
-        emit CraftedBatch(msg.sender, recipeId, positionIds, totalLocked);
     }
 
     // ============ Destroy / redeem ============
@@ -600,38 +630,8 @@ contract MasterForgeV1 is
      * @notice Write bytes to SSTORE2 and return pointer address.
      * @dev Uses SSTORE2 pattern: deploy a minimal contract with the bytes as code.
      */
-    function _writeSSTORE2(bytes memory data) internal returns (address pointer) {
-        // SSTORE2 pattern: deploy a minimal contract with the bytes as code
-        // Bytecode structure:
-        //   PUSH2 <length> (3 bytes: 0x61 + 2-byte length)
-        //   DUP1 (1 byte: 0x80)
-        //   PUSH1 0c (2 bytes: 0x60 0x0c) - offset to data (12 bytes)
-        //   PUSH1 00 (2 bytes: 0x60 0x00) - destination offset
-        //   CODECOPY (1 byte: 0x39)
-        //   PUSH1 00 (2 bytes: 0x60 0x00) - return offset
-        //   RETURN (1 byte: 0xf3)
-        //   <data>
-        // Total header: 12 bytes
-        bytes memory bytecode = abi.encodePacked(
-            hex"61", // PUSH2
-            uint16(data.length), // Length of data
-            hex"80", // DUP1
-            hex"60", // PUSH1
-            hex"0c", // offset to data (12 bytes)
-            hex"60", // PUSH1
-            hex"00", // offset
-            hex"39", // CODECOPY
-            hex"60", // PUSH1
-            hex"00", // offset
-            hex"f3", // RETURN
-            data
-        );
-
-        assembly {
-            pointer := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        if (pointer == address(0)) revert InvalidFeeConfig(); // Deployment failed
+    function _writeSSTORE2(bytes memory data) internal returns (address) {
+        return SSTORE2Deployer.deploy(data);
     }
 
     // ============ TokenURI support ============
@@ -645,5 +645,30 @@ contract MasterForgeV1 is
         if (p.owner == address(0)) revert InvalidPosition();
         Recipe memory r = recipes[p.recipeId];
         return r.uri; // placeholder until full on-chain JSON+Base64 is implemented
+    }
+}
+
+/**
+ * @dev Isolated library for SSTORE2 deployment to avoid stack-too-deep in main contract.
+ */
+library SSTORE2Deployer {
+    error DeploymentFailed();
+
+    function deploy(bytes memory data) internal returns (address pointer) {
+        // Build bytecode for SSTORE2 pattern
+        bytes memory bytecode = abi.encodePacked(
+            hex"61",
+            uint16(data.length),
+            hex"80600c6000396000f3",
+            data
+        );
+        
+        // Deploy using CREATE
+        uint256 bytecodeLen = bytecode.length;
+        assembly ("memory-safe") {
+            pointer := create(0, add(bytecode, 0x20), bytecodeLen)
+        }
+
+        if (pointer == address(0)) revert DeploymentFailed();
     }
 }

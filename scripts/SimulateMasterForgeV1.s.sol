@@ -144,7 +144,7 @@ contract SimulateMasterForgeV1 is Script {
             craftFeeBps: 0,
             destroyFeeBps: 0,
             feeRecipient: feeReceiver,
-            uri: "ipfs://test-coin-uri"
+            uri: "https://www.xprmint.com/coins/coin1a.json"
         });
 
         uint256 recipeId = masterForge.createRecipe(cfg);

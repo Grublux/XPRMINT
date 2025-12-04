@@ -1,0 +1,11 @@
+{
+  "name": "NGT Coin – 1000",
+  "description": "A forged NGT coin locked with 1000 NGT. This represents 1000 $NGT staked inside the Master Forge.",
+  "image": "https://www.xprmint.com/coins/coin1a.png",
+  "attributes": [
+    { "trait_type": "Item Class", "value": "Coin" },
+    { "trait_type": "Stake Amount", "value": "1000 NGT" },
+    { "trait_type": "Version", "value": "V1" }
+  ]
+}
+
