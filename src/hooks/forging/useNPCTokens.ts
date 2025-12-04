@@ -98,42 +98,65 @@ export function useNPCTokens() {
 
       if (showProgress) setProgress({ stage: 'scanning', progress: 30, message: 'Scanning transfers...' });
 
-      // Scan Transfer events
+      // Scan Transfer events in chunks to avoid RPC limits
       const currentBlock = await publicClient.getBlockNumber();
       console.log('[useNPCTokens] Scanning from block', NPC_DEPLOYMENT_BLOCK.toString(), 'to', currentBlock.toString());
 
-      const [receivedLogs, sentLogs] = await Promise.all([
-        publicClient.getLogs({
-          address: NPC_CONTRACT_ADDRESS,
-          event: {
-            type: 'event',
-            name: 'Transfer',
-            inputs: [
-              { type: 'address', indexed: true, name: 'from' },
-              { type: 'address', indexed: true, name: 'to' },
-              { type: 'uint256', indexed: true, name: 'tokenId' },
-            ],
-          },
-          args: { to: address },
-          fromBlock: NPC_DEPLOYMENT_BLOCK,
-          toBlock: currentBlock,
-        }),
-        publicClient.getLogs({
-          address: NPC_CONTRACT_ADDRESS,
-          event: {
-            type: 'event',
-            name: 'Transfer',
-            inputs: [
-              { type: 'address', indexed: true, name: 'from' },
-              { type: 'address', indexed: true, name: 'to' },
-              { type: 'uint256', indexed: true, name: 'tokenId' },
-            ],
-          },
-          args: { from: address },
-          fromBlock: NPC_DEPLOYMENT_BLOCK,
-          toBlock: currentBlock,
-        }),
-      ]);
+      const CHUNK_SIZE = 500_000n;
+      const receivedLogs: any[] = [];
+      const sentLogs: any[] = [];
+      
+      let fromBlock = NPC_DEPLOYMENT_BLOCK;
+      while (fromBlock < currentBlock) {
+        const toBlock = fromBlock + CHUNK_SIZE > currentBlock ? currentBlock : fromBlock + CHUNK_SIZE;
+        
+        if (showProgress) {
+          const progressPct = 30 + Math.floor(Number((fromBlock - NPC_DEPLOYMENT_BLOCK) * 100n / (currentBlock - NPC_DEPLOYMENT_BLOCK)) * 0.25);
+          setProgress({ stage: 'scanning', progress: progressPct, message: `Scanning blocks ${fromBlock.toString()}...` });
+        }
+        
+        try {
+          const [chunkReceived, chunkSent] = await Promise.all([
+            publicClient.getLogs({
+              address: NPC_CONTRACT_ADDRESS,
+              event: {
+                type: 'event',
+                name: 'Transfer',
+                inputs: [
+                  { type: 'address', indexed: true, name: 'from' },
+                  { type: 'address', indexed: true, name: 'to' },
+                  { type: 'uint256', indexed: true, name: 'tokenId' },
+                ],
+              },
+              args: { to: address },
+              fromBlock,
+              toBlock,
+            }),
+            publicClient.getLogs({
+              address: NPC_CONTRACT_ADDRESS,
+              event: {
+                type: 'event',
+                name: 'Transfer',
+                inputs: [
+                  { type: 'address', indexed: true, name: 'from' },
+                  { type: 'address', indexed: true, name: 'to' },
+                  { type: 'uint256', indexed: true, name: 'tokenId' },
+                ],
+              },
+              args: { from: address },
+              fromBlock,
+              toBlock,
+            }),
+          ]);
+          
+          receivedLogs.push(...chunkReceived);
+          sentLogs.push(...chunkSent);
+        } catch (err) {
+          console.error('[useNPCTokens] Chunk scan failed:', fromBlock.toString(), '-', toBlock.toString(), err);
+        }
+        
+        fromBlock = toBlock + 1n;
+      }
 
       console.log('[useNPCTokens] Received logs:', receivedLogs.length, 'Sent logs:', sentLogs.length);
 
