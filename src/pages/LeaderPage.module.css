@@ -1,0 +1,474 @@
+.leaderPage {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  padding: 0;
+  margin: -24px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+
+.imageWrapper {
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .imageWrapper {
+    max-width: 1920px;
+    height: 100vh;
+    align-items: center;
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: inline-block;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+
+@media (min-width: 768px) {
+  .imageContainer {
+    width: auto;
+    height: 100vh;
+    max-width: 100%;
+  }
+}
+
+.backgroundImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+
+.backgroundImageLeader2 {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+
+@media (max-width: 767px) {
+  .backgroundImageLeader2 {
+    width: 150vw;
+    height: auto;
+    max-height: none;
+    transform: translateX(2%);
+  }
+  
+  .imageContainerLeader2 {
+    width: auto;
+    min-width: 150vw;
+    height: auto;
+    max-height: none;
+  }
+  
+  .imageWrapper {
+    height: auto;
+    max-height: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .backgroundImage {
+    width: auto;
+    height: 100vh;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  
+  .backgroundImageLeader2 {
+    width: auto;
+    height: 100vh;
+    max-width: 100%;
+    object-fit: contain;
+  }
+}
+
+
+.progressContainer {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressContainerLeader2 {
+  top: 60px;
+}
+
+.overlayImage {
+  position: absolute;
+  top: 50%;
+  left: 48%;
+  transform: translate(-50%, -50%) scale(0.333);
+  z-index: 5;
+  max-width: 100%;
+  height: auto;
+}
+
+.progressLabel {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: lowercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dotsContainer {
+  display: inline-flex;
+  gap: 0;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  min-width: 60px;
+}
+
+.dot {
+  opacity: 0;
+  animation: dotBuild1 3s linear infinite;
+}
+
+.dot:nth-child(1) {
+  animation: dotBuild1 3s linear infinite;
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation: dotBuild2 3s linear infinite;
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation: dotBuild3 3s linear infinite;
+  animation-delay: 0.6s;
+}
+
+.dot:nth-child(4) {
+  animation: dotBuild4 3s linear infinite;
+  animation-delay: 0.9s;
+}
+
+.dot:nth-child(5) {
+  animation: dotBuild5 3s linear infinite;
+  animation-delay: 1.2s;
+}
+
+.dot:nth-child(6) {
+  animation: dotBuild6 3s linear infinite;
+  animation-delay: 1.5s;
+}
+
+.dot:nth-child(7) {
+  animation: dotBuild7 3s linear infinite;
+  animation-delay: 1.8s;
+}
+
+/* All dots disappear at 2.4s absolute time */
+@keyframes dotBuild1 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  80% { opacity: 1; }
+  83% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild2 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  70% { opacity: 1; }
+  73% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild3 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  60% { opacity: 1; }
+  63% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild4 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  50% { opacity: 1; }
+  53% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild5 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  40% { opacity: 1; }
+  43% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild6 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  30% { opacity: 1; }
+  33% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild7 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  20% { opacity: 1; }
+  23% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.paginator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  z-index: 10;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.paginatorCurrent {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.paginatorLink {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+}
+
+.paginatorLink:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+}
+
+
+.progressContainer {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressLabel {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: lowercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dotsContainer {
+  display: inline-flex;
+  gap: 0;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  min-width: 60px;
+}
+
+.dot {
+  opacity: 0;
+  animation: dotBuild1 3s linear infinite;
+}
+
+.dot:nth-child(1) {
+  animation: dotBuild1 3s linear infinite;
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation: dotBuild2 3s linear infinite;
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation: dotBuild3 3s linear infinite;
+  animation-delay: 0.6s;
+}
+
+.dot:nth-child(4) {
+  animation: dotBuild4 3s linear infinite;
+  animation-delay: 0.9s;
+}
+
+.dot:nth-child(5) {
+  animation: dotBuild5 3s linear infinite;
+  animation-delay: 1.2s;
+}
+
+.dot:nth-child(6) {
+  animation: dotBuild6 3s linear infinite;
+  animation-delay: 1.5s;
+}
+
+.dot:nth-child(7) {
+  animation: dotBuild7 3s linear infinite;
+  animation-delay: 1.8s;
+}
+
+/* All dots disappear at 2.4s absolute time */
+@keyframes dotBuild1 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  80% { opacity: 1; }
+  83% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild2 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  70% { opacity: 1; }
+  73% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild3 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  60% { opacity: 1; }
+  63% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild4 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  50% { opacity: 1; }
+  53% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild5 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  40% { opacity: 1; }
+  43% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild6 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  30% { opacity: 1; }
+  33% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes dotBuild7 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  20% { opacity: 1; }
+  23% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.paginator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  z-index: 10;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.paginatorCurrent {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.paginatorLink {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+}
+
+.paginatorLink:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+}
+
