@@ -21,7 +21,7 @@ export default function ForgePage() {
   const [showNPCModal, setShowNPCModal] = useState(false);
   const [selectedNPC, setSelectedNPC] = useState<NPCToken | null>(null);
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
-  const [isForging, setIsForging] = useState(false);
+  const [isForging, _setIsForging] = useState(false);
   const hasShownSecondMessage = useRef(false);
   const nextIdRef = useRef(0);
 
