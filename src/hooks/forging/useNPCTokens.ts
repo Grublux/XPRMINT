@@ -16,8 +16,8 @@ export type ScanProgress = {
 };
 
 const STORAGE_KEY_PREFIX = 'npc-tokens-';
-// NPC deployed Nov 2024 - start from a recent block to avoid timeout
-const NPC_DEPLOYMENT_BLOCK = 28_000_000n;
+// NPC contract - scan from beginning to catch all transfers
+const NPC_DEPLOYMENT_BLOCK = 1n;
 
 const npcAbi = [
   {
