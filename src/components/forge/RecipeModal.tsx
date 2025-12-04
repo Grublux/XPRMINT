@@ -10,6 +10,7 @@ type RecipeModalProps = {
   maxCoins?: number;
   ngtPerCoin?: number;
   coalPerCoin?: number;
+  cruciblesRequired?: number;
 };
 
 export default function RecipeModal({
@@ -20,23 +21,27 @@ export default function RecipeModal({
   maxCoins = 10,
   ngtPerCoin = 1000,
   coalPerCoin = 10,
+  cruciblesRequired = 1,
 }: RecipeModalProps) {
   const [numCoins, setNumCoins] = useState(1);
   const [hasEnoughNGT, setHasEnoughNGT] = useState(false);
   const [hasEnoughCoal, setHasEnoughCoal] = useState(false);
+  const [hasEnoughCrucibles, setHasEnoughCrucibles] = useState(false);
 
   const totalNGT = numCoins * ngtPerCoin;
   const totalCoal = numCoins * coalPerCoin;
 
-  // Check if user has enough NGT
+  // Check if user has enough resources
   useEffect(() => {
     const balance = parseFloat(ngtBalance.replace(/,/g, '')) || 0;
     setHasEnoughNGT(balance >= totalNGT);
     // TODO: Check COAL balance from contract
     setHasEnoughCoal(true); // Placeholder - assume true for now
+    // TODO: Check Crucible balance from contract
+    setHasEnoughCrucibles(true); // Placeholder - assume true for now
   }, [ngtBalance, totalNGT]);
 
-  const canForge = hasEnoughNGT && hasEnoughCoal && numCoins > 0;
+  const canForge = hasEnoughNGT && hasEnoughCoal && hasEnoughCrucibles && numCoins > 0;
 
   const handleIncrement = () => {
     if (numCoins < maxCoins) {
@@ -98,6 +103,12 @@ export default function RecipeModal({
             <span className={styles.reqLabel}>COAL Required:</span>
             <span className={styles.reqValue}>{totalCoal.toLocaleString()}</span>
             {!hasEnoughCoal && <span className={styles.warning}>Insufficient</span>}
+          </div>
+          
+          <div className={`${styles.requirementRow} ${!hasEnoughCrucibles ? styles.insufficient : ''}`}>
+            <span className={styles.reqLabel}>Crucible Required:</span>
+            <span className={styles.reqValue}>{cruciblesRequired}</span>
+            {!hasEnoughCrucibles && <span className={styles.warning}>Insufficient</span>}
           </div>
         </div>
 

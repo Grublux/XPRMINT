@@ -389,13 +389,22 @@
 
 .progressBarContainer {
   position: absolute;
-  top: 76%;
+  top: 42%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
+}
+
+.progressPercent {
+  color: #c9a227;
+  font-size: 14px;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(201, 162, 39, 0.5);
 }
 
 .progressBarTrack {

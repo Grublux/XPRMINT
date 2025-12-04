@@ -5,6 +5,7 @@ import { useNPCTokens } from '../hooks/forging/useNPCTokens';
 import type { NPCToken } from '../hooks/forging/useNPCTokens';
 import RecipeModal from '../components/forge/RecipeModal';
 import NPCModal from '../components/forge/NPCModal';
+import ForgeSuccessModal from '../components/forge/ForgeSuccessModal';
 
 type ChatBubble = {
   id: number;
@@ -21,9 +22,14 @@ export default function ForgePage() {
   const [showNPCModal, setShowNPCModal] = useState(false);
   const [selectedNPC, setSelectedNPC] = useState<NPCToken | null>(null);
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
-  const [isForging, _setIsForging] = useState(false);
+  const [isForging, setIsForging] = useState(false);
+  const [forgeProgress, setForgeProgress] = useState(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [coinsForged, setCoinsForged] = useState(0);
+  const [pendingCoins, setPendingCoins] = useState(1);
   const hasShownSecondMessage = useRef(false);
   const nextIdRef = useRef(0);
+  const forgeStartTime = useRef<number | null>(null);
 
   const addBubble = useCallback((lines: string[]) => {
     const id = nextIdRef.current++;
@@ -44,6 +50,51 @@ export default function ForgePage() {
     }, 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Forge progress animation - 60 seconds with variable speed
+  useEffect(() => {
+    if (!isForging) {
+      forgeStartTime.current = null;
+      return;
+    }
+
+    forgeStartTime.current = Date.now();
+    const TOTAL_DURATION = 60000; // 60 seconds
+
+    // Custom easing function that creates variable speed
+    const getProgress = (elapsed: number): number => {
+      const t = elapsed / TOTAL_DURATION;
+      if (t >= 1) return 100;
+      
+      // Create a bumpy progress curve
+      // Fast start (0-15%), slow (15-30%), fast (30-50%), very slow crawl (50-80%), fast finish (80-100%)
+      if (t < 0.1) return t * 150; // Fast: 0-15%
+      if (t < 0.25) return 15 + (t - 0.1) * 100; // Slower: 15-30%
+      if (t < 0.4) return 30 + (t - 0.25) * 133; // Fast: 30-50%
+      if (t < 0.75) return 50 + (t - 0.4) * 85; // Slow crawl: 50-80%
+      return 80 + (t - 0.75) * 80; // Fast finish: 80-100%
+    };
+
+    const interval = setInterval(() => {
+      if (!forgeStartTime.current) return;
+      
+      const elapsed = Date.now() - forgeStartTime.current;
+      const progress = getProgress(elapsed);
+      
+      setForgeProgress(Math.min(100, Math.round(progress)));
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        setIsForging(false);
+        setForgeProgress(0);
+        setCoinsForged(pendingCoins);
+        setShowSuccessModal(true);
+        // TODO: Update coin counter, decrement NGT/Coal balances when contract wired in
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isForging, addBubble]);
 
   // Messages after NPC is selected
   useEffect(() => {
@@ -76,6 +127,7 @@ export default function ForgePage() {
     console.log('Recipe confirmed:', numCoins, 'coins');
     setShowRecipeModal(false);
     setRecipeConfirmed(true);
+    setPendingCoins(numCoins);
     addBubble([`Recipe set for ${numCoins} coin${numCoins > 1 ? 's' : ''}.`, 'Click "Forge" when ready!']);
   };
 
@@ -85,7 +137,6 @@ export default function ForgePage() {
 
   return (
     <div className={styles.forgePage}>
-      <h1 className={styles.title}>Master Forge</h1>
       <div className={styles.imageContainer}>
         <div className={styles.imageWrapper}>
           <img src="/forge_clean.png" alt="Forge" className={styles.backgroundImage} />
@@ -109,11 +160,12 @@ export default function ForgePage() {
             ))}
           </div>
           
-          {/* Progress bar under cauldron - only show when forging */}
+          {/* Progress bar - only show when forging */}
           {isForging && (
             <div className={styles.progressBarContainer}>
+              <div className={styles.progressPercent}>{forgeProgress}%</div>
               <div className={styles.progressBarTrack}>
-                <div className={styles.progressBarFill} style={{ width: '0%' }}></div>
+                <div className={styles.progressBarFill} style={{ width: `${forgeProgress}%` }}></div>
               </div>
             </div>
           )}
@@ -143,7 +195,9 @@ export default function ForgePage() {
               onClick={() => canOpenRecipe && setShowRecipeModal(true)}
               disabled={!canOpenRecipe}
             >
-              <span className={styles.actionButtonLabel}>Recipe</span>
+              <span className={styles.actionButtonLabel}>
+                {recipeConfirmed ? `${pendingCoins} Coin${pendingCoins > 1 ? 's' : ''} ✓` : 'Recipe'}
+              </span>
             </button>
             <button 
               className={`${styles.actionButton} ${styles.npcButton} ${selectedNPC ? styles.npcButtonSelected : ''}`} 
@@ -167,6 +221,12 @@ export default function ForgePage() {
             <button 
               className={`${styles.actionButton} ${!canForge ? styles.actionButtonDisabled : ''}`}
               disabled={!canForge}
+              onClick={() => {
+                if (canForge) {
+                  setIsForging(true);
+                  addBubble(['Forging in progress...']);
+                }
+              }}
             >
               <span className={styles.actionButtonLabel}>Forge</span>
             </button>
@@ -190,6 +250,16 @@ export default function ForgePage() {
         tokens={npcTokens}
         isLoading={npcLoading}
         progress={npcProgress}
+      />
+
+      <ForgeSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          setRecipeConfirmed(false);
+          addBubble(['Ready for another forge?', 'Set your "Recipe" to continue.']);
+        }}
+        coinsForged={coinsForged}
       />
     </div>
   );
