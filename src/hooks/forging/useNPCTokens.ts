@@ -16,8 +16,6 @@ export type ScanProgress = {
 };
 
 const STORAGE_KEY_PREFIX = 'npc-tokens-';
-// NPC contract - scan from beginning to catch all transfers
-const NPC_DEPLOYMENT_BLOCK = 1n;
 
 const npcAbi = [
   {
@@ -28,18 +26,18 @@ const npcAbi = [
     outputs: [{ name: '', type: 'string' }],
   },
   {
-    name: 'ownerOf',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'tokenId', type: 'uint256' }],
-    outputs: [{ name: '', type: 'address' }],
-  },
-  {
     name: 'balanceOf',
     type: 'function',
     stateMutability: 'view',
     inputs: [{ name: 'owner', type: 'address' }],
     outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    name: 'tokensOfOwner',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256[]' }],
   },
 ] as const;
 
@@ -60,34 +58,28 @@ export function useNPCTokens() {
 
   const getCacheKey = useCallback(() => `${STORAGE_KEY_PREFIX}${address}-${chain?.id}`, [address, chain?.id]);
 
-  // Core scan function using on-chain event logs
+  // Core scan function using tokensOfOwner
   const doScan = useCallback(async (showProgress: boolean) => {
     if (!address || !publicClient || isScanning.current) return;
     
     isScanning.current = true;
     if (showProgress) setIsLoading(true);
-    if (showProgress) setProgress({ stage: 'scanning', progress: 10, message: 'Checking balance...' });
+    if (showProgress) setProgress({ stage: 'scanning', progress: 20, message: 'Fetching tokens...' });
 
     try {
-      // First check balance
-      let balance: bigint;
-      try {
-        balance = await publicClient.readContract({
-          address: NPC_CONTRACT_ADDRESS,
-          abi: npcAbi,
-          functionName: 'balanceOf',
-          args: [address],
-        });
-        console.log('[useNPCTokens] Balance:', balance.toString());
-      } catch (err) {
-        console.error('[useNPCTokens] balanceOf failed:', err);
-        if (showProgress) setProgress({ stage: 'error', progress: 100, message: 'Could not check balance' });
-        isScanning.current = false;
-        if (showProgress) setIsLoading(false);
-        return;
-      }
+      // Use tokensOfOwner to get all token IDs directly
+      console.log('[useNPCTokens] Calling tokensOfOwner for:', address);
+      
+      const tokenIds = await publicClient.readContract({
+        address: NPC_CONTRACT_ADDRESS,
+        abi: npcAbi,
+        functionName: 'tokensOfOwner',
+        args: [address],
+      });
 
-      if (balance === 0n) {
+      console.log('[useNPCTokens] tokensOfOwner returned:', tokenIds);
+
+      if (!tokenIds || tokenIds.length === 0) {
         setTokens([]);
         hasScanned.current = true;
         if (showProgress) setProgress({ stage: 'complete', progress: 100, message: 'No NPCs found' });
@@ -96,122 +88,15 @@ export function useNPCTokens() {
         return;
       }
 
-      if (showProgress) setProgress({ stage: 'scanning', progress: 30, message: 'Scanning transfers...' });
+      if (showProgress) setProgress({ stage: 'metadata', progress: 50, message: `Found ${tokenIds.length} NPC(s), loading...` });
 
-      // Scan Transfer events in chunks to avoid RPC limits
-      const currentBlock = await publicClient.getBlockNumber();
-      console.log('[useNPCTokens] Scanning from block', NPC_DEPLOYMENT_BLOCK.toString(), 'to', currentBlock.toString());
-
-      const CHUNK_SIZE = 500_000n;
-      const receivedLogs: any[] = [];
-      const sentLogs: any[] = [];
-      
-      let fromBlock = NPC_DEPLOYMENT_BLOCK;
-      while (fromBlock < currentBlock) {
-        const toBlock = fromBlock + CHUNK_SIZE > currentBlock ? currentBlock : fromBlock + CHUNK_SIZE;
-        
-        if (showProgress) {
-          const progressPct = 30 + Math.floor(Number((fromBlock - NPC_DEPLOYMENT_BLOCK) * 100n / (currentBlock - NPC_DEPLOYMENT_BLOCK)) * 0.25);
-          setProgress({ stage: 'scanning', progress: progressPct, message: `Scanning blocks ${fromBlock.toString()}...` });
-        }
-        
-        try {
-          const [chunkReceived, chunkSent] = await Promise.all([
-            publicClient.getLogs({
-              address: NPC_CONTRACT_ADDRESS,
-              event: {
-                type: 'event',
-                name: 'Transfer',
-                inputs: [
-                  { type: 'address', indexed: true, name: 'from' },
-                  { type: 'address', indexed: true, name: 'to' },
-                  { type: 'uint256', indexed: true, name: 'tokenId' },
-                ],
-              },
-              args: { to: address },
-              fromBlock,
-              toBlock,
-            }),
-            publicClient.getLogs({
-              address: NPC_CONTRACT_ADDRESS,
-              event: {
-                type: 'event',
-                name: 'Transfer',
-                inputs: [
-                  { type: 'address', indexed: true, name: 'from' },
-                  { type: 'address', indexed: true, name: 'to' },
-                  { type: 'uint256', indexed: true, name: 'tokenId' },
-                ],
-              },
-              args: { from: address },
-              fromBlock,
-              toBlock,
-            }),
-          ]);
-          
-          receivedLogs.push(...chunkReceived);
-          sentLogs.push(...chunkSent);
-        } catch (err) {
-          console.error('[useNPCTokens] Chunk scan failed:', fromBlock.toString(), '-', toBlock.toString(), err);
-        }
-        
-        fromBlock = toBlock + 1n;
-      }
-
-      console.log('[useNPCTokens] Received logs:', receivedLogs.length, 'Sent logs:', sentLogs.length);
-
-      const tokenIds = new Set<bigint>();
-      
-      for (const log of receivedLogs) {
-        if (log.args.tokenId !== undefined) {
-          tokenIds.add(log.args.tokenId as bigint);
-          console.log('[useNPCTokens] Received token:', (log.args.tokenId as bigint).toString());
-        }
-      }
-      for (const log of sentLogs) {
-        if (log.args.tokenId !== undefined) {
-          tokenIds.delete(log.args.tokenId as bigint);
-          console.log('[useNPCTokens] Sent token:', (log.args.tokenId as bigint).toString());
-        }
-      }
-
-      console.log('[useNPCTokens] Candidate token IDs:', Array.from(tokenIds).map(id => id.toString()));
-
-      if (showProgress) setProgress({ stage: 'scanning', progress: 60, message: 'Verifying ownership...' });
-
-      // Verify ownership
-      const foundTokens: NPCToken[] = [];
-      for (const tokenId of tokenIds) {
-        try {
-          const owner = await publicClient.readContract({
-            address: NPC_CONTRACT_ADDRESS,
-            abi: npcAbi,
-            functionName: 'ownerOf',
-            args: [tokenId],
-          });
-          console.log('[useNPCTokens] Token', tokenId.toString(), 'owner:', owner);
-          if ((owner as string).toLowerCase() === address.toLowerCase()) {
-            foundTokens.push({ tokenId, name: `NPC #${tokenId.toString()}` });
-          }
-        } catch (err) {
-          console.error('[useNPCTokens] ownerOf failed for token', tokenId.toString(), err);
-        }
-      }
-
-      console.log('[useNPCTokens] Verified tokens:', foundTokens.length);
-
-      if (foundTokens.length === 0) {
-        setTokens([]);
-        hasScanned.current = true;
-        if (showProgress) setProgress({ stage: 'complete', progress: 100, message: 'No NPCs found' });
-        isScanning.current = false;
-        if (showProgress) setIsLoading(false);
-        return;
-      }
+      // Build token objects
+      const foundTokens: NPCToken[] = tokenIds.map((id: bigint) => ({
+        tokenId: id,
+        name: `NPC #${id.toString()}`,
+      }));
 
       // Fetch metadata
-      if (showProgress) setProgress({ stage: 'metadata', progress: 80, message: 'Loading images...' });
-      
       await Promise.all(
         foundTokens.map(async (token) => {
           try {
