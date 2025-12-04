@@ -1,11 +1,14 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import styles from './AppLayout.module.css';
 
 export default function AppLayout(){
   const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const [showNavMenu, setShowNavMenu] = useState(false);
   const walletMenuRef = useRef<HTMLDivElement>(null);
+  const navMenuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
   const { address, isConnected } = useAccount();
   const { connectors, connect, isPending, error: connectError, reset: resetConnect } = useConnect();
   const { disconnect } = useDisconnect();
@@ -69,16 +72,24 @@ export default function AppLayout(){
       if (walletMenuRef.current && !walletMenuRef.current.contains(event.target as Node)) {
         setShowWalletMenu(false);
       }
+      if (navMenuRef.current && !navMenuRef.current.contains(event.target as Node)) {
+        setShowNavMenu(false);
+      }
     };
 
-    if (showWalletMenu) {
+    if (showWalletMenu || showNavMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showWalletMenu]);
+  }, [showWalletMenu, showNavMenu]);
+
+  // Close nav menu when route changes
+  useEffect(() => {
+    setShowNavMenu(false);
+  }, [location.pathname]);
 
   const handleWalletClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -112,6 +123,42 @@ export default function AppLayout(){
       <header className={styles.header}>
         <div className={styles.headerContent}>
                 <div className={styles.headerLeft}>
+                  <div className={styles.navMenuContainer} ref={navMenuRef}>
+                    <button 
+                      className={styles.hamburgerButton}
+                      onClick={() => setShowNavMenu(!showNavMenu)}
+                      aria-label="Toggle menu"
+                    >
+                      <span className={styles.hamburgerLine}></span>
+                      <span className={styles.hamburgerLine}></span>
+                      <span className={styles.hamburgerLine}></span>
+                    </button>
+                    {showNavMenu && (
+                      <div className={styles.navMenu}>
+                        <Link 
+                          to="/" 
+                          className={styles.navMenuItem}
+                          onClick={() => setShowNavMenu(false)}
+                        >
+                          Dashboard
+                        </Link>
+                        <Link 
+                          to="/leader" 
+                          className={styles.navMenuItem}
+                          onClick={() => setShowNavMenu(false)}
+                        >
+                          Leader
+                        </Link>
+                        <Link 
+                          to="/forge" 
+                          className={styles.navMenuItem}
+                          onClick={() => setShowNavMenu(false)}
+                        >
+                          Forge
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                   <div className={styles.titleText}>XPRMINT</div>
                 </div>
           <div className={styles.headerRight}>

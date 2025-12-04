@@ -233,3 +233,4 @@ echo "Templates with images: $WITH_IMAGE / $TOTAL"
 
 
 
+

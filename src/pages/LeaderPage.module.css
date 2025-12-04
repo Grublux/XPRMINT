@@ -102,8 +102,9 @@
   
   .backgroundImageLeader2 {
     width: auto;
-    height: 100vh;
+    height: auto;
     max-width: 100%;
+    max-height: 100vh;
     object-fit: contain;
   }
 }
@@ -121,6 +122,13 @@
 
 .progressContainerLeader2 {
   top: 60px;
+}
+
+@media (max-width: 767px) {
+  .progressContainerLeader2 {
+    left: 20px;
+    position: fixed;
+  }
 }
 
 .overlayImage {
