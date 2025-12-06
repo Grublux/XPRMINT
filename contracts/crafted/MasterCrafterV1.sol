@@ -27,6 +27,8 @@ contract MasterCrafterV1 is
     MasterCrafterV1Storage,
     MasterCrafterV1Events
 {
+    string internal constant _BASE_METADATA_URL = "https://www.xprmint.com/crafted/metadata/";
+
     IERC20 public defaultInputErc20;
 
     modifier onlyAdmin() {
@@ -455,10 +457,9 @@ contract MasterCrafterV1 is
         });
     }
 
-    function positionTokenURI(uint256 /*positionId*/) external view returns (string memory) {
-        // Phase 1: Return static JSON URL for testing
-        // TODO Phase 2: Return dynamic on-chain JSON with per-token metadata
-        return "https://www.xprmint.com/coins/coin1a.json";
+    function positionTokenURI(uint256 positionId) external view returns (string memory) {
+        require(positions[positionId].recipeId != 0, "InvalidPosition");
+        return string.concat(_BASE_METADATA_URL, positionId.toString());
     }
 
     function _buildMetadataJSON(MetadataCtx memory m) internal pure returns (string memory) {
