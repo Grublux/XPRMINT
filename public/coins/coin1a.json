@@ -1,11 +1,12 @@
 {
-  "name": "NGT Coin – 1000",
-  "description": "A forged NGT coin locked with 1000 NGT. This represents 1000 $NGT staked inside the Master Forge.",
+  "name": "Crafted Coin",
+  "description": "NGMI Genesis Forge | Crafted on The Goblinn.",
   "image": "https://www.xprmint.com/coins/coin1a.png",
+  "external_url": "https://www.xprmint.com/coins",
   "attributes": [
+    { "trait_type": "Forge", "value": "NGMI Genesis Forge" },
+    { "trait_type": "Crafter", "value": "Crafter #0" },
     { "trait_type": "Item Class", "value": "Coin" },
-    { "trait_type": "Stake Amount", "value": "1000 NGT" },
-    { "trait_type": "Version", "value": "V1" }
+    { "trait_type": "NGT Locked", "value": 1000 }
   ]
 }
-

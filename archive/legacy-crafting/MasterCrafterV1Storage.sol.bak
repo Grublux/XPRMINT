@@ -1,0 +1,84 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+/**
+ * @title MasterCrafterV1Storage
+ * @notice Storage layout for the upgradeable MasterCrafterV1 contract.
+ * @dev Mirrors V3 storage; slot order preserved with renamed identifiers.
+ */
+abstract contract MasterCrafterV1Storage {
+    enum ItemClass { COIN, RELIC, ARTIFACT, TOOL, COMPONENT }
+
+    struct Recipe {
+        bool active;
+        ItemClass itemClass;
+        address inputToken;
+        uint256 inputPerUnit;
+        address coalToken1155;
+        uint256 coalTokenId;
+        uint256 coalPerUnit;
+        address imagePointer;
+        bytes32 imageHash;
+        uint64 lockDuration;
+        uint16 craftFeeBps;
+        uint16 destroyFeeBps;
+        address feeRecipient;
+        address craftCreator;
+        string uri;
+    }
+
+    struct Position {
+        uint256 recipeId;
+        uint64 createdAt;
+        uint64 unlockAt;
+        uint256 inputAmountLocked;
+        address owner;
+    }
+
+    struct RoyaltySeat {
+        address collection;
+        uint256 tokenId;
+    }
+
+    struct NPCCraftStats {
+        uint64 positionsCrafted;
+        uint64 positionsDestroyed;
+        uint128 totalNGTLocked;
+        uint128 totalNGTFeeEarned;
+        uint128 totalCoalBurned;
+        uint64 lastCraftAt;
+    }
+
+    address internal _upgrader;
+    mapping(address => bool) internal _admins;
+
+    uint256 public nextRecipeId;
+    mapping(uint256 => Recipe) internal recipes;
+
+    mapping<uint256 => Position) public positions;
+
+    uint256 public totalInputLocked;
+    mapping(address => uint256) public userActivePositions;
+    mapping(uint256 => uint256) public totalInputByRecipe;
+    mapping<uint256 => uint256) public totalPositionsByRecipe;
+
+    mapping(address => string) public craftName;
+
+    address public defaultInputToken;
+    address public feeToken;
+    address public feeRouter;
+    address public positionsToken;
+    uint256 public maxBatchSize;
+
+    mapping(uint256 => RoyaltySeat) public positionRoyaltySeat;
+    mapping(address => bool) public allowedRoyaltyCollections;
+    address public defaultRoyaltyCollection;
+
+    mapping(address => mapping(uint256 => NPCCraftStats)) internal npcCraftStats;
+
+    mapping(uint256 => string) public forgeName;
+    mapping(uint256 => string) public npcName;
+
+    uint256[34] private __gap;
+}
+

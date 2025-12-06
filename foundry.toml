@@ -3,23 +3,47 @@ src = "contracts"
 out = "out"
 libs = ["lib"]
 remappings = [
+    "creator-token-standards/@openzeppelin/contracts/=lib/creator-token-standards/lib/openzeppelin-contracts/contracts/",
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "creator-token-standards/=lib/creator-token-standards/src/",
+    "creator-token-standards/erc721c/=lib/creator-token-standards/src/erc721c/",
+    "creator-token-standards/token/=lib/creator-token-standards/src/token/",
+    "creator-token-standards/programmable-royalties/=lib/creator-token-standards/src/programmable-royalties/",
+    "creator-token-standards/access/=lib/creator-token-standards/src/access/",
     "forge-std/=lib/forge-std/src/",
+    "solmate/=lib/solmate/src/",
+    "creator-token-contracts/=lib/creator-token-standards/src/",
 ]
 evm_version = "cancun"
-solc_version = "0.8.28"
+solc_version = "0.8.24"
 optimizer = true
 optimizer_runs = 200
-via_ir = true
-# NOTE: These compiler settings MUST be reused during ApeScan verification:
-# - solc_version = 0.8.24
-# - evm_version = cancun
-# - optimizer = true
-# - optimizer_runs = 200
-# - via_ir = false
-ignore = ["lib/**"]
+via_ir = false
 fs_permissions = [
     { access = "read", path = "docs/stabilization_script/sim/items/output/" },
     { access = "read", path = "assets/items/" }
 ]
+
+[profile.crafted]
+src = "contracts/crafted"
+out = "out"
+libs = ["lib"]
+remappings = [
+    "creator-token-standards/@openzeppelin/contracts/=lib/creator-token-standards/lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "creator-token-standards/=lib/creator-token-standards/src/",
+    "creator-token-standards/erc721c/=lib/creator-token-standards/src/erc721c/",
+    "creator-token-standards/token/=lib/creator-token-standards/src/token/",
+    "creator-token-standards/programmable-royalties/=lib/creator-token-standards/src/programmable-royalties/",
+    "creator-token-standards/access/=lib/creator-token-standards/src/access/",
+    "forge-std/=lib/forge-std/src/",
+    "solmate/=lib/solmate/src/",
+    "creator-token-contracts/=lib/creator-token-standards/src/",
+]
+evm_version = "cancun"
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
