@@ -1,0 +1,208 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 2px solid #c9a227;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.3);
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #fff;
+}
+
+.title {
+  color: #c9a227;
+  font-size: 1.4rem;
+  margin: 0 0 20px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 40px 20px;
+}
+
+.loadingMessage {
+  color: #c9a227;
+  font-size: 14px;
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(201, 162, 39, 0.2);
+  border-top-color: #c9a227;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressTrack {
+  width: 100%;
+  max-width: 200px;
+  height: 8px;
+  background: rgba(201, 162, 39, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #c9a227 0%, #ffd700 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.hint {
+  font-size: 0.85rem;
+  margin-top: 12px;
+  color: #666;
+}
+
+.connectButton {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.15));
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+  display: block;
+  margin: 0 auto;
+}
+
+.connectButton:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 200, 100, 0.25));
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  transform: translateY(-1px);
+}
+
+.connectHint {
+  margin-top: 12px;
+  color: #888;
+  font-size: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.npcCard {
+  background: rgba(201, 162, 39, 0.1);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.npcCard:hover {
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.2);
+  transform: translateY(-2px);
+}
+
+.npcImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.npcPlaceholder {
+  width: 80px;
+  height: 80px;
+  background: rgba(201, 162, 39, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c9a227;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.npcName {
+  color: #ddd;
+  font-size: 11px;
+  text-align: center;
+}
+
+.npcXp {
+  color: #c9a227;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 16px;
+  }
+  
+  .title {
+    font-size: 1rem;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+  
+  .npcImage,
+  .npcPlaceholder {
+    width: 60px;
+    height: 60px;
+  }
+}
+

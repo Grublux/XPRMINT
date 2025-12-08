@@ -2,7 +2,6 @@
 
 import ForgeApp from "@/features/forge/ForgeApp";
 
-export default function HomePage() {
-  // Home mirrors /forge for now.
+export default function ForgePage() {
   return <ForgeApp />;
 }
