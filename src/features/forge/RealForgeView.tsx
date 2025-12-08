@@ -345,8 +345,8 @@ export function RealForgeView(props: RealForgeViewProps) {
       <div className={styles.content}>
       </div>
 
-      {/* Modals temporarily disabled until wagmi is wired */}
-      {false && (
+      {/* Modals enabled now that wagmi is wired */}
+      {true && (
         <>
           <RecipeModal
             isOpen={showRecipeModal}
