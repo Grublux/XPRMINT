@@ -68,6 +68,7 @@ export function RealForgeView(props: RealForgeViewProps) {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [showNPCModal, setShowNPCModal] = useState(false);
   const [selectedNPC, setSelectedNPC] = useState<NPCToken | null>(null);
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
 
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
   const [isForging, setIsForging] = useState(false);
@@ -97,16 +98,49 @@ export function RealForgeView(props: RealForgeViewProps) {
     }, 7500);
   }, []);
 
-  // Initial welcome message
+  // Clear selected NPC and recipe when wallet disconnects
+  useEffect(() => {
+    if (!isConnected) {
+      setSelectedNPC(null);
+      setRecipeConfirmed(false);
+      hasShownSecondMessage.current = false;
+      setShowWalletMenu(false);
+    }
+  }, [isConnected]);
+
+  // Close wallet menu when clicking outside
+  useEffect(() => {
+    if (!showWalletMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const walletContainer = document.querySelector('[data-wallet-container]');
+      if (walletContainer && !walletContainer.contains(target)) {
+        setShowWalletMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showWalletMenu]);
+
+  // Initial welcome message - depends on wallet connection
   useEffect(() => {
     const timer = setTimeout(() => {
-      addBubble([
-        "Welcome to the Master Forge.",
-        'First you\'ll need to "Choose NPC" below.',
-      ]);
+      if (isConnected) {
+        addBubble([
+          "Welcome to the Master Forge.",
+          'To begin "Choose NPC" below.',
+        ]);
+      } else {
+        addBubble([
+          "Welcome to the Master Forge.",
+          "Connect wallet and Name your forge!",
+        ]);
+      }
     }, 500);
     return () => clearTimeout(timer);
-  }, [addBubble]);
+  }, [addBubble, isConnected]);
 
   // Forge progress animation – 60 seconds with variable speed
   useEffect(() => {
@@ -154,23 +188,15 @@ export function RealForgeView(props: RealForgeViewProps) {
     if (selectedNPC && !hasShownSecondMessage.current) {
       hasShownSecondMessage.current = true;
 
-      const timer1 = setTimeout(() => {
-        addBubble([
-          "Your crafting XP will track",
-          "with your NPC as you forge.",
-        ]);
-      }, 500);
-
-      const timer2 = setTimeout(() => {
+      const timer = setTimeout(() => {
         addBubble([
           'Next you\'ll need to confirm',
           'your "Recipe" below.',
         ]);
-      }, 3500);
+      }, 500);
 
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+        clearTimeout(timer);
       };
     }
   }, [selectedNPC, addBubble]);
@@ -204,6 +230,76 @@ export function RealForgeView(props: RealForgeViewProps) {
           />
           <div className={styles.cauldronGlow}></div>
           <div className={styles.flameGlow}></div>
+
+          {/* Top header */}
+          <div className={styles.forgeHeader}>
+            <div className={styles.forgeHeaderRow}>
+              <img src="/hammer_gold1.png" alt="Forge" className={styles.forgeHeaderIcon} />
+              <div className={styles.forgeHeaderText}>
+                {isConnected ? "Bland_Forge1" : "Forge Not Connected"}
+              </div>
+              <div className={styles.forgeHeaderSpacer}></div>
+              {/* NGT balance */}
+              <div className={styles.forgeHeaderNGT}>
+                <span
+                  className={styles.counterValue}
+                  suppressHydrationWarning
+                >
+                  {!mounted
+                    ? "0.00"
+                    : ngtIsLoading
+                    ? "..."
+                    : ngtIsPlaceholder
+                    ? "0.00"
+                    : ngtDisplayBalance}
+                </span>
+                <span className={styles.counterLabel}>NGT</span>
+              </div>
+              {/* Wallet icon button */}
+              <div className={styles.forgeHeaderWalletContainer} data-wallet-container>
+                <button
+                  className={styles.forgeHeaderWalletIcon}
+                  onClick={() => {
+                    if (isConnected && address) {
+                      setShowWalletMenu(!showWalletMenu);
+                    } else {
+                      onConnectClick?.();
+                    }
+                  }}
+                  disabled={false}
+                  title={isConnected && address ? address : "Connect Wallet"}
+                >
+                  <img src="/wallet2a.png" alt="Wallet" className={styles.forgeHeaderWalletIconImg} />
+                  <div className={styles.forgeHeaderWalletOverlay}>
+                    {!isConnected ? (
+                      <>
+                        <div className={styles.forgeHeaderWalletNoConnectCircle}></div>
+                        <div className={styles.forgeHeaderWalletNoConnectLine}></div>
+                      </>
+                    ) : (
+                      <div className={styles.forgeHeaderWalletConnectedCircle}></div>
+                    )}
+                  </div>
+                </button>
+                {isConnected && address && showWalletMenu && (
+                  <div className={styles.forgeHeaderWalletMenu}>
+                    <div className={styles.forgeHeaderWalletAddress}>{address}</div>
+                    <button
+                      className={styles.forgeHeaderWalletDisconnect}
+                      onClick={() => {
+                        if (onConnectClick) {
+                          onConnectClick();
+                        }
+                        setShowWalletMenu(false);
+                      }}
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Top left leader avatar */}
           <img
@@ -241,21 +337,6 @@ export function RealForgeView(props: RealForgeViewProps) {
 
           {/* Top right counters */}
           <div className={styles.countersContainer}>
-            <div className={styles.goldCounter}>
-              <span
-                className={styles.counterValue}
-                suppressHydrationWarning
-              >
-                {!mounted
-                  ? "0.00"
-                  : ngtIsLoading
-                  ? "..."
-                  : ngtIsPlaceholder
-                  ? "0.00"
-                  : ngtDisplayBalance}
-              </span>
-              <span className={styles.counterLabel}>NGT</span>
-            </div>
             <div className={styles.coinCounter}>
               <span className={styles.coinIcon}>🪙</span>
               <span
