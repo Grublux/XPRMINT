@@ -5,6 +5,7 @@ import styles from "./ForgePage.module.css";
 import RecipeModal from "@/features/forge/components/RecipeModal";
 import NPCModal from "@/features/forge/components/NPCModal";
 import ForgeSuccessModal from "@/features/forge/components/ForgeSuccessModal";
+import BagModal from "@/features/forge/components/BagModal";
 
 // Minimal NPCToken shape for the UI (keeps this file self-contained)
 export type NPCToken = {
@@ -69,6 +70,7 @@ export function RealForgeView(props: RealForgeViewProps) {
   const [showNPCModal, setShowNPCModal] = useState(false);
   const [selectedNPC, setSelectedNPC] = useState<NPCToken | null>(null);
   const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const [showBagModal, setShowBagModal] = useState(false); // Bag inspection modal
 
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
   const [isForging, setIsForging] = useState(false);
@@ -105,6 +107,7 @@ export function RealForgeView(props: RealForgeViewProps) {
       setRecipeConfirmed(false);
       hasShownSecondMessage.current = false;
       setShowWalletMenu(false);
+    } else {
     }
   }, [isConnected]);
 
@@ -234,9 +237,11 @@ export function RealForgeView(props: RealForgeViewProps) {
           {/* Top header */}
           <div className={styles.forgeHeader}>
             <div className={styles.forgeHeaderRow}>
-              <img src="/hammer_gold1.png" alt="Forge" className={styles.forgeHeaderIcon} />
-              <div className={styles.forgeHeaderText}>
-                {isConnected ? "Bland_Forge1" : "Forge Not Connected"}
+              <div className={styles.forgeHeaderNameArea}>
+                <img src="/forge_2a.png" alt="Forge" className={styles.forgeHeaderIcon} />
+                <div className={styles.forgeHeaderText}>
+                  {isConnected ? "NGMI Genesis Forge" : "Forge Not Connected"}
+                </div>
               </div>
               <div className={styles.forgeHeaderSpacer}></div>
               {/* NGT balance */}
@@ -337,23 +342,54 @@ export function RealForgeView(props: RealForgeViewProps) {
 
           {/* Top right counters */}
           <div className={styles.countersContainer}>
-            <div className={styles.coinCounter}>
-              <span className={styles.coinIcon}>🪙</span>
-              <span
-                className={styles.coinCount}
-                suppressHydrationWarning
-              >
-                {!mounted
-                  ? "x0"
-                  : coinBalanceLoading
-                  ? "..."
-                  : `x${coinBalance}`}
-              </span>
-            </div>
-            <div className={styles.coinCounter}>
-              <span className={styles.coalIcon}>🪨</span>
-              <span className={styles.coinCount}>x0</span>
-            </div>
+            {isConnected && (
+              <div className={styles.bagContents}>
+                <div className={styles.bagContentsHeader}>
+                  <img src="/bag.png" alt="Bag" className={styles.bagIcon} />
+                  <div className={styles.bagContentsLabel}>My Bag</div>
+                </div>
+                <div className={styles.bagHelperText}>click item to see details</div>
+                <div className={styles.itemsRow}>
+                  {coinBalance > 0 ? (
+                    <button
+                      className={styles.coinCounter}
+                      onClick={() => setShowBagModal(true)}
+                      title="View coins in bag"
+                    >
+                      <span className={styles.coinIcon}>🪙</span>
+                      <span
+                        className={styles.coinCount}
+                        suppressHydrationWarning
+                      >
+                        {!mounted
+                          ? "x0"
+                          : coinBalanceLoading
+                          ? "..."
+                          : `x${coinBalance}`}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className={`${styles.coinCounter} ${styles.empty}`}>
+                      <span className={styles.coinIcon}>🪙</span>
+                      <span
+                        className={styles.coinCount}
+                        suppressHydrationWarning
+                      >
+                        {!mounted
+                          ? "x0"
+                          : coinBalanceLoading
+                          ? "..."
+                          : `x${coinBalance}`}
+                      </span>
+                    </div>
+                  )}
+                  <div className={`${styles.coalCounter} ${styles.empty}`}>
+                    <span className={styles.coalIcon}>🪨</span>
+                    <span className={styles.coalCount}>x0</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom action buttons */}
@@ -426,10 +462,21 @@ export function RealForgeView(props: RealForgeViewProps) {
       <div className={styles.content}>
       </div>
 
-      {/* Modals enabled now that wagmi is wired */}
-      {true && (
-        <>
-          <RecipeModal
+          {/* Bag Modal */}
+          {showBagModal && (
+            <BagModal
+              isOpen={showBagModal}
+              onClose={() => setShowBagModal(false)}
+              coinBalance={coinBalance}
+              coinBalanceLoading={coinBalanceLoading}
+              address={address}
+            />
+          )}
+
+          {/* Modals enabled now that wagmi is wired */}
+          {true && (
+            <>
+              <RecipeModal
             isOpen={showRecipeModal}
             onClose={() => setShowRecipeModal(false)}
             onForge={handleRecipeConfirm}

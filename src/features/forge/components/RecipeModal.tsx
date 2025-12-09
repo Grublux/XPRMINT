@@ -374,9 +374,10 @@ export default function RecipeModal({
 
         {selectedNPC && recipe && (
           <div className={styles.helperText}>
-            You will place {totalNGT.toLocaleString(undefined, { maximumFractionDigits: 2 })} NGT into {numCoins} coin{numCoins !== 1 ? 's' : ''}, it will be locked for {lockDurationText} before it can be destroyed and the $NGT reclaimed by the bearer.
-            <br />
-            * 10% of the $NGT will be routed to the crafter NPC {selectedNPC.tokenId.toString()} no matter who destroys the coin
+            • You will place <strong>{totalNGT.toLocaleString(undefined, { maximumFractionDigits: 2 })} NGT</strong> into {numCoins} coin{numCoins !== 1 ? 's' : ''}.<br />
+            • It will be locked for <strong>0 seconds</strong> before it can be destroyed and the $NGT reclaimed by the bearer.<br />
+            • <strong>{(totalNGT * 0.1).toLocaleString(undefined, { maximumFractionDigits: 2 })} NGT</strong> (10%) of the $NGT will be routed to the crafter NPC {selectedNPC.tokenId.toString()} when the coin{numCoins !== 1 ? 's are' : ' is'} destroyed.<br />
+            • NPC {selectedNPC.tokenId.toString()} will receive 6.9% secondary royalties.
           </div>
         )}
 

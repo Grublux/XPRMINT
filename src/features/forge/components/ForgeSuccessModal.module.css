@@ -3,9 +3,12 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
+  padding-top: 80px;
+  padding-bottom: 20px;
+  overflow-y: auto;
 }
 
 .modal {
@@ -20,6 +23,7 @@
   box-shadow: 
     0 0 30px rgba(201, 162, 39, 0.3),
     0 0 60px rgba(201, 162, 39, 0.1);
+  margin-bottom: 20px;
 }
 
 .successIcon {
@@ -90,6 +94,12 @@
 .dismissBtn:hover {
   background: linear-gradient(180deg, rgba(201, 162, 39, 1) 0%, rgba(181, 142, 29, 1) 100%);
   box-shadow: 0 0 20px rgba(201, 162, 39, 0.4);
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding-top: 100px;
+  }
 }
 
 @media (max-width: 480px) {
