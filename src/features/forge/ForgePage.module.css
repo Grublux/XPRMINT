@@ -312,6 +312,7 @@
   gap: 8px;
   background: transparent;
   padding: 4px 8px;
+  margin-left: -12px; /* Shift logo and name left */
 }
 
 .forgeHeaderIcon {
