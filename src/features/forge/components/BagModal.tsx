@@ -27,10 +27,12 @@ const DESTROY_ABI = [
 
 function CoinCard({ 
   token, 
-  onExpand 
+  onExpand,
+  isExpanded
 }: { 
   token: CoinToken;
   onExpand: (token: CoinToken) => void;
+  isExpanded?: boolean;
 }) {
   const formatNGT = (amount: bigint | undefined) => {
     if (!amount) return '0';
@@ -41,7 +43,10 @@ function CoinCard({
   };
 
   return (
-    <div className={styles.coinCard} onClick={() => onExpand(token)}>
+    <div 
+      className={`${styles.coinCard} ${isExpanded ? styles.coinCardExpanded : ''}`}
+      onClick={() => onExpand(token)}
+    >
       {token.imageUrl ? (
         <img 
           src={token.imageUrl} 
@@ -195,15 +200,14 @@ export default function BagModal({
   const { writeContract, data: hash, isPending: isDestroying } = useWriteContract();
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
 
-  useEffect(() => {
-    if (isOpen && address && !hasScanned) {
-      scan();
-      setHasScanned(true);
-    }
-  }, [isOpen, address, hasScanned, scan]);
+  // Don't trigger scan here - useCoinTokens already auto-scans on mount
+  // The hook handles scanning automatically, so we don't need to call it again
 
   const handleExpand = (token: CoinToken) => {
-    setExpandedToken(token);
+    // Small delay to prevent ghosting on mobile touch
+    requestAnimationFrame(() => {
+      setExpandedToken(token);
+    });
   };
 
   const handleDestroy = async (token: CoinToken) => {
@@ -284,12 +288,9 @@ export default function BagModal({
                       key={token.tokenId.toString()}
                       token={token}
                       onExpand={handleExpand}
+                      isExpanded={expandedToken?.tokenId === token.tokenId}
                     />
                   ))}
-                  {/* Reserve space for loading items to prevent layout shift */}
-                  {isLoading && filteredTokens.length > 0 && (
-                    <div className={styles.coinCardPlaceholder}></div>
-                  )}
                 </div>
               )}
             </div>

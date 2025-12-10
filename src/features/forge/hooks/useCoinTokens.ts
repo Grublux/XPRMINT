@@ -49,6 +49,7 @@ export function useCoinTokens() {
   const [isLoading, setIsLoading] = useState(false);
   const isScanning = useRef(false);
   const hasScanned = useRef(false);
+  const tokensRef = useRef<CoinToken[]>([]); // Track tokens in ref to avoid stale closures
 
   const getCacheKey = useCallback(() => {
     if (!address) return null;
@@ -59,7 +60,11 @@ export function useCoinTokens() {
     if (!address || !publicClient || isScanning.current) return;
     
     isScanning.current = true;
-    setIsLoading(true);
+    // Don't set loading to true if we already have tokens (from cache) - prevents flicker
+    const currentTokens = tokensRef.current;
+    if (currentTokens.length === 0) {
+      setIsLoading(true);
+    }
 
     try {
       const cacheKey = getCacheKey();
@@ -104,7 +109,15 @@ export function useCoinTokens() {
       });
 
       if (!tokenIds || tokenIds.length === 0) {
+        // Only clear tokens if we actually have none (don't clear if we have cached tokens)
+        if (currentTokens.length > 0) {
+          // Keep existing tokens, just mark as not loading
+          isScanning.current = false;
+          setIsLoading(false);
+          return;
+        }
         setTokens([]);
+        tokensRef.current = [];
         isScanning.current = false;
         setIsLoading(false);
         return;
@@ -117,7 +130,15 @@ export function useCoinTokens() {
       const verifiedTokenIds = tokenIds;
 
       if (verifiedTokenIds.length === 0) {
+        // Only clear tokens if we actually have none (don't clear if we have cached tokens)
+        if (currentTokens.length > 0) {
+          // Keep existing tokens, just mark as not loading
+          isScanning.current = false;
+          setIsLoading(false);
+          return;
+        }
         setTokens([]);
+        tokensRef.current = [];
         isScanning.current = false;
         setIsLoading(false);
         return;
@@ -293,8 +314,10 @@ export function useCoinTokens() {
         const token = await promise;
         foundTokens.push(token);
         setTokens([...foundTokens]); // Update UI as each token loads
+        tokensRef.current = [...foundTokens]; // Update ref
       }
       hasScanned.current = true;
+      setIsLoading(false); // Make sure loading is cleared when done
       
       // Cache results
       if (cacheKey) {
@@ -322,7 +345,12 @@ export function useCoinTokens() {
       }
     } catch (error) {
       console.error('[useCoinTokens] Scan failed:', error);
-      setTokens([]);
+      // Only clear tokens on error if we don't have any cached tokens
+      // This prevents flicker when we have cached tokens and scan fails
+      if (tokensRef.current.length === 0) {
+        setTokens([]);
+        tokensRef.current = [];
+      }
     } finally {
       isScanning.current = false;
       setIsLoading(false);
@@ -348,6 +376,7 @@ export function useCoinTokens() {
             unlockAt: t.unlockAt ? BigInt(t.unlockAt) : undefined,
           }));
           setTokens(cachedTokens);
+          tokensRef.current = cachedTokens; // Update ref when loading from cache
           console.log('[useCoinTokens] Loaded', cachedTokens.length, 'tokens from cache');
         }
       }

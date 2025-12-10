@@ -132,13 +132,13 @@ export function RealForgeView(props: RealForgeViewProps) {
     const timer = setTimeout(() => {
       if (isConnected) {
         addBubble([
-          "Welcome to the Master Forge.",
-          'To begin "Choose NPC" below.',
+          "You are using the NGMI Genesis Forge,",
+          "Choose NPC to continue",
         ]);
       } else {
         addBubble([
-          "Welcome to the Master Forge.",
-          "Connect wallet and Name your forge!",
+          "Welcome to the Genesis Forge",
+          "Connect your wallet to begin",
         ]);
       }
     }, 500);
@@ -240,7 +240,7 @@ export function RealForgeView(props: RealForgeViewProps) {
               <div className={styles.forgeHeaderNameArea}>
                 <img src="/forge_2a.png" alt="Forge" className={styles.forgeHeaderIcon} />
                 <div className={styles.forgeHeaderText}>
-                  {isConnected ? "NGMI Genesis Forge" : "Forge Not Connected"}
+                  {isConnected ? "NGMI Genesis Forge" : "Wallet Not Connected"}
                 </div>
               </div>
               <div className={styles.forgeHeaderSpacer}></div>
@@ -429,8 +429,7 @@ export function RealForgeView(props: RealForgeViewProps) {
                     className={styles.selectedNPCXp}
                     suppressHydrationWarning
                   >
-                    {/* Forge-bound XP – not NPC-bound. */}
-                    Forge XP: {!mounted
+                    NPC LVL: {!mounted
                       ? "0"
                       : forgeXPLoading
                       ? "..."
