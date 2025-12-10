@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import styles from "./BagModal.module.css";
 import { useCoinTokens } from "../hooks/useCoinTokens";
 import type { CoinToken } from "../hooks/useCoinTokens";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { MASTER_CRAFTER_ADDRESS } from "@/features/crafted/constants";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract, useAccount } from "wagmi";
+import { MASTER_CRAFTER_V4_PROXY } from "@/features/crafted/constants";
+import { useNGTBalance } from "../hooks/useNGTBalance";
 
 type BagModalProps = {
   isOpen: boolean;
@@ -24,6 +25,26 @@ const DESTROY_ABI = [
     outputs: [],
   },
 ] as const;
+
+const GET_DESTROY_QUOTE_ABI = [
+  {
+    type: 'function',
+    stateMutability: 'view',
+    name: 'getDestroyQuote',
+    inputs: [
+      { name: 'posId', type: 'uint256' },
+      { name: 'destroyer', type: 'address' },
+    ],
+    outputs: [
+      { name: 'totalLocked', type: 'uint256' },
+      { name: 'npcFee', type: 'uint256' },
+      { name: 'teamFee', type: 'uint256' },
+      { name: 'refund', type: 'uint256' },
+    ],
+  },
+] as const;
+
+const APESCAN_BASE_URL = 'https://apescan.io/tx';
 
 function CoinCard({ 
   token, 
@@ -76,10 +97,26 @@ function ExpandedCoinView({
   token,
   onClose,
   onDestroy,
+  isDestroying,
+  isConfirming,
+  isSuccess,
+  transactionHash,
+  refundAmount,
+  destroyQuote,
+  isCrafter,
+  quoteLoading,
 }: {
   token: CoinToken;
   onClose: () => void;
   onDestroy: () => void;
+  isDestroying?: boolean;
+  isConfirming?: boolean;
+  isSuccess?: boolean;
+  transactionHash?: string;
+  refundAmount?: string;
+  destroyQuote?: readonly [string, string, string, string] | undefined;
+  isCrafter?: boolean;
+  quoteLoading?: boolean;
 }) {
   const formatNGT = (amount: bigint | undefined) => {
     if (!amount) return '0';
@@ -89,11 +126,6 @@ function ExpandedCoinView({
     });
   };
   
-  console.log('[ExpandedCoinView] Token data:', {
-    tokenId: token.tokenId.toString(),
-    ngtLocked: token.ngtLocked?.toString(),
-    craftedByMe: token.craftedByMe,
-  });
 
   const formatDate = (timestamp: bigint | undefined) => {
     if (!timestamp) return 'Unknown';
@@ -101,10 +133,28 @@ function ExpandedCoinView({
     return date.toLocaleString();
   };
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleCloseClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
   return (
-    <div className={styles.expandedOverlay} onClick={onClose}>
+    <div className={styles.expandedOverlay} onClick={handleOverlayClick}>
       <div className={styles.expandedModal} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>×</button>
+        <button 
+          className={styles.closeButton} 
+          onClick={handleCloseClick}
+          type="button"
+        >
+          ×
+        </button>
         
         <div className={styles.expandedContent}>
           {token.imageUrl ? (
@@ -154,7 +204,29 @@ function ExpandedCoinView({
             
             {/* Helper text above destroy button - ALWAYS SHOW */}
             <div className={styles.destroyHelperText}>
-              {token.ngtLocked !== undefined ? (
+              {quoteLoading ? (
+                <>
+                  Loading destruction quote...
+                </>
+              ) : destroyQuote && refundAmount !== undefined ? (
+                isCrafter ? (
+                  <>
+                    You <strong>crafted</strong> this coin. You will receive <strong>{formatNGT(BigInt(refundAmount))} NGT</strong>
+                    {BigInt(destroyQuote[2]) > 0n && (
+                      <> (after <strong>{formatNGT(BigInt(destroyQuote[2]))} NGT</strong> team fee)</>
+                    )}
+                    {BigInt(destroyQuote[2]) === 0n && <> and pay no fees</>} if you destroy it.
+                  </>
+                ) : (
+                  <>
+                    You <strong>did not craft</strong> this coin. You will receive <strong>{formatNGT(BigInt(refundAmount))} NGT</strong> total after paying <strong>{formatNGT(BigInt(destroyQuote[1]))} NGT</strong> (destruction fee) to the crafter
+                    {BigInt(destroyQuote[2]) > 0n && (
+                      <> and <strong>{formatNGT(BigInt(destroyQuote[2]))} NGT</strong> team fee</>
+                    )}.
+                  </>
+                )
+              ) : token.ngtLocked !== undefined ? (
+                // Fallback to old calculation if quote not available
                 token.craftedByMe ? (
                   <>
                     You <strong>crafted</strong> this coin. You will receive <strong>{formatNGT(token.ngtLocked)} NGT</strong> and pay no fees if you destroy it.
@@ -171,13 +243,55 @@ function ExpandedCoinView({
               )}
             </div>
             
-            <button
-              className={`${styles.destroyButton} ${styles.destroyButtonLarge} ${token.isLocked ? styles.destroyButtonDisabled : ''}`}
-              onClick={onDestroy}
-              disabled={token.isLocked}
-            >
-              {token.isLocked ? '🔒 Still Locked' : '💥 DESTROY'}
-            </button>
+            {isSuccess ? (
+              <div className={styles.successState}>
+                <div className={styles.successIcon}>✓</div>
+                <div className={styles.successMessage}>
+                  <div className={styles.successTitle}>Coin successfully destroyed!</div>
+                  {refundAmount !== undefined && (
+                    <div className={styles.successRefund}>
+                      You received {formatNGT(refundAmount)} NGT
+                    </div>
+                  )}
+                  {transactionHash && (
+                    <a
+                      href={`${APESCAN_BASE_URL}/${transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.transactionLink}
+                    >
+                      Transaction #{transactionHash.slice(0, 10)}...
+                    </a>
+                  )}
+                </div>
+                <button
+                  className={styles.okButton}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  type="button"
+                >
+                  OK
+                </button>
+              </div>
+            ) : (isDestroying || isConfirming) ? (
+              <div className={styles.destroyingState}>
+                <div className={styles.spinner}></div>
+                <div className={styles.destroyingMessage}>
+                  Destroying {token.name} #{token.tokenId.toString()}
+                </div>
+              </div>
+            ) : (
+              <button
+                className={`${styles.destroyButton} ${styles.destroyButtonLarge} ${token.isLocked ? styles.destroyButtonDisabled : ''}`}
+                onClick={onDestroy}
+                disabled={token.isLocked}
+              >
+                {token.isLocked ? '🔒 Still Locked' : '💥 DESTROY'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -196,9 +310,42 @@ export default function BagModal({
   const [showCraftedOnly, setShowCraftedOnly] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [expandedToken, setExpandedToken] = useState<CoinToken | null>(null);
+  const { address: accountAddress } = useAccount();
+  
+  // Get NGT balance refetch function to update balance after destroy
+  const { refetch: refetchNGTBalance } = useNGTBalance();
   
   const { writeContract, data: hash, isPending: isDestroying } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess: isTxSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
+  
+  // Track if we've had a successful transaction to refetch on any close
+  const hasSuccessfulTx = isTxSuccess;
+  
+  // Get destroy quote to calculate refund amount and fees
+  const { data: destroyQuote, isLoading: quoteLoading } = useReadContract({
+    address: MASTER_CRAFTER_V4_PROXY,
+    abi: GET_DESTROY_QUOTE_ABI,
+    functionName: 'getDestroyQuote',
+    args: expandedToken && accountAddress 
+      ? [expandedToken.tokenId, accountAddress] 
+      : undefined,
+    query: {
+      enabled: !!expandedToken && !!accountAddress,
+    },
+  });
+  
+  // Extract quote data
+  const totalLocked = destroyQuote?.[0];
+  const npcFee = destroyQuote?.[1];
+  const teamFee = destroyQuote?.[2];
+  const refundAmount = destroyQuote?.[3]; // refund is the 4th return value
+  
+  // Determine if destroyer is the crafter by comparing refund calculation
+  // Crafter: refund = totalLocked - teamFee
+  // Non-crafter: refund = totalLocked - npcFee - teamFee
+  const isCrafter = destroyQuote && totalLocked && refundAmount && teamFee
+    ? refundAmount === (totalLocked - teamFee)
+    : undefined;
 
   // Don't trigger scan here - useCoinTokens already auto-scans on mount
   // The hook handles scanning automatically, so we don't need to call it again
@@ -215,7 +362,7 @@ export default function BagModal({
     
     try {
       await writeContract({
-        address: MASTER_CRAFTER_ADDRESS,
+        address: MASTER_CRAFTER_V4_PROXY,
         abi: DESTROY_ABI,
         functionName: 'destroyPosition',
         args: [token.tokenId],
@@ -225,16 +372,26 @@ export default function BagModal({
     }
   };
 
-  // Close expanded view when transaction completes
+  // Refresh tokens and NGT balance after transaction completes (but keep expanded view open for success message)
   useEffect(() => {
-    if (hash && !isConfirming && expandedToken) {
-      setExpandedToken(null);
+    if (isTxSuccess && expandedToken) {
+      // Refresh NGT balance immediately
+      refetchNGTBalance();
+      
       // Refresh tokens after destroy
       setTimeout(() => {
         scan();
-      }, 2000);
+      }, 1000);
     }
-  }, [hash, isConfirming, expandedToken, scan]);
+  }, [isTxSuccess, expandedToken, scan, refetchNGTBalance]);
+
+  // Handle close with NGT balance refetch if there was a successful transaction
+  const handleClose = () => {
+    if (hasSuccessfulTx) {
+      refetchNGTBalance();
+    }
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -245,9 +402,9 @@ export default function BagModal({
 
   return (
     <>
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>×</button>
+        <button className={styles.closeButton} onClick={handleClose}>×</button>
         
         <h2 className={styles.title}>My Bag</h2>
         
@@ -302,8 +459,29 @@ export default function BagModal({
     {expandedToken && (
       <ExpandedCoinView
         token={expandedToken}
-        onClose={() => setExpandedToken(null)}
+        onClose={() => {
+          // Immediately close - no async operations should block this
+          setExpandedToken(null);
+          // Reset transaction state when closing (async, but doesn't block close)
+          if (hasSuccessfulTx) {
+            // Refresh NGT balance one more time to ensure it's up to date
+            refetchNGTBalance();
+            // Small delay to allow state cleanup
+            setTimeout(() => {
+              // Force refresh tokens one more time
+              scan();
+            }, 500);
+          }
+        }}
         onDestroy={() => handleDestroy(expandedToken)}
+        isDestroying={isDestroying}
+        isConfirming={isConfirming}
+        isSuccess={isTxSuccess}
+        transactionHash={hash}
+        refundAmount={refundAmount ? String(refundAmount) : undefined}
+        destroyQuote={destroyQuote ? destroyQuote.map(q => String(q)) as readonly [string, string, string, string] : undefined}
+        isCrafter={isCrafter}
+        quoteLoading={quoteLoading}
       />
     )}
     </>
