@@ -25,6 +25,7 @@ export type RealForgeViewProps = {
   address?: string | null;
   isConnected: boolean;
   onConnectClick?: () => void;
+  onDisconnectClick?: () => void;
 
   // NGT balance
   ngtDisplayBalance: string; // e.g. "123.45"
@@ -51,6 +52,7 @@ export function RealForgeView(props: RealForgeViewProps) {
     address,
     isConnected,
     onConnectClick,
+    onDisconnectClick,
     ngtDisplayBalance,
     ngtIsLoading = false,
     ngtIsPlaceholder = false,
@@ -359,8 +361,8 @@ export function RealForgeView(props: RealForgeViewProps) {
                     <button
                       className={styles.forgeHeaderWalletDisconnect}
                       onClick={() => {
-                        if (onConnectClick) {
-                          onConnectClick();
+                        if (onDisconnectClick) {
+                          onDisconnectClick();
                         }
                         setShowWalletMenu(false);
                       }}

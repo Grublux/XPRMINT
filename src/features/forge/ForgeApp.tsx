@@ -22,6 +22,10 @@ export default function ForgeApp() {
     }
   };
 
+  const handleDisconnect = () => {
+    disconnect();
+  };
+
   // Map NPC tokens to RealForgeView format
   const npcTokensFormatted: NPCToken[] = npcTokens.map((token) => ({
     tokenId: typeof token.tokenId === 'bigint' ? token.tokenId : BigInt(token.tokenId),
@@ -34,6 +38,7 @@ export default function ForgeApp() {
       address={address}
       isConnected={isConnected}
       onConnectClick={handleConnect}
+      onDisconnectClick={handleDisconnect}
       ngtDisplayBalance={ngtBalance}
       ngtIsLoading={ngtLoading}
       coinBalance={coinBalance}
