@@ -6,6 +6,13 @@ import RecipeModal from "@/features/forge/components/RecipeModal";
 import NPCModal from "@/features/forge/components/NPCModal";
 import ForgeSuccessModal from "@/features/forge/components/ForgeSuccessModal";
 import BagModal from "@/features/forge/components/BagModal";
+import ForgeConfirmModal from "@/features/forge/components/ForgeConfirmModal";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { MASTER_CRAFTER_V4_PROXY } from "@/features/crafted/constants";
+import { useRecipe } from "@/features/forge/hooks/useRecipe";
+import { useNGTBalance } from "@/features/forge/hooks/useNGTBalance";
+import { useCoinTokens } from "@/features/forge/hooks/useCoinTokens";
+import type { ScanProgress } from "@/features/forge/hooks/useNPCTokens";
 
 // Minimal NPCToken shape for the UI (keeps this file self-contained)
 export type NPCToken = {
@@ -40,9 +47,9 @@ export type RealForgeViewProps = {
   forgeXPLoading?: boolean;
 
   // NPCs (just selection + scanning, no XP)
-  npcTokens: NPCToken[];
+  npcTokens: Array<{ tokenId: bigint; name?: string; imageUrl?: string }>;
   npcLoading: boolean;
-  npcProgress?: number | string; // whatever useNPCTokens.progress was
+  npcProgress?: ScanProgress;
   onScanNPCsClick?: () => void;
 };
 
@@ -73,6 +80,9 @@ export function RealForgeView(props: RealForgeViewProps) {
   const [showBagModal, setShowBagModal] = useState(false); // Bag inspection modal
 
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
+  const [confirmedRecipeId, setConfirmedRecipeId] = useState<number | null>(null);
+  const [confirmedNumCoins, setConfirmedNumCoins] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isForging, setIsForging] = useState(false);
   const [forgeProgress, setForgeProgress] = useState(0);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -209,7 +219,9 @@ export function RealForgeView(props: RealForgeViewProps) {
     setShowNPCModal(false);
   };
 
-  const handleRecipeConfirm = (numCoins: number) => {
+  const handleRecipeConfirm = (recipeId: number, numCoins: number, npcId: bigint) => {
+    setConfirmedRecipeId(recipeId);
+    setConfirmedNumCoins(numCoins);
     setPendingCoins(numCoins);
     setRecipeConfirmed(true);
     setShowRecipeModal(false);
@@ -218,6 +230,66 @@ export function RealForgeView(props: RealForgeViewProps) {
       'Click "Forge" when ready!',
     ]);
   };
+
+  // Transaction hooks
+  const CRAFT_ABI = [
+    {
+      type: 'function',
+      stateMutability: 'nonpayable',
+      name: 'craftWithNPC',
+      inputs: [
+        { name: 'recipeId', type: 'uint256' },
+        { name: 'npcId', type: 'uint256' },
+      ],
+      outputs: [{ name: 'posId', type: 'uint256' }],
+    },
+  ] as const;
+
+  const { writeContract, data: craftHash, isPending: isCraftPending } = useWriteContract();
+  const { isLoading: isCraftConfirming, isSuccess: isCraftSuccess } = useWaitForTransactionReceipt({ 
+    hash: craftHash 
+  });
+
+  // Get recipe data for confirmation modal
+  const { recipe } = useRecipe(confirmedRecipeId || 1);
+  const { refetch: refetchNGTBalance } = useNGTBalance();
+  const { scan: scanCoins } = useCoinTokens();
+
+  const ngtPerCoin = recipe ? Number(recipe.inputPerUnit) / 1e18 : 0;
+
+  const handleForgeClick = () => {
+    if (canForge && selectedNPC && confirmedRecipeId !== null) {
+      setShowConfirmModal(true);
+    }
+  };
+
+  const handleConfirmAndForge = async () => {
+    if (!selectedNPC || confirmedRecipeId === null) return;
+
+    try {
+      // Craft one coin at a time - for now just craft the first one
+      // TODO: Handle multiple coins sequentially
+      await writeContract({
+        address: MASTER_CRAFTER_V4_PROXY,
+        abi: CRAFT_ABI,
+        functionName: 'craftWithNPC',
+        args: [BigInt(confirmedRecipeId), BigInt(selectedNPC.tokenId)],
+      } as any);
+    } catch (err) {
+      console.error('[RealForgeView] Craft failed:', err);
+    }
+  };
+
+  // Handle transaction success
+  useEffect(() => {
+    if (isCraftSuccess) {
+      setCoinsForged(confirmedNumCoins);
+      refetchNGTBalance();
+      setTimeout(() => {
+        scanCoins();
+      }, 1000);
+    }
+  }, [isCraftSuccess, confirmedNumCoins, refetchNGTBalance, scanCoins]);
 
   const canOpenRecipe = !!selectedNPC;
   const canForge = !!selectedNPC && recipeConfirmed;
@@ -444,12 +516,7 @@ export function RealForgeView(props: RealForgeViewProps) {
             <button
               className={`${styles.actionButton} ${!canForge ? styles.actionButtonDisabled : ""}`}
               disabled={!canForge}
-              onClick={() => {
-                if (canForge) {
-                  setIsForging(true);
-                  addBubble(["Forging in progress..."]);
-                }
-              }}
+              onClick={handleForgeClick}
             >
               <span className={styles.actionButtonLabel}>Forge</span>
             </button>
@@ -478,9 +545,9 @@ export function RealForgeView(props: RealForgeViewProps) {
               <RecipeModal
             isOpen={showRecipeModal}
             onClose={() => setShowRecipeModal(false)}
-            onForge={handleRecipeConfirm}
+            onConfirm={handleRecipeConfirm}
             ngtBalance={ngtDisplayBalance}
-            selectedNPC={selectedNPC}
+            selectedNPC={selectedNPC ? { tokenId: typeof selectedNPC.tokenId === 'bigint' ? selectedNPC.tokenId : BigInt(selectedNPC.tokenId), name: selectedNPC.name } : null}
             onNPCSelect={(npc) => {
               handleNPCSelect(npc);
             }}
@@ -509,6 +576,31 @@ export function RealForgeView(props: RealForgeViewProps) {
             }}
             coinsForged={coinsForged}
           />
+
+          {showConfirmModal && selectedNPC && confirmedRecipeId !== null && (
+            <ForgeConfirmModal
+              isOpen={showConfirmModal}
+              onClose={() => {
+                if (!isCraftPending && !isCraftConfirming && !isCraftSuccess) {
+                  setShowConfirmModal(false);
+                }
+              }}
+              onConfirm={handleConfirmAndForge}
+              recipeId={confirmedRecipeId}
+              numCoins={confirmedNumCoins}
+              npcId={BigInt(selectedNPC.tokenId)}
+              ngtPerCoin={ngtPerCoin}
+              lockDuration={recipe?.lockDuration || BigInt(0)}
+              isPending={isCraftPending}
+              isConfirming={isCraftConfirming}
+              isSuccess={isCraftSuccess}
+              transactionHash={craftHash}
+              onSeeMyCoins={() => {
+                setShowConfirmModal(false);
+                setShowBagModal(true);
+              }}
+            />
+          )}
         </>
       )}
     </div>
