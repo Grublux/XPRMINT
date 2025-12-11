@@ -12,14 +12,7 @@ import { MASTER_CRAFTER_V4_PROXY } from "@/features/crafted/constants";
 import { useRecipe } from "@/features/forge/hooks/useRecipe";
 import { useNGTBalance } from "@/features/forge/hooks/useNGTBalance";
 import { useCoinTokens } from "@/features/forge/hooks/useCoinTokens";
-import type { ScanProgress } from "@/features/forge/hooks/useNPCTokens";
-
-// Minimal NPCToken shape for the UI (keeps this file self-contained)
-export type NPCToken = {
-  tokenId: bigint | number;
-  name?: string;
-  imageUrl?: string;
-};
+import type { ScanProgress, NPCToken } from "@/features/forge/hooks/useNPCTokens";
 
 type ChatBubble = {
   id: number;
