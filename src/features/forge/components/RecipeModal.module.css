@@ -1,0 +1,553 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+  padding-top: 80px;
+  padding-bottom: 20px;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: linear-gradient(180deg, #3a3a2a 0%, #2a2a1a 100%);
+  border: 3px solid #6a6a5a;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 
+    0 0 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: slideIn 0.3s ease-out;
+  margin-bottom: 20px;
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #fff;
+}
+
+.title {
+  color: #ffcc44;
+  font-size: 20px;
+  margin: 0 0 20px 0;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 200, 50, 0.3);
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recipeDropdownContainer {
+  position: relative;
+}
+
+.recipeDropdownButton {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #5a5a4a;
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recipeDropdownButton:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: #6a6a5a;
+}
+
+.dropdownArrow {
+  color: #888;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.recipeDropdownButton:hover .dropdownArrow {
+  color: #ccc;
+}
+
+.recipeDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: linear-gradient(180deg, #2a2a1a 0%, #1a1a1a 100%);
+  border: 2px solid #5a5a4a;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.recipeDropdownItem {
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  border-bottom: 1px solid #3a3a2a;
+}
+
+.recipeDropdownItem:last-child {
+  border-bottom: none;
+}
+
+.recipeDropdownItem:hover:not(:disabled) {
+  background: rgba(255, 200, 50, 0.1);
+  color: #ffcc44;
+}
+
+.recipeDropdownItemSelected {
+  background: rgba(255, 200, 50, 0.15);
+  color: #ffcc44;
+}
+
+.recipeDropdownItemDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: #666;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #3a3a2a;
+}
+
+.fieldLabel {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.fieldValueContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.fieldValue {
+  color: #ffcc44;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.npcHelperText {
+  color: #666;
+  font-size: 10px;
+  font-style: italic;
+}
+
+.recipeRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.label {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #5a5a4a;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.counterBtn {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(180deg, #5a5a4a 0%, #4a4a3a 100%);
+  border: 1px solid #6a6a5a;
+  border-radius: 6px;
+  color: #ffcc44;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.counterBtn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #6a6a5a 0%, #5a5a4a 100%);
+}
+
+.counterBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.counterValue {
+  color: #ffcc44;
+  font-size: 20px;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+.maxLabel {
+  color: #888;
+  font-size: 12px;
+}
+
+.requirements {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid #4a4a3a;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.requirementRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #3a3a2a;
+}
+
+.requirementRow:last-child {
+  border-bottom: none;
+}
+
+.reqLabel {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.reqValue {
+  color: #ffcc44;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.insufficient .reqValue {
+  color: #ff6666;
+}
+
+.negativeValue {
+  color: #ff6666 !important;
+}
+
+.warning {
+  color: #ff6666;
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.helperText {
+  padding: 12px 0;
+  margin-bottom: 20px;
+  color: #aaa;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.npcLink {
+  background: none;
+  border: none;
+  color: #ffcc44;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.npcLink:hover {
+  color: #ffdd66;
+  text-decoration: none;
+}
+
+.npcSelectionContainer {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid #4a4a3a;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 400px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+.npcSelectionLoading,
+.npcSelectionEmpty {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+.npcSpinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(201, 162, 39, 0.2);
+  border-top-color: #c9a227;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+
+.npcLoadingMessage {
+  color: #c9a227;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.npcProgressTrack {
+  width: 100%;
+  max-width: 200px;
+  height: 6px;
+  background: rgba(201, 162, 39, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.npcProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #c9a227 0%, #ffd700 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.npcSelectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.npcSelectionCard {
+  background: rgba(201, 162, 39, 0.1);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.npcSelectionCard:hover {
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.2);
+  transform: translateY(-2px);
+}
+
+.npcSelectionCardSelected {
+  border-color: #ffcc44;
+  background: rgba(255, 200, 50, 0.2);
+}
+
+.npcSelectionImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.npcSelectionPlaceholder {
+  width: 60px;
+  height: 60px;
+  background: rgba(201, 162, 39, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c9a227;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.npcSelectionName {
+  color: #ddd;
+  font-size: 10px;
+  text-align: center;
+}
+
+.npcSelectionXp {
+  color: #c9a227;
+  font-size: 9px;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #4a4a3a 0%, #3a3a2a 100%);
+  border: 2px solid #5a5a4a;
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+  background: linear-gradient(180deg, #5a5a4a 0%, #4a4a3a 100%);
+  color: #fff;
+}
+
+.forgeBtn {
+  padding: 10px 24px;
+  background: linear-gradient(180deg, rgba(0, 60, 80, 0.9) 0%, rgba(0, 40, 60, 0.95) 100%);
+  border: 2px solid #00ccff;
+  border-radius: 8px;
+  color: #00ccff;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+}
+
+.forgeBtn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(0, 80, 100, 0.9) 0%, rgba(0, 60, 80, 0.95) 100%);
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.5);
+}
+
+.forgeBtn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding-top: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 16px;
+    min-width: 280px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .recipeRow {
+    gap: 8px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .counterValue {
+    font-size: 18px;
+  }
+
+  .requirements {
+    padding: 12px;
+  }
+
+  .reqLabel {
+    font-size: 12px;
+  }
+
+  .reqValue {
+    font-size: 14px;
+  }
+}
+

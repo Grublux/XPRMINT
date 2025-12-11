@@ -1,0 +1,11 @@
+{
+  "name": "Coin #1",
+  "description": "The first crafted coin",
+  "image": "/coins/coin1a.png",
+  "attributes": [
+    {
+      "trait_type": "NGT Locked",
+      "value": "1000000000000000000"
+    }
+  ]
+}
