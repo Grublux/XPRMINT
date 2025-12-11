@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd web && npm install && npm run build",
+  "buildCommand": "git submodule update --init --recursive && cd web && npm install && npm run build",
   "outputDirectory": "web/.next",
-  "installCommand": "cd web && npm install",
+  "installCommand": "git submodule update --init --recursive && cd web && npm install",
   "framework": "nextjs",
   "rootDirectory": "web"
 }
