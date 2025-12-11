@@ -1,24 +1,24 @@
 import { useAccount, useReadContract } from 'wagmi';
-import { POSITIONS_ADDRESS } from '@/features/crafted/constants';
+import { CRAFTED_V4_POSITIONS_PROXY } from '@/features/crafted/constants';
 import type { Address } from 'viem';
 
-const POSITIONS_ABI = [
+const CRAFTED_V4_POSITIONS_ABI = [
   {
     type: 'function',
     stateMutability: 'view',
-    name: 'balanceOf',
-    inputs: [{ name: 'owner', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
+    name: 'tokensOfOwner',
+    inputs: [{ name: 'ownerAddr', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256[]' }],
   },
 ] as const;
 
 export function useCoinBalance() {
   const { address } = useAccount();
 
-  const { data: balance, isLoading, isError, error } = useReadContract({
-    address: POSITIONS_ADDRESS,
-    abi: POSITIONS_ABI,
-    functionName: 'balanceOf',
+  const { data: tokens, isLoading, isError, error } = useReadContract({
+    address: CRAFTED_V4_POSITIONS_PROXY,
+    abi: CRAFTED_V4_POSITIONS_ABI,
+    functionName: 'tokensOfOwner',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
@@ -26,7 +26,7 @@ export function useCoinBalance() {
   });
 
   return {
-    balance: balance ? Number(balance) : 0,
+    balance: tokens ? tokens.length : 0,
     isLoading,
     isError,
     error,

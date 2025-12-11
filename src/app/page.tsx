@@ -1,8 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import ForgeApp from "@/features/forge/ForgeApp";
-
-export default function HomePage() {
-  // Home mirrors /forge for now.
-  return <ForgeApp />;
+export default function Home() {
+  redirect("/forge");
+  return null;
 }
+

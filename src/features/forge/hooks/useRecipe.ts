@@ -1,6 +1,6 @@
 import { useReadContract } from 'wagmi';
 import type { Address } from 'viem';
-import { MASTER_CRAFTER_ADDRESS } from '@/features/crafted/constants';
+import { MASTER_CRAFTER_V4_PROXY } from '@/features/crafted/constants';
 
 const MASTER_CRAFTER_ABI = [
   {
@@ -39,7 +39,7 @@ export type Recipe = {
 
 export function useRecipe(recipeId: number = 1) {
   const { data: recipeData, isLoading, isError, error } = useReadContract({
-    address: MASTER_CRAFTER_ADDRESS,
+    address: MASTER_CRAFTER_V4_PROXY,
     abi: MASTER_CRAFTER_ABI,
     functionName: 'getRecipe',
     args: [BigInt(recipeId)],
@@ -49,7 +49,7 @@ export function useRecipe(recipeId: number = 1) {
   });
 
   const { data: maxBatchSize } = useReadContract({
-    address: MASTER_CRAFTER_ADDRESS,
+    address: MASTER_CRAFTER_V4_PROXY,
     abi: MASTER_CRAFTER_ABI,
     functionName: 'maxBatchSize',
   });

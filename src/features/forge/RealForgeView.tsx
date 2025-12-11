@@ -5,13 +5,14 @@ import styles from "./ForgePage.module.css";
 import RecipeModal from "@/features/forge/components/RecipeModal";
 import NPCModal from "@/features/forge/components/NPCModal";
 import ForgeSuccessModal from "@/features/forge/components/ForgeSuccessModal";
-
-// Minimal NPCToken shape for the UI (keeps this file self-contained)
-export type NPCToken = {
-  tokenId: bigint | number;
-  name?: string;
-  imageUrl?: string;
-};
+import BagModal from "@/features/forge/components/BagModal";
+import ForgeConfirmModal from "@/features/forge/components/ForgeConfirmModal";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { MASTER_CRAFTER_V4_PROXY } from "@/features/crafted/constants";
+import { useRecipe } from "@/features/forge/hooks/useRecipe";
+import { useNGTBalance } from "@/features/forge/hooks/useNGTBalance";
+import { useCoinTokens } from "@/features/forge/hooks/useCoinTokens";
+import type { ScanProgress, NPCToken } from "@/features/forge/hooks/useNPCTokens";
 
 type ChatBubble = {
   id: number;
@@ -39,9 +40,9 @@ export type RealForgeViewProps = {
   forgeXPLoading?: boolean;
 
   // NPCs (just selection + scanning, no XP)
-  npcTokens: NPCToken[];
+  npcTokens: Array<{ tokenId: bigint; name?: string; imageUrl?: string }>;
   npcLoading: boolean;
-  npcProgress?: number | string; // whatever useNPCTokens.progress was
+  npcProgress?: ScanProgress;
   onScanNPCsClick?: () => void;
 };
 
@@ -68,8 +69,13 @@ export function RealForgeView(props: RealForgeViewProps) {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [showNPCModal, setShowNPCModal] = useState(false);
   const [selectedNPC, setSelectedNPC] = useState<NPCToken | null>(null);
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const [showBagModal, setShowBagModal] = useState(false); // Bag inspection modal
 
   const [recipeConfirmed, setRecipeConfirmed] = useState(false);
+  const [confirmedRecipeId, setConfirmedRecipeId] = useState<number | null>(null);
+  const [confirmedNumCoins, setConfirmedNumCoins] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isForging, setIsForging] = useState(false);
   const [forgeProgress, setForgeProgress] = useState(0);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -97,16 +103,50 @@ export function RealForgeView(props: RealForgeViewProps) {
     }, 7500);
   }, []);
 
-  // Initial welcome message
+  // Clear selected NPC and recipe when wallet disconnects
+  useEffect(() => {
+    if (!isConnected) {
+      setSelectedNPC(null);
+      setRecipeConfirmed(false);
+      hasShownSecondMessage.current = false;
+      setShowWalletMenu(false);
+    } else {
+    }
+  }, [isConnected]);
+
+  // Close wallet menu when clicking outside
+  useEffect(() => {
+    if (!showWalletMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const walletContainer = document.querySelector('[data-wallet-container]');
+      if (walletContainer && !walletContainer.contains(target)) {
+        setShowWalletMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showWalletMenu]);
+
+  // Initial welcome message - depends on wallet connection
   useEffect(() => {
     const timer = setTimeout(() => {
-      addBubble([
-        "Welcome to the Master Forge.",
-        'First you\'ll need to "Choose NPC" below.',
-      ]);
+      if (isConnected) {
+        addBubble([
+          "You are using the NGMI Genesis Forge,",
+          "Choose NPC to continue",
+        ]);
+      } else {
+        addBubble([
+          "Welcome to the Genesis Forge",
+          "Connect your wallet to begin",
+        ]);
+      }
     }, 500);
     return () => clearTimeout(timer);
-  }, [addBubble]);
+  }, [addBubble, isConnected]);
 
   // Forge progress animation – 60 seconds with variable speed
   useEffect(() => {
@@ -154,23 +194,15 @@ export function RealForgeView(props: RealForgeViewProps) {
     if (selectedNPC && !hasShownSecondMessage.current) {
       hasShownSecondMessage.current = true;
 
-      const timer1 = setTimeout(() => {
-        addBubble([
-          "Your crafting XP will track",
-          "with your NPC as you forge.",
-        ]);
-      }, 500);
-
-      const timer2 = setTimeout(() => {
+      const timer = setTimeout(() => {
         addBubble([
           'Next you\'ll need to confirm',
           'your "Recipe" below.',
         ]);
-      }, 3500);
+      }, 500);
 
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+        clearTimeout(timer);
       };
     }
   }, [selectedNPC, addBubble]);
@@ -180,7 +212,9 @@ export function RealForgeView(props: RealForgeViewProps) {
     setShowNPCModal(false);
   };
 
-  const handleRecipeConfirm = (numCoins: number) => {
+  const handleRecipeConfirm = (recipeId: number, numCoins: number, npcId: bigint) => {
+    setConfirmedRecipeId(recipeId);
+    setConfirmedNumCoins(numCoins);
     setPendingCoins(numCoins);
     setRecipeConfirmed(true);
     setShowRecipeModal(false);
@@ -189,6 +223,68 @@ export function RealForgeView(props: RealForgeViewProps) {
       'Click "Forge" when ready!',
     ]);
   };
+
+  // Transaction hooks
+  const CRAFT_ABI = [
+    {
+      type: 'function',
+      stateMutability: 'nonpayable',
+      name: 'craftWithNPC',
+      inputs: [
+        { name: 'recipeId', type: 'uint256' },
+        { name: 'npcId', type: 'uint256' },
+      ],
+      outputs: [{ name: 'posId', type: 'uint256' }],
+    },
+  ] as const;
+
+  const { writeContract, data: craftHash, isPending: isCraftPending } = useWriteContract();
+  const { isLoading: isCraftConfirming, isSuccess: isCraftSuccess } = useWaitForTransactionReceipt({ 
+    hash: craftHash 
+  });
+
+  // Get recipe data for confirmation modal
+  const { recipe } = useRecipe(confirmedRecipeId || 1);
+  const { refetch: refetchNGTBalance } = useNGTBalance();
+  const { scan: scanCoins } = useCoinTokens();
+
+  const ngtPerCoin = recipe ? Number(recipe.inputPerUnit) / 1e18 : 0;
+
+  const handleForgeClick = () => {
+    if (canForge && selectedNPC && confirmedRecipeId !== null) {
+      setShowConfirmModal(true);
+    }
+  };
+
+  const handleConfirmAndForge = async () => {
+    if (!selectedNPC || confirmedRecipeId === null) return;
+
+    try {
+      // Craft one coin at a time - for now just craft the first one
+      // TODO: Handle multiple coins sequentially
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (writeContract as any)({
+        address: MASTER_CRAFTER_V4_PROXY,
+        abi: CRAFT_ABI,
+        functionName: 'craftWithNPC',
+        args: [BigInt(confirmedRecipeId), BigInt(selectedNPC.tokenId)],
+        chainId: 33139, // ApeChain
+      });
+    } catch (err) {
+      console.error('[RealForgeView] Craft failed:', err);
+    }
+  };
+
+  // Handle transaction success
+  useEffect(() => {
+    if (isCraftSuccess) {
+      setCoinsForged(confirmedNumCoins);
+      refetchNGTBalance();
+      setTimeout(() => {
+        scanCoins();
+      }, 1000);
+    }
+  }, [isCraftSuccess, confirmedNumCoins, refetchNGTBalance, scanCoins]);
 
   const canOpenRecipe = !!selectedNPC;
   const canForge = !!selectedNPC && recipeConfirmed;
@@ -204,6 +300,78 @@ export function RealForgeView(props: RealForgeViewProps) {
           />
           <div className={styles.cauldronGlow}></div>
           <div className={styles.flameGlow}></div>
+
+          {/* Top header */}
+          <div className={styles.forgeHeader}>
+            <div className={styles.forgeHeaderRow}>
+              <div className={styles.forgeHeaderNameArea}>
+                <img src="/forge_2a.png" alt="Forge" className={styles.forgeHeaderIcon} />
+                <div className={styles.forgeHeaderText}>
+                  {isConnected ? "NGMI Genesis Forge" : "Wallet Not Connected"}
+                </div>
+              </div>
+              <div className={styles.forgeHeaderSpacer}></div>
+              {/* NGT balance */}
+              <div className={styles.forgeHeaderNGT}>
+                <span
+                  className={styles.counterValue}
+                  suppressHydrationWarning
+                >
+                  {!mounted
+                    ? "0.00"
+                    : ngtIsLoading
+                    ? "..."
+                    : ngtIsPlaceholder
+                    ? "0.00"
+                    : ngtDisplayBalance}
+                </span>
+                <span className={styles.counterLabel}>NGT</span>
+              </div>
+              {/* Wallet icon button */}
+              <div className={styles.forgeHeaderWalletContainer} data-wallet-container>
+                <button
+                  className={styles.forgeHeaderWalletIcon}
+                  onClick={() => {
+                    if (isConnected && address) {
+                      setShowWalletMenu(!showWalletMenu);
+                    } else {
+                      onConnectClick?.();
+                    }
+                  }}
+                  disabled={false}
+                  title={isConnected && address ? address : "Connect Wallet"}
+                >
+                  <img src="/wallet2a.png" alt="Wallet" className={styles.forgeHeaderWalletIconImg} />
+                  <div className={styles.forgeHeaderWalletOverlay}>
+                    {!isConnected ? (
+                      <>
+                        <div className={styles.forgeHeaderWalletNoConnectCircle}></div>
+                        <div className={styles.forgeHeaderWalletNoConnectLine}></div>
+                      </>
+                    ) : (
+                      <div className={styles.forgeHeaderWalletConnectedCircle}></div>
+                    )}
+                  </div>
+                </button>
+                {isConnected && address && showWalletMenu && (
+                  <div className={styles.forgeHeaderWalletMenu}>
+                    <div className={styles.forgeHeaderWalletAddress}>{address}</div>
+                    <button
+                      className={styles.forgeHeaderWalletDisconnect}
+                      onClick={() => {
+                        if (onConnectClick) {
+                          onConnectClick();
+                        }
+                        setShowWalletMenu(false);
+                      }}
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Top left leader avatar */}
           <img
@@ -241,38 +409,54 @@ export function RealForgeView(props: RealForgeViewProps) {
 
           {/* Top right counters */}
           <div className={styles.countersContainer}>
-            <div className={styles.goldCounter}>
-              <span
-                className={styles.counterValue}
-                suppressHydrationWarning
-              >
-                {!mounted
-                  ? "0.00"
-                  : ngtIsLoading
-                  ? "..."
-                  : ngtIsPlaceholder
-                  ? "0.00"
-                  : ngtDisplayBalance}
-              </span>
-              <span className={styles.counterLabel}>NGT</span>
-            </div>
-            <div className={styles.coinCounter}>
-              <span className={styles.coinIcon}>🪙</span>
-              <span
-                className={styles.coinCount}
-                suppressHydrationWarning
-              >
-                {!mounted
-                  ? "x0"
-                  : coinBalanceLoading
-                  ? "..."
-                  : `x${coinBalance}`}
-              </span>
-            </div>
-            <div className={styles.coinCounter}>
-              <span className={styles.coalIcon}>🪨</span>
-              <span className={styles.coinCount}>x0</span>
-            </div>
+            {isConnected && (
+              <div className={styles.bagContents}>
+                <div className={styles.bagContentsHeader}>
+                  <img src="/bag.png" alt="Bag" className={styles.bagIcon} />
+                  <div className={styles.bagContentsLabel}>My Bag</div>
+                </div>
+                <div className={styles.bagHelperText}>click item to see details</div>
+                <div className={styles.itemsRow}>
+                  {coinBalance > 0 ? (
+                    <button
+                      className={styles.coinCounter}
+                      onClick={() => setShowBagModal(true)}
+                      title="View coins in bag"
+                    >
+                      <span className={styles.coinIcon}>🪙</span>
+                      <span
+                        className={styles.coinCount}
+                        suppressHydrationWarning
+                      >
+                        {!mounted
+                          ? "x0"
+                          : coinBalanceLoading
+                          ? "..."
+                          : `x${coinBalance}`}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className={`${styles.coinCounter} ${styles.empty}`}>
+                      <span className={styles.coinIcon}>🪙</span>
+                      <span
+                        className={styles.coinCount}
+                        suppressHydrationWarning
+                      >
+                        {!mounted
+                          ? "x0"
+                          : coinBalanceLoading
+                          ? "..."
+                          : `x${coinBalance}`}
+                      </span>
+                    </div>
+                  )}
+                  <div className={`${styles.coalCounter} ${styles.empty}`}>
+                    <span className={styles.coalIcon}>🪨</span>
+                    <span className={styles.coalCount}>x0</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom action buttons */}
@@ -312,8 +496,7 @@ export function RealForgeView(props: RealForgeViewProps) {
                     className={styles.selectedNPCXp}
                     suppressHydrationWarning
                   >
-                    {/* Forge-bound XP – not NPC-bound. */}
-                    Forge XP: {!mounted
+                    NPC LVL: {!mounted
                       ? "0"
                       : forgeXPLoading
                       ? "..."
@@ -328,12 +511,7 @@ export function RealForgeView(props: RealForgeViewProps) {
             <button
               className={`${styles.actionButton} ${!canForge ? styles.actionButtonDisabled : ""}`}
               disabled={!canForge}
-              onClick={() => {
-                if (canForge) {
-                  setIsForging(true);
-                  addBubble(["Forging in progress..."]);
-                }
-              }}
+              onClick={handleForgeClick}
             >
               <span className={styles.actionButtonLabel}>Forge</span>
             </button>
@@ -345,15 +523,26 @@ export function RealForgeView(props: RealForgeViewProps) {
       <div className={styles.content}>
       </div>
 
-      {/* Modals enabled now that wagmi is wired */}
-      {true && (
-        <>
-          <RecipeModal
+          {/* Bag Modal */}
+          {showBagModal && (
+            <BagModal
+              isOpen={showBagModal}
+              onClose={() => setShowBagModal(false)}
+              coinBalance={coinBalance}
+              coinBalanceLoading={coinBalanceLoading}
+              address={address}
+            />
+          )}
+
+          {/* Modals enabled now that wagmi is wired */}
+          {true && (
+            <>
+              <RecipeModal
             isOpen={showRecipeModal}
             onClose={() => setShowRecipeModal(false)}
-            onForge={handleRecipeConfirm}
+            onConfirm={handleRecipeConfirm}
             ngtBalance={ngtDisplayBalance}
-            selectedNPC={selectedNPC}
+            selectedNPC={selectedNPC ? { tokenId: selectedNPC.tokenId as bigint, name: selectedNPC.name } : null}
             onNPCSelect={(npc) => {
               handleNPCSelect(npc);
             }}
@@ -382,6 +571,31 @@ export function RealForgeView(props: RealForgeViewProps) {
             }}
             coinsForged={coinsForged}
           />
+
+          {showConfirmModal && selectedNPC && confirmedRecipeId !== null && (
+            <ForgeConfirmModal
+              isOpen={showConfirmModal}
+              onClose={() => {
+                if (!isCraftPending && !isCraftConfirming && !isCraftSuccess) {
+                  setShowConfirmModal(false);
+                }
+              }}
+              onConfirm={handleConfirmAndForge}
+              recipeId={confirmedRecipeId}
+              numCoins={confirmedNumCoins}
+              npcId={BigInt(selectedNPC.tokenId)}
+              ngtPerCoin={ngtPerCoin}
+              lockDuration={recipe?.lockDuration || BigInt(0)}
+              isPending={isCraftPending}
+              isConfirming={isCraftConfirming}
+              isSuccess={isCraftSuccess}
+              transactionHash={craftHash}
+              onSeeMyCoins={() => {
+                setShowConfirmModal(false);
+                setShowBagModal(true);
+              }}
+            />
+          )}
         </>
       )}
     </div>

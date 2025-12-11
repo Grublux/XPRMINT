@@ -6,10 +6,13 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 100;
   animation: fadeIn 0.2s ease-out;
+  padding-top: 80px;
+  padding-bottom: 20px;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -29,6 +32,7 @@
     0 0 40px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   animation: slideIn 0.3s ease-out;
+  margin-bottom: 20px;
 }
 
 @keyframes slideIn {
@@ -504,6 +508,12 @@
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding-top: 100px;
+  }
 }
 
 @media (max-width: 480px) {

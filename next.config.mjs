@@ -1,6 +1,40 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+        pathname: '/ipfs/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ipfs.io',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'xprmint-metadata-oych.vercel.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.xprmint.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.gateway.pinata.cloud',
+        pathname: '/**',
+      },
+    ],
+  },
   webpack: (config, { webpack }) => {
     // Ignore optional wallet connector SDKs that we haven't installed.
     // This keeps wagmi happy without pulling in huge extra deps.
