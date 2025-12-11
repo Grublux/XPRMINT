@@ -540,7 +540,7 @@ export function RealForgeView(props: RealForgeViewProps) {
             onClose={() => setShowRecipeModal(false)}
             onConfirm={handleRecipeConfirm}
             ngtBalance={ngtDisplayBalance}
-            selectedNPC={selectedNPC ? { tokenId: selectedNPC.tokenId, name: selectedNPC.name } : null}
+            selectedNPC={selectedNPC ? { tokenId: selectedNPC.tokenId as bigint, name: selectedNPC.name } : null}
             onNPCSelect={(npc) => {
               handleNPCSelect(npc);
             }}
