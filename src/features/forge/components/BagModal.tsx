@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import styles from "./BagModal.module.css";
 import { useCoinTokens } from "../hooks/useCoinTokens";
 import type { CoinToken } from "../hooks/useCoinTokens";
-import { useWriteContract, useWaitForTransactionReceipt, useReadContract, useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract, useReadContracts, useAccount } from "wagmi";
 import { MASTER_CRAFTER_V4_PROXY } from "@/features/crafted/constants";
 import { useNGTBalance } from "../hooks/useNGTBalance";
+import { useNPCTokens } from "../hooks/useNPCTokens";
 
 type BagModalProps = {
   isOpen: boolean;
@@ -44,16 +45,32 @@ const GET_DESTROY_QUOTE_ABI = [
   },
 ] as const;
 
+const POSITION_NPC_ID_ABI = [
+  {
+    type: 'function',
+    stateMutability: 'view',
+    name: 'positionNpcIdView',
+    inputs: [{ name: 'posId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const;
+
 const APESCAN_BASE_URL = 'https://apescan.io/tx';
 
 function CoinCard({ 
   token, 
   onExpand,
-  isExpanded
+  isExpanded,
+  npcId,
+  isNPCInWallet,
+  npcTokenIdsInWallet
 }: { 
   token: CoinToken;
   onExpand: (token: CoinToken) => void;
   isExpanded?: boolean;
+  npcId?: bigint;
+  isNPCInWallet?: boolean;
+  npcTokenIdsInWallet?: Set<string>;
 }) {
   const formatNGT = (amount: bigint | undefined) => {
     if (!amount) return '0';
@@ -84,11 +101,30 @@ function CoinCard({
       {token.ngtLocked !== undefined && (
         <span className={styles.ngtAmount}>{formatNGT(token.ngtLocked)} NGT</span>
       )}
-      {token.craftedByMe !== undefined && (
-        <span className={`${styles.craftedBadge} ${token.craftedByMe ? styles.craftedByMe : styles.notCrafted}`}>
-          {token.craftedByMe ? "✓ Crafted by me" : "Not crafted by me"}
-        </span>
-      )}
+      {(() => {
+        // ALWAYS show NPC info - use npcId prop (from contract), fallback to token.crafterNPCId
+        const displayNPCId = npcId !== undefined && npcId !== null && npcId !== 0n 
+          ? npcId 
+          : (token.crafterNPCId !== undefined && token.crafterNPCId !== null && token.crafterNPCId !== 0n 
+            ? token.crafterNPCId 
+            : undefined);
+        
+        if (displayNPCId === undefined) {
+          // No NPC ID available - show nothing or "Unknown NPC"
+          return null;
+        }
+        
+        // Check if NPC is in wallet
+        const displayInWallet = npcId !== undefined 
+          ? isNPCInWallet 
+          : (npcTokenIdsInWallet ? npcTokenIdsInWallet.has(displayNPCId.toString()) : undefined);
+        
+        return (
+          <span className={`${styles.craftedBadge} ${displayInWallet === true ? styles.craftedByMe : styles.notCrafted}`}>
+            {displayInWallet === true ? "✓" : "✗"} Crafted by NPC {displayNPCId.toString()}
+          </span>
+        );
+      })()}
     </div>
   );
 }
@@ -105,6 +141,8 @@ function ExpandedCoinView({
   destroyQuote,
   isCrafter,
   quoteLoading,
+  npcId,
+  isNPCInWallet,
 }: {
   token: CoinToken;
   onClose: () => void;
@@ -117,6 +155,8 @@ function ExpandedCoinView({
   destroyQuote?: readonly [string, string, string, string] | undefined;
   isCrafter?: boolean;
   quoteLoading?: boolean;
+  npcId?: bigint;
+  isNPCInWallet?: boolean;
 }) {
   const formatNGT = (amount: bigint | undefined) => {
     if (!amount) return '0';
@@ -209,7 +249,7 @@ function ExpandedCoinView({
                   Loading destruction quote...
                 </>
               ) : destroyQuote && refundAmount !== undefined ? (
-                isCrafter ? (
+                (isCrafter || (npcId !== undefined && isNPCInWallet)) ? (
                   <>
                     You <strong>crafted</strong> this coin. You will receive <strong>{formatNGT(BigInt(refundAmount))} NGT</strong>
                     {BigInt(destroyQuote[2]) > 0n && (
@@ -219,7 +259,7 @@ function ExpandedCoinView({
                   </>
                 ) : (
                   <>
-                    You <strong>did not craft</strong> this coin. You will receive <strong>{formatNGT(BigInt(refundAmount))} NGT</strong> total after paying <strong>{formatNGT(BigInt(destroyQuote[1]))} NGT</strong> (destruction fee) to the crafter
+                    You <strong>did not craft</strong> this coin. You will receive <strong>{formatNGT(BigInt(refundAmount))} NGT</strong> after paying <strong>{formatNGT(BigInt(destroyQuote[1]))} NGT</strong> (destruction fee) to the crafter
                     {BigInt(destroyQuote[2]) > 0n && (
                       <> and <strong>{formatNGT(BigInt(destroyQuote[2]))} NGT</strong> team fee</>
                     )}.
@@ -227,13 +267,13 @@ function ExpandedCoinView({
                 )
               ) : token.ngtLocked !== undefined ? (
                 // Fallback to old calculation if quote not available
-                token.craftedByMe ? (
+                (token.craftedByMe || (npcId !== undefined && isNPCInWallet)) ? (
                   <>
                     You <strong>crafted</strong> this coin. You will receive <strong>{formatNGT(token.ngtLocked)} NGT</strong> and pay no fees if you destroy it.
                   </>
                 ) : (
                   <>
-                    You <strong>did not craft</strong> this coin. You will receive <strong>{formatNGT((token.ngtLocked * 90n) / 100n)} NGT</strong> total after paying <strong>{formatNGT((token.ngtLocked * 10n) / 100n)} NGT</strong> (destruction fee) to the crafter.
+                    You <strong>did not craft</strong> this coin. You will receive <strong>{formatNGT((token.ngtLocked * 90n) / 100n)} NGT</strong> after paying <strong>{formatNGT((token.ngtLocked * 10n) / 100n)} NGT</strong> (destruction fee) to the crafter.
                   </>
                 )
               ) : (
@@ -307,10 +347,72 @@ export default function BagModal({
   address,
 }: BagModalProps) {
   const { tokens, isLoading, scan } = useCoinTokens();
+  const { tokens: npcTokens } = useNPCTokens();
   const [showCraftedOnly, setShowCraftedOnly] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [expandedToken, setExpandedToken] = useState<CoinToken | null>(null);
   const { address: accountAddress } = useAccount();
+  
+  // Create a Set of NPC token IDs in wallet for quick lookup
+  const npcTokenIdsInWallet = useMemo(() => {
+    const ids = new Set(npcTokens.map(npc => npc.tokenId.toString()));
+    console.log('[BagModal] NPC tokens in wallet:', Array.from(ids));
+    return ids;
+  }, [npcTokens]);
+  
+  // Fetch NPC IDs from contract using useReadContracts for batch reads
+  const npcIdContractCalls = useMemo(() => {
+    return tokens.map(token => ({
+      address: MASTER_CRAFTER_V4_PROXY,
+      abi: POSITION_NPC_ID_ABI,
+      functionName: 'positionNpcIdView' as const,
+      args: [token.tokenId] as const,
+    }));
+  }, [tokens]);
+  
+  const npcIdResults = useReadContracts({
+    contracts: npcIdContractCalls,
+    query: {
+      enabled: isOpen && tokens.length > 0,
+    },
+  });
+  
+  // Create a map of tokenId -> npcId from contract calls
+  const tokenIdToNPCId = useMemo(() => {
+    const map = new Map<string, bigint>();
+    tokens.forEach((token, index) => {
+      const result = npcIdResults.data?.[index];
+      const npcIdFromContract = result?.status === 'success' && result.result !== undefined && result.result !== null && BigInt(result.result) !== 0n
+        ? BigInt(result.result)
+        : undefined;
+      // Prefer contract data, fallback to metadata
+      const npcId = npcIdFromContract !== undefined
+        ? npcIdFromContract
+        : (token.crafterNPCId !== undefined && token.crafterNPCId !== null && token.crafterNPCId !== 0n
+          ? token.crafterNPCId
+          : undefined);
+      if (npcId !== undefined) {
+        map.set(token.tokenId.toString(), npcId);
+        console.log(`[BagModal] Coin ${token.tokenId.toString()} crafted by NPC ${npcId.toString()}`);
+      }
+    });
+    console.log('[BagModal] Token to NPC ID map:', Array.from(map.entries()));
+    return map;
+  }, [tokens, npcIdResults.data]);
+  
+  // Create a map of tokenId -> isNPCInWallet
+  const tokenIdToNPCInWallet = useMemo(() => {
+    const map = new Map<string, boolean>();
+    tokens.forEach(token => {
+      const npcId = tokenIdToNPCId.get(token.tokenId.toString());
+      if (npcId !== undefined) {
+        const inWallet = npcTokenIdsInWallet.has(npcId.toString());
+        map.set(token.tokenId.toString(), inWallet);
+        console.log(`[BagModal] Coin ${token.tokenId.toString()} NPC ${npcId.toString()} in wallet: ${inWallet}`);
+      }
+    });
+    return map;
+  }, [tokens, tokenIdToNPCId, npcTokenIdsInWallet]);
   
   // Get NGT balance refetch function to update balance after destroy
   const { refetch: refetchNGTBalance } = useNGTBalance();
@@ -338,14 +440,34 @@ export default function BagModal({
   const totalLocked = destroyQuote?.[0];
   const npcFee = destroyQuote?.[1];
   const teamFee = destroyQuote?.[2];
-  const refundAmount = destroyQuote?.[3]; // refund is the 4th return value
+  const refundAmountFromQuote = destroyQuote?.[3]; // refund is the 4th return value
   
-  // Determine if destroyer is the crafter by comparing refund calculation
-  // Crafter: refund = totalLocked - teamFee
-  // Non-crafter: refund = totalLocked - npcFee - teamFee
-  const isCrafter = destroyQuote && totalLocked && refundAmount && teamFee
-    ? refundAmount === (totalLocked - teamFee)
+  // Check if the NPC that crafted this coin is in the wallet
+  const expandedNPCId = expandedToken 
+    ? (tokenIdToNPCId.get(expandedToken.tokenId.toString()) || expandedToken.crafterNPCId)
     : undefined;
+  const expandedNPCInWallet = expandedNPCId !== undefined && expandedToken
+    ? tokenIdToNPCInWallet.get(expandedToken.tokenId.toString())
+    : undefined;
+  
+  console.log('[BagModal] Expanded token:', expandedToken?.tokenId.toString(), 'NPC ID:', expandedNPCId?.toString(), 'NPC in wallet:', expandedNPCInWallet);
+  
+  // Determine if destroyer is the crafter
+  // If NPC is in wallet, user IS the crafter (they own the NPC that crafted it)
+  const isCrafter = expandedNPCInWallet === true || (destroyQuote && totalLocked && refundAmountFromQuote && teamFee
+    ? BigInt(refundAmountFromQuote) === (BigInt(totalLocked) - BigInt(teamFee))
+    : false);
+  
+  console.log('[BagModal] Is crafter:', isCrafter, 'NPC in wallet:', expandedNPCInWallet);
+  
+  // Calculate correct refund amount
+  // If NPC is in wallet (user is crafter): refund = totalLocked - teamFee
+  // Otherwise: refund = totalLocked - npcFee - teamFee (or use quote value)
+  const refundAmount = totalLocked && npcFee !== undefined && teamFee !== undefined
+    ? (isCrafter 
+        ? BigInt(totalLocked) - BigInt(teamFee)
+        : BigInt(totalLocked) - BigInt(npcFee) - BigInt(teamFee))
+    : refundAmountFromQuote;
 
   // Don't trigger scan here - useCoinTokens already auto-scans on mount
   // The hook handles scanning automatically, so we don't need to call it again
@@ -397,7 +519,11 @@ export default function BagModal({
 
   const hasItems = coinBalance > 0;
   const filteredTokens = showCraftedOnly 
-    ? tokens.filter(t => t.craftedByMe) 
+    ? tokens.filter(t => {
+        const npcId = tokenIdToNPCId.get(t.tokenId.toString());
+        if (npcId === undefined) return false;
+        return npcTokenIdsInWallet.has(npcId.toString());
+      })
     : tokens;
 
   return (
@@ -424,7 +550,7 @@ export default function BagModal({
                     onChange={(e) => setShowCraftedOnly(e.target.checked)}
                     className={styles.filterCheckbox}
                   />
-                  <span>Crafted by me</span>
+                  <span>Crafter in Wallet</span>
                 </label>
               </div>
               <p className={styles.sectionHelperText}>Click coin to view/destroy</p>
@@ -436,18 +562,25 @@ export default function BagModal({
                 </div>
               ) : filteredTokens.length === 0 ? (
                 <div className={styles.empty}>
-                  <p>{showCraftedOnly ? "No coins crafted by you." : "No coins found."}</p>
+                  <p>{showCraftedOnly ? "No coins with crafter NPC in wallet." : "No coins found."}</p>
                 </div>
               ) : (
                 <div className={styles.grid}>
-                  {filteredTokens.map(token => (
-                    <CoinCard
-                      key={token.tokenId.toString()}
-                      token={token}
-                      onExpand={handleExpand}
-                      isExpanded={expandedToken?.tokenId === token.tokenId}
-                    />
-                  ))}
+                  {filteredTokens.map(token => {
+                    const npcId = tokenIdToNPCId.get(token.tokenId.toString());
+                    const isNPCInWallet = npcId !== undefined ? tokenIdToNPCInWallet.get(token.tokenId.toString()) : undefined;
+                    return (
+                      <CoinCard
+                        key={token.tokenId.toString()}
+                        token={token}
+                        onExpand={handleExpand}
+                        isExpanded={expandedToken?.tokenId === token.tokenId}
+                        npcId={npcId}
+                        isNPCInWallet={isNPCInWallet}
+                        npcTokenIdsInWallet={npcTokenIdsInWallet}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -478,10 +611,12 @@ export default function BagModal({
         isConfirming={isConfirming}
         isSuccess={isTxSuccess}
         transactionHash={hash}
-        refundAmount={refundAmount ? String(refundAmount) : undefined}
+        refundAmount={refundAmount !== undefined ? String(refundAmount) : undefined}
         destroyQuote={destroyQuote ? destroyQuote.map(q => String(q)) as readonly [string, string, string, string] : undefined}
         isCrafter={isCrafter}
         quoteLoading={quoteLoading}
+        npcId={expandedNPCId}
+        isNPCInWallet={expandedNPCInWallet}
       />
     )}
     </>
