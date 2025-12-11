@@ -44,9 +44,17 @@
 .title {
   color: #c9a227;
   font-size: 1.4rem;
-  margin: 0 0 20px;
+  margin: 0 0 8px;
   text-align: center;
   font-family: 'Press Start 2P', monospace;
+}
+
+.helpText {
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0 0 20px;
+  font-style: italic;
 }
 
 .loading,
@@ -135,6 +143,12 @@
   gap: 12px;
 }
 
+.npcCardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .npcCard {
   background: rgba(201, 162, 39, 0.1);
   border: 2px solid transparent;
@@ -146,6 +160,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .npcCard:hover {
@@ -193,6 +208,162 @@
   }
 }
 
+.expandedView {
+  position: relative;
+  width: 100%;
+}
+
+.expandedTitle {
+  color: #c9a227;
+  font-size: 1.2rem;
+  margin: 0 0 20px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.expandedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.expandedImage {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #c9a227;
+}
+
+.expandedPlaceholder {
+  width: 150px;
+  height: 150px;
+  background: rgba(201, 162, 39, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #c9a227;
+}
+
+.expandedName {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.chooseNameText {
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+  font-style: italic;
+}
+
+.npcNumberSmall {
+  font-size: 10px !important;
+  font-weight: normal !important;
+  color: rgba(201, 162, 39, 0.5) !important;
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.chooseButtonSmall {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #c9a227 0%, #ffd700 100%);
+  border: 1px solid #c9a227;
+  border-radius: 6px;
+  color: #000;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(201, 162, 39, 0.2);
+  width: 100%;
+}
+
+.chooseButtonSmall:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #c9a227 100%);
+  box-shadow: 0 0 12px rgba(201, 162, 39, 0.4);
+  transform: translateY(-1px);
+}
+
+.chooseButtonSmall:active {
+  transform: translateY(0);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.statItem:last-child {
+  border-bottom: none;
+}
+
+.statLabel {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.statValue {
+  color: #c9a227;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.loadingStats {
+  color: #888;
+  text-align: center;
+  padding: 20px;
+}
+
+.noStats {
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+.chooseButton {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #c9a227 0%, #ffd700 100%);
+  border: 2px solid #c9a227;
+  border-radius: 8px;
+  color: #000;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(201, 162, 39, 0.3);
+  margin-top: 8px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.chooseButton:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #c9a227 100%);
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.5);
+  transform: translateY(-2px);
+}
+
+.chooseButton:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 480px) {
   .modal {
     padding: 16px;
@@ -200,6 +371,16 @@
   
   .title {
     font-size: 1rem;
+  }
+  
+  .expandedTitle {
+    font-size: 0.9rem;
+  }
+  
+  .expandedImage,
+  .expandedPlaceholder {
+    width: 120px;
+    height: 120px;
   }
   
   .grid {
@@ -211,6 +392,15 @@
   .npcPlaceholder {
     width: 60px;
     height: 60px;
+  }
+  
+  .statItem {
+    padding: 6px 10px;
+  }
+  
+  .statLabel,
+  .statValue {
+    font-size: 0.8rem;
   }
 }
 

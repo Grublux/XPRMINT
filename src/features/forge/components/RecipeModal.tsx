@@ -5,11 +5,12 @@ import { useNPCTokens } from '../hooks/useNPCTokens';
 import { useNPCXP } from '../hooks/useNPCXP';
 import { useAccount } from 'wagmi';
 import type { NPCToken } from '../hooks/useNPCTokens';
+import { useActiveRecipes } from '../hooks/useActiveRecipes';
 
 type RecipeModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onForge: (numCoins: number) => void;
+  onConfirm: (recipeId: number, numCoins: number, npcId: bigint) => void;
   ngtBalance: string;
   selectedNPC?: { tokenId: bigint; name?: string } | null;
   onNPCSelect?: (npc: NPCToken) => void;
@@ -24,7 +25,7 @@ function NPCSelectionCard({
   isSelected: boolean; 
   onSelect: () => void;
 }) {
-  const { xp, isLoading: xpLoading } = useNPCXP(token.tokenId);
+  const { stats, isLoading: statsLoading } = useNPCXP(token.tokenId);
   
   return (
     <button
@@ -43,9 +44,11 @@ function NPCSelectionCard({
         </div>
       )}
       <span className={styles.npcSelectionName}>{token.name}</span>
-      <span className={styles.npcSelectionXp}>
-        XP: {xpLoading ? '...' : xp.toLocaleString()}
-      </span>
+      {stats && (
+        <span className={styles.npcSelectionXp}>
+          Crafts: {statsLoading ? '...' : stats.crafts.toLocaleString()}
+        </span>
+      )}
     </button>
   );
 }
@@ -53,7 +56,7 @@ function NPCSelectionCard({
 export default function RecipeModal({
   isOpen,
   onClose,
-  onForge,
+  onConfirm,
   ngtBalance,
   selectedNPC,
   onNPCSelect,
@@ -65,14 +68,10 @@ export default function RecipeModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { recipe, maxCoins, isLoading: recipeLoading } = useRecipe(selectedRecipeId);
   const { tokens: npcTokens, isLoading: npcLoading, progress: npcProgress, scan: scanNPCs } = useNPCTokens();
-  const [numCoins, setNumCoins] = useState(1);
+  const { recipes: activeRecipes } = useActiveRecipes();
+  const [numCoins, setNumCoins] = useState(10);
   const [hasEnoughNGT, setHasEnoughNGT] = useState(false);
   const [hasEnoughCoal, setHasEnoughCoal] = useState(false);
-
-  const recipes = [
-    { id: 1, name: 'OG Coin' },
-    { id: 2, name: 'Necklace - coming soon', disabled: true },
-  ];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -146,9 +145,10 @@ export default function RecipeModal({
     }
   };
 
-  const handleForge = () => {
-    if (canForge) {
-      onForge(numCoins);
+  const handleConfirm = () => {
+    if (canForge && selectedNPC) {
+      onConfirm(selectedRecipeId, numCoins, selectedNPC.tokenId);
+      onClose();
     }
   };
 
@@ -210,22 +210,22 @@ export default function RecipeModal({
               className={styles.recipeDropdownButton}
               onClick={() => setShowRecipeDropdown(!showRecipeDropdown)}
             >
-              <span>{recipes.find(r => r.id === selectedRecipeId)?.name || 'Select Recipe'}</span>
+              <span>{activeRecipes.find(r => r.id === selectedRecipeId)?.name || 'Select Recipe'}</span>
               <span className={styles.dropdownArrow}>▼</span>
             </button>
             {showRecipeDropdown && (
               <div className={styles.recipeDropdown}>
-                {recipes.map((r) => (
+                {activeRecipes.map((r) => (
                   <button
                     key={r.id}
-                    className={`${styles.recipeDropdownItem} ${r.disabled ? styles.recipeDropdownItemDisabled : ''} ${selectedRecipeId === r.id ? styles.recipeDropdownItemSelected : ''}`}
+                    className={`${styles.recipeDropdownItem} ${!r.active ? styles.recipeDropdownItemDisabled : ''} ${selectedRecipeId === r.id ? styles.recipeDropdownItemSelected : ''}`}
                     onClick={() => {
-                      if (!r.disabled) {
+                      if (r.active) {
                         setSelectedRecipeId(r.id);
                         setShowRecipeDropdown(false);
                       }
                     }}
-                    disabled={r.disabled}
+                    disabled={!r.active}
                   >
                     {r.name}
                   </button>
@@ -387,7 +387,7 @@ export default function RecipeModal({
           </button>
           <button 
             className={`${styles.forgeBtn} ${!canForge ? styles.disabled : ''}`}
-            onClick={handleForge}
+            onClick={handleConfirm}
             disabled={!canForge}
           >
             Confirm

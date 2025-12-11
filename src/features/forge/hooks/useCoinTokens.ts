@@ -101,7 +101,8 @@ export function useCoinTokens() {
       ] as const;
 
       console.log('[useCoinTokens] Calling tokensOfOwner on V4 contract...');
-      const tokenIds = await publicClient.readContract({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tokenIds = await (publicClient.readContract as any)({
         address: CRAFTED_V4_POSITIONS_PROXY,
         abi: TOKENS_OF_OWNER_ABI,
         functionName: 'tokensOfOwner',
@@ -165,7 +166,8 @@ export function useCoinTokens() {
           
           // Fetch position data and metadata in parallel
           const [positionResult, metadataResult] = await Promise.allSettled([
-            publicClient.readContract({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (publicClient.readContract as any)({
               address: MASTER_CRAFTER_V4_PROXY,
               abi: MASTER_CRAFTER_ABI,
               functionName: 'getPosition',

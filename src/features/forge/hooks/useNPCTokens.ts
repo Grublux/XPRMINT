@@ -70,7 +70,8 @@ export function useNPCTokens() {
       // Use tokensOfOwner to get all token IDs directly
       console.log('[useNPCTokens] Calling tokensOfOwner for:', address);
       
-      const tokenIds = await publicClient.readContract({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tokenIds = await (publicClient.readContract as any)({
         address: NPC_CONTRACT_ADDRESS,
         abi: npcAbi,
         functionName: 'tokensOfOwner',
@@ -100,7 +101,8 @@ export function useNPCTokens() {
       await Promise.all(
         foundTokens.map(async (token) => {
           try {
-            const uri = await publicClient.readContract({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const uri = await (publicClient.readContract as any)({
               address: NPC_CONTRACT_ADDRESS,
               abi: npcAbi,
               functionName: 'tokenURI',

@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useAccount, useConnect, useDisconnect, useConnectorClient } from "wagmi";
-import { RealForgeView, type NPCToken } from "@/features/forge/RealForgeView";
+import { RealForgeView } from "@/features/forge/RealForgeView";
+import type { NPCToken } from "@/features/forge/hooks/useNPCTokens";
 import { useNGTBalance } from "@/features/forge/hooks/useNGTBalance";
 import { useNPCTokens } from "@/features/forge/hooks/useNPCTokens";
 import { useCoinBalance } from "@/features/forge/hooks/useCoinBalance";
@@ -53,7 +54,8 @@ export default function LegacyForgeRoot() {
       if (connectorClient) {
         console.log("Found stale connector client, disconnecting first");
         try {
-          await connectorClient.disconnect();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (connectorClient as any).disconnect();
           await new Promise(resolve => setTimeout(resolve, 300));
         } catch (err) {
           console.log("Error disconnecting stale client:", err);
@@ -127,18 +129,8 @@ export default function LegacyForgeRoot() {
     imageUrl: token.imageUrl,
   }));
 
-  // Map progress to string format
-  const npcProgress: number | string | undefined = npcProgressRaw.stage === 'idle'
-    ? "NPC scan idle"
-    : npcProgressRaw.stage === 'scanning'
-    ? `Scanning... ${npcProgressRaw.progress}%`
-    : npcProgressRaw.stage === 'metadata'
-    ? `Loading metadata... ${npcProgressRaw.progress}%`
-    : npcProgressRaw.stage === 'complete'
-    ? npcProgressRaw.message
-    : npcProgressRaw.stage === 'error'
-    ? `Error: ${npcProgressRaw.message}`
-    : npcProgressRaw.message;
+  // Pass ScanProgress object directly (RealForgeView expects ScanProgress, not string)
+  const npcProgress = npcProgressRaw;
 
   // Forge XP - address/forge-bound (not NPC-bound)
   // For now, set to 0 until we have a hook for it

@@ -290,7 +290,7 @@ function ExpandedCoinView({
                   <div className={styles.successTitle}>Coin successfully destroyed!</div>
                   {refundAmount !== undefined && (
                     <div className={styles.successRefund}>
-                      You received {formatNGT(refundAmount)} NGT
+                      You received {formatNGT(BigInt(refundAmount))} NGT
                     </div>
                   )}
                   {transactionHash && (
@@ -362,16 +362,20 @@ export default function BagModal({
   
   // Fetch NPC IDs from contract using useReadContracts for batch reads
   const npcIdContractCalls = useMemo(() => {
+    if (tokens.length === 0) return [];
     return tokens.map(token => ({
-      address: MASTER_CRAFTER_V4_PROXY,
+      address: MASTER_CRAFTER_V4_PROXY as `0x${string}`,
       abi: POSITION_NPC_ID_ABI,
       functionName: 'positionNpcIdView' as const,
-      args: [token.tokenId] as const,
+      args: [token.tokenId] as readonly [bigint],
     }));
   }, [tokens]);
   
-  const npcIdResults = useReadContracts({
-    contracts: npcIdContractCalls,
+  // TypeScript goes insane on the full wagmi generics here.
+  // We intentionally cap the typing at this boundary.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const npcIdResults = (useReadContracts as any)({
+    contracts: npcIdContractCalls as any,
     query: {
       enabled: isOpen && tokens.length > 0,
     },
@@ -483,7 +487,8 @@ export default function BagModal({
     if (token.isLocked) return;
     
     try {
-      await writeContract({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (writeContract as any)({
         address: MASTER_CRAFTER_V4_PROXY,
         abi: DESTROY_ABI,
         functionName: 'destroyPosition',
@@ -612,7 +617,7 @@ export default function BagModal({
         isSuccess={isTxSuccess}
         transactionHash={hash}
         refundAmount={refundAmount !== undefined ? String(refundAmount) : undefined}
-        destroyQuote={destroyQuote ? destroyQuote.map(q => String(q)) as readonly [string, string, string, string] : undefined}
+        destroyQuote={destroyQuote ? (destroyQuote.map(q => String(q)) as unknown as readonly [string, string, string, string]) : undefined}
         isCrafter={isCrafter}
         quoteLoading={quoteLoading}
         npcId={expandedNPCId}

@@ -262,12 +262,13 @@ export function RealForgeView(props: RealForgeViewProps) {
     try {
       // Craft one coin at a time - for now just craft the first one
       // TODO: Handle multiple coins sequentially
-      await writeContract({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (writeContract as any)({
         address: MASTER_CRAFTER_V4_PROXY,
         abi: CRAFT_ABI,
         functionName: 'craftWithNPC',
         args: [BigInt(confirmedRecipeId), BigInt(selectedNPC.tokenId)],
-      } as any);
+      });
     } catch (err) {
       console.error('[RealForgeView] Craft failed:', err);
     }
