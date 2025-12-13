@@ -1,6 +1,5 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
 @openzeppelin/=lib/openzeppelin-contracts/contracts/
-creator-token-standards/@openzeppelin/=lib/openzeppelin-contracts/
 @limitbreak/creator-token-standards/=lib/creator-token-standards/src/
 creator-token-standards/=lib/creator-token-standards/src/
 ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/
