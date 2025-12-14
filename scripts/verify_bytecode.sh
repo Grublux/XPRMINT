@@ -19,7 +19,8 @@ echo "Step 1: Building local contracts"
 echo "------------------------------------------------------------"
 forge clean > /dev/null 2>&1 || true
 
-if ! forge build > /dev/null 2>&1; then
+# Build all three contracts explicitly
+if ! forge build contracts/crafted/CraftedV5Positions.sol contracts/crafted/MasterCrafterV5.sol contracts/stats/NPCStatsV5.sol > /dev/null 2>&1; then
     echo "ERROR: Failed to build contracts"
     exit 1
 fi
@@ -41,7 +42,7 @@ verify_bytecode() {
     local_file=$(mktemp)
     chain_file=$(mktemp)
     
-    # Extract bytecode from JSON artifact if forge inspect fails
+    # Extract bytecode from JSON artifact
     artifact_path="out/${contract_name}.sol/${contract_name}.json"
     if [ -f "$artifact_path" ]; then
         if ! jq -r '.deployedBytecode.object' "$artifact_path" > "$local_file" 2>/dev/null; then
@@ -50,8 +51,8 @@ verify_bytecode() {
             FAILED=true
             return
         fi
-    elif ! forge inspect "$contract_path" deployedBytecode > "$local_file" 2>/dev/null; then
-        echo "FAIL - Could not extract local bytecode"
+    else
+        echo "FAIL - Artifact not found: $artifact_path"
         rm -f "$local_file" "$chain_file"
         FAILED=true
         return
