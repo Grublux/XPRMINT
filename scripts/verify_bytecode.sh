@@ -41,14 +41,20 @@ verify_bytecode() {
     local_file=$(mktemp)
     chain_file=$(mktemp)
     
-    # Try contract name first (simpler), then fall back to full path
-    if ! forge inspect "$contract_name" deployedBytecode > "$local_file" 2>/dev/null; then
-        if ! forge inspect "$contract_path" deployedBytecode > "$local_file" 2>/dev/null; then
-            echo "FAIL - Could not extract local bytecode"
+    # Extract bytecode from JSON artifact if forge inspect fails
+    artifact_path="out/${contract_name}.sol/${contract_name}.json"
+    if [ -f "$artifact_path" ]; then
+        if ! jq -r '.deployedBytecode.object' "$artifact_path" > "$local_file" 2>/dev/null; then
+            echo "FAIL - Could not extract local bytecode from artifact"
             rm -f "$local_file" "$chain_file"
             FAILED=true
             return
         fi
+    elif ! forge inspect "$contract_path" deployedBytecode > "$local_file" 2>/dev/null; then
+        echo "FAIL - Could not extract local bytecode"
+        rm -f "$local_file" "$chain_file"
+        FAILED=true
+        return
     fi
     
     if ! cast code "$impl_address" --rpc-url "$RPC_URL" > "$chain_file" 2>/dev/null; then
