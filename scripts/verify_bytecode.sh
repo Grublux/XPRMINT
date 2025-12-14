@@ -19,9 +19,17 @@ echo "Step 1: Building local contracts"
 echo "------------------------------------------------------------"
 forge clean > /dev/null 2>&1 || true
 
-# Build all three contracts explicitly
-if ! forge build contracts/crafted/CraftedV5Positions.sol contracts/crafted/MasterCrafterV5.sol contracts/stats/NPCStatsV5.sol > /dev/null 2>&1; then
-    echo "ERROR: Failed to build contracts"
+# Build all three contracts explicitly (one at a time to avoid dependency issues)
+if ! forge build contracts/crafted/CraftedV5Positions.sol > /dev/null 2>&1; then
+    echo "ERROR: Failed to build CraftedV5Positions"
+    exit 1
+fi
+if ! forge build contracts/crafted/MasterCrafterV5.sol > /dev/null 2>&1; then
+    echo "ERROR: Failed to build MasterCrafterV5"
+    exit 1
+fi
+if ! forge build contracts/stats/NPCStatsV5.sol > /dev/null 2>&1; then
+    echo "ERROR: Failed to build NPCStatsV5"
     exit 1
 fi
 echo "Build complete"
